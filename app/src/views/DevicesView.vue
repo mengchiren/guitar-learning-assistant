@@ -30,7 +30,7 @@ function selectAmp(id) {
     >
       <div class="device-head">
         <div>
-          <div class="device-name">🎸 {{ g.name }}</div>
+          <div class="device-name">{{ g.name }}</div>
           <div class="dim small">{{ g.pickups }}</div>
         </div>
         <span v-if="settings.activeDevices.guitarId === g.id" class="tag on">使用中</span>
@@ -40,7 +40,7 @@ function selectAmp(id) {
         {{ p.pos }} 档：{{ p.label }} —— {{ p.use }}
       </div>
       <div class="small" style="margin-top: 8px"><b>旋钮</b>：{{ g.knobs.join(' / ') }}</div>
-      <div v-for="t in g.tips" :key="t" class="muted small" style="margin-top: 4px">💡 {{ t }}</div>
+      <div v-for="t in g.tips" :key="t" class="muted small" style="margin-top: 4px">{{ t }}</div>
     </div>
 
     <div
@@ -52,7 +52,7 @@ function selectAmp(id) {
     >
       <div class="device-head">
         <div>
-          <div class="device-name">🔊 {{ a.name }}</div>
+          <div class="device-name">{{ a.name }}</div>
           <div class="dim small">通道：{{ a.channels.join(' / ') }}</div>
         </div>
         <span v-if="settings.activeDevices.ampId === a.id" class="tag on">使用中</span>

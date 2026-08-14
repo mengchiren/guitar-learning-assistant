@@ -47,8 +47,8 @@ const presets = [60, 80, 100, 120, 140, 160, 180]
       </select>
 
       <div class="btn-row" style="margin-top: 14px">
-        <button class="btn btn-primary" @click="m.toggle()">{{ m.running.value ? '⏹ 停止' : '▶ 开始' }}</button>
-        <button class="btn" @click="m.tap()">👆 打拍定速</button>
+        <button class="btn btn-primary" @click="m.toggle()">{{ m.running.value ? '停止' : '开始' }}</button>
+        <button class="btn" @click="m.tap()">打拍定速</button>
       </div>
 
       <p class="muted small" style="margin-top: 10px">

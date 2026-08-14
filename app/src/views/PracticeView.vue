@@ -72,9 +72,9 @@ onUnmounted(() => timer.stop())
     </div>
 
     <div v-if="!finished" class="btn-row">
-      <button v-if="!timer.running.value" class="btn btn-primary" @click="timer.start()">▶ 开始</button>
-      <button v-else class="btn" @click="timer.pause()">⏸ 暂停</button>
-      <button class="btn" @click="finish()" :disabled="timer.elapsedSec.value < 1">⏹ 结束打卡</button>
+      <button v-if="!timer.running.value" class="btn btn-primary" @click="timer.start()">开始</button>
+      <button v-else class="btn" @click="timer.pause()">暂停</button>
+      <button class="btn" @click="finish()" :disabled="timer.elapsedSec.value < 1">结束打卡</button>
     </div>
 
     <div v-if="finished && !saved" class="card">
@@ -91,9 +91,9 @@ onUnmounted(() => timer.stop())
     </div>
 
     <div v-if="saved" class="card" style="text-align: center">
-      <p style="font-size: 20px">🎉 打卡成功！</p>
+      <p style="font-size: 20px; font-weight: 800">打卡成功</p>
       <p class="dim small" style="margin: 8px 0">
-        今日累计 {{ Math.floor(practice.todaySeconds / 60) }} 分钟，连续 🔥 {{ practice.streakDays }} 天
+        今日累计 {{ Math.floor(practice.todaySeconds / 60) }} 分钟，连续 {{ practice.streakDays }} 天
       </p>
       <router-link to="/" class="btn btn-block">回首页</router-link>
     </div>
@@ -106,12 +106,12 @@ onUnmounted(() => timer.stop())
       <label>时长（分钟）</label>
       <input type="number" v-model="backfillMinutes" min="1" max="600" />
       <button class="btn btn-block" style="margin-top: 12px" @click="backfill">补卡</button>
-      <p v-if="backfillDone" class="small" style="color: var(--ok); margin-top: 8px">✅ 已补卡</p>
+      <p v-if="backfillDone" class="small" style="color: var(--ok); margin-top: 8px">已补卡</p>
     </div>
   </div>
 </template>
 
 <style scoped>
 .clock-card { text-align: center; padding: 24px 16px; }
-.clock { font-size: 56px; font-weight: 700; font-variant-numeric: tabular-nums; margin-bottom: 6px; }
+.clock { font-size: 56px; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -1px; margin-bottom: 6px; }
 </style>

@@ -20,7 +20,7 @@ import seedSongs from '../data/seedSongs.json'
         <span>BPM {{ s.bpm }}</span> · <span>{{ s.key }}</span> · <span>难度：{{ s.difficulty }}</span>
       </div>
       <div v-if="s.chords" class="muted small" style="margin-top: 6px">和弦：{{ s.chords }}</div>
-      <div v-if="s.note" class="muted small" style="margin-top: 4px">💡 {{ s.note }}</div>
+      <div v-if="s.note" class="muted small" style="margin-top: 4px">{{ s.note }}</div>
       <div class="muted small" style="margin-top: 4px; opacity: 0.7">数据来源：{{ s.dataFrom }}</div>
     </div>
   </div>

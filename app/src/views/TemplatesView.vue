@@ -25,7 +25,7 @@ import { TONE_TEMPLATES } from '../data/templates'
         <div class="tpl-item"><b>Delay</b>{{ t.amp.delay }}</div>
         <div class="tpl-item"><b>Reverb</b>{{ t.amp.reverb }}</div>
       </div>
-      <p class="muted small" style="margin-top: 8px">💡 {{ t.说明 }}</p>
+      <p class="muted small" style="margin-top: 8px">{{ t.说明 }}</p>
     </div>
   </div>
 </template>

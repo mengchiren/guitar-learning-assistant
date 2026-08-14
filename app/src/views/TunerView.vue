@@ -49,7 +49,7 @@ onUnmounted(() => tuner.stop())
       </div>
       <div class="btn-row" style="margin-top: 14px">
         <button class="btn btn-primary" @click="tuner.active.value ? tuner.stop() : tuner.start()">
-          {{ tuner.active.value ? '⏹ 停止收音' : '🎙 开始收音' }}
+          {{ tuner.active.value ? '停止收音' : '开始收音' }}
         </button>
       </div>
       <p v-if="tuner.error.value" class="small" style="color: var(--danger); margin-top: 10px">

@@ -1,22 +1,26 @@
+<script setup>
+import Icon from '../components/Icon.vue'
+</script>
+
 <template>
   <div>
     <h1 class="page-title">我的</h1>
     <router-link to="/devices" class="card row-card">
-      <span>🎸</span>
+      <span class="row-icon"><Icon name="guitar" :size="22" /></span>
       <div>
         <div>我的设备</div>
         <div class="dim small">Ibanez GRX40 + JOYO Jam Buddy 2</div>
       </div>
     </router-link>
     <router-link to="/reminders" class="card row-card">
-      <span>⏰</span>
+      <span class="row-icon"><Icon name="bell" :size="22" /></span>
       <div>
         <div>提醒设置</div>
         <div class="dim small">练琴提醒 · 打卡</div>
       </div>
     </router-link>
     <router-link to="/templates" class="card row-card">
-      <span>🎚️</span>
+      <span class="row-icon"><Icon name="sliders" :size="22" /></span>
       <div>
         <div>音色套路库</div>
         <div class="dim small">5 套常用音色设置</div>
@@ -35,5 +39,5 @@
 
 <style scoped>
 .row-card { display: flex; gap: 12px; align-items: center; text-decoration: none; color: var(--text); font-weight: 600; }
-.row-card span { font-size: 24px; }
+.row-icon { display: flex; color: var(--text-dim); }
 </style>
