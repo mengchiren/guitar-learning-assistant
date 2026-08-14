@@ -1,0 +1,117 @@
+<script setup>
+import { ref, computed, onUnmounted } from 'vue'
+import { usePracticeStore } from '../stores/practice'
+import { usePracticeTimer } from '../composables/usePracticeTimer'
+
+const practice = usePracticeStore()
+const timer = usePracticeTimer()
+
+// 用本地时区日期（toISOString 是 UTC，凌晨会差一天）
+function localDateStr(d = new Date()) {
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
+
+const TAG_OPTIONS = ['歌曲', '基本功', '课程', '自由练习']
+const tags = ref([])
+const note = ref('')
+const finished = ref(false)
+const saved = ref(false)
+const backfillDate = ref(localDateStr())
+const backfillMinutes = ref(30)
+const backfillDone = ref(false)
+
+const clock = computed(() => {
+  const total = Math.floor(timer.elapsedSec.value)
+  const m = String(Math.floor(total / 60)).padStart(2, '0')
+  const s = String(total % 60).padStart(2, '0')
+  return `${m}:${s}`
+})
+
+function toggleTag(t) {
+  const i = tags.value.indexOf(t)
+  if (i >= 0) tags.value.splice(i, 1)
+  else tags.value.push(t)
+}
+
+function finish() {
+  timer.stop()
+  finished.value = true
+}
+
+function saveRecord() {
+  practice.addRecord({
+    date: localDateStr(),
+    seconds: Math.max(1, Math.round(timer.elapsedSec.value)),
+    tags: [...tags.value],
+    note: note.value,
+  })
+  saved.value = true
+}
+
+function backfill() {
+  const secs = Math.max(1, Math.round(Number(backfillMinutes.value) * 60))
+  practice.addRecord({ date: backfillDate.value, seconds: secs, tags: ['补卡'], note: note.value || '手动补卡' })
+  backfillDone.value = true
+  setTimeout(() => (backfillDone.value = false), 3000)
+}
+
+onUnmounted(() => timer.stop())
+</script>
+
+<template>
+  <div>
+    <h1 class="page-title">练习计时</h1>
+
+    <div class="card clock-card">
+      <div class="clock">{{ clock }}</div>
+      <div class="dim small">{{ timer.running.value ? '练习中…' : '开始后计时，练完点「结束打卡」' }}</div>
+      <div class="dim small" style="margin-top: 4px">今日已打卡 {{ Math.floor(practice.todaySeconds / 60) }} 分钟</div>
+    </div>
+
+    <div v-if="!finished" class="btn-row">
+      <button v-if="!timer.running.value" class="btn btn-primary" @click="timer.start()">▶ 开始</button>
+      <button v-else class="btn" @click="timer.pause()">⏸ 暂停</button>
+      <button class="btn" @click="finish()" :disabled="timer.elapsedSec.value < 1">⏹ 结束打卡</button>
+    </div>
+
+    <div v-if="finished && !saved" class="card">
+      <h2>这次练了什么？</h2>
+      <p class="small dim">时长 {{ Math.round(timer.elapsedSec.value / 60) }} 分钟</p>
+      <div class="tag-row" style="margin-top: 8px">
+        <span v-for="t in TAG_OPTIONS" :key="t" class="tag" :class="{ on: tags.includes(t) }" @click="toggleTag(t)">
+          {{ t }}
+        </span>
+      </div>
+      <label>备注（练了什么、遇到什么问题）</label>
+      <textarea v-model="note" rows="3" placeholder="例如：爬格子到 60 速度，G 换 C 还不顺"></textarea>
+      <button class="btn btn-primary btn-block" style="margin-top: 12px" @click="saveRecord">保存打卡</button>
+    </div>
+
+    <div v-if="saved" class="card" style="text-align: center">
+      <p style="font-size: 20px">🎉 打卡成功！</p>
+      <p class="dim small" style="margin: 8px 0">
+        今日累计 {{ Math.floor(practice.todaySeconds / 60) }} 分钟，连续 🔥 {{ practice.streakDays }} 天
+      </p>
+      <router-link to="/" class="btn btn-block">回首页</router-link>
+    </div>
+
+    <div v-if="!finished" class="card">
+      <h2>补卡</h2>
+      <p class="muted small">漏记了？手动补一条记录。</p>
+      <label>日期</label>
+      <input type="date" v-model="backfillDate" />
+      <label>时长（分钟）</label>
+      <input type="number" v-model="backfillMinutes" min="1" max="600" />
+      <button class="btn btn-block" style="margin-top: 12px" @click="backfill">补卡</button>
+      <p v-if="backfillDone" class="small" style="color: var(--ok); margin-top: 8px">✅ 已补卡</p>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.clock-card { text-align: center; padding: 24px 16px; }
+.clock { font-size: 56px; font-weight: 700; font-variant-numeric: tabular-nums; margin-bottom: 6px; }
+</style>

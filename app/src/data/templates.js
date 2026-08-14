@@ -1,0 +1,51 @@
+// 音色套路模板库（M0 确定的「套路模板 + 歌曲归类」方案的核心数据资产）。
+// 参数按 JOYO Jam Buddy 2 + Ibanez GRX40 标注，是「参考起点」，实际弹奏时用耳朵微调。
+// M2 起：歌曲分析会把每首歌归类到这里的某个套路。
+
+export const TONE_TEMPLATES = [
+  {
+    id: 'clean',
+    name: '清音伴奏',
+    适用: '民谣感 / 分解和弦',
+    示例: '《真的爱你》前奏、《光辉岁月》分解',
+    guitar: { pickup: '档位 1~3（琴颈/中间）', tone: '6~8 偏亮' },
+    amp: { channel: 'Clean 清音', model: 'Clean', gain: 3, eq: { b: 5, m: 5, t: 5 }, mod: '关', delay: '关', reverb: 'Hall 轻（约 3）' },
+    说明: '音色旋钮开大偏亮，音量旋钮可稍收。适合弹唱伴奏与分解和弦。',
+  },
+  {
+    id: 'clean-chorus',
+    name: '清音 + 合唱氛围',
+    适用: 'J-Rock 清音扫弦',
+    示例: '动漫歌清音段落、轻音《ふわふわ時間》前奏',
+    guitar: { pickup: '档位 1 或 2', tone: '5~7' },
+    amp: { channel: 'Clean 清音', model: 'Clean', gain: 3, eq: { b: 5, m: 5, t: 5 }, mod: 'Chorus 轻（速度慢）', delay: '关', reverb: 'Hall 中（约 4）' },
+    说明: '合唱效果让扫弦有「宽」的感觉，是 J-Rock 清音段落的标配。',
+  },
+  {
+    id: 'light-od',
+    name: '轻过载节奏',
+    适用: '流行摇滚节奏',
+    示例: '《光辉岁月》节奏吉他',
+    guitar: { pickup: '档位 4~5', tone: '5~6' },
+    amp: { channel: 'Rhythm 节奏', model: 'Blues', gain: 5, eq: { b: 6, m: 5, t: 5 }, mod: '关', delay: '关', reverb: 'Hall 轻' },
+    说明: '介于清音与失真之间，分解和强力和弦都能弹。Bass +1 让声音厚一点。',
+  },
+  {
+    id: 'crunch',
+    name: '失真节奏 Riff',
+    适用: '摇滚 / 金属节奏',
+    示例: '《NO, Thank You!》《空の箱》',
+    guitar: { pickup: '档位 5（琴桥双线圈）', tone: '6~7' },
+    amp: { channel: 'Rhythm 节奏', model: 'Rock', gain: 6, eq: { b: 5, m: 5, t: 6 }, mod: '关', delay: '关', reverb: 'Hall 轻' },
+    说明: '强力和弦、闷音下拨的主战场。Treble +1 更冲；弹单音旋律时改用 Lead 通道。',
+  },
+  {
+    id: 'lead',
+    name: '失真主音 Solo',
+    适用: '主音旋律 / Solo',
+    示例: '《星座になれたら》主旋律',
+    guitar: { pickup: '档位 5', tone: '7~8' },
+    amp: { channel: 'Lead 主音', model: 'Rock', gain: 7, eq: { b: 5, m: 6, t: 6 }, mod: '关', delay: 'Analog 轻', reverb: 'Hall 中' },
+    说明: 'Gain 和 Mid 拉高让单音「站得住」，轻延迟增加空间感。',
+  },
+]

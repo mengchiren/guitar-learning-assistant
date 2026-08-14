@@ -1,0 +1,80 @@
+[
+  {
+    "id": "no-thank-you",
+    "title": "NO, Thank You!",
+    "artist": "放課後ティータイム",
+    "source": "轻音少女 K-ON!! ED2",
+    "bpm": 181,
+    "key": "A 小调",
+    "template": "失真节奏 Riff",
+    "difficulty": "中（快歌，建议先 80% 速度跟节拍器）",
+    "chords": "前奏 Am-C-B；主歌 Am-C-G-D；预副歌 Am-D-F-C…；副歌 F-G-C-Am-G（卡农变体）",
+    "note": "强力和弦驱动，重点练闷音与下拨；M0 对拍歌曲（spike 调性误判为 E 小调，以本条目为准）",
+    "dataFrom": "社区扒谱交叉验证 + 用户整理"
+  },
+  {
+    "id": "singing",
+    "title": "Singing!",
+    "artist": "放課後ティータイム",
+    "source": "轻音少女 剧场版 ED",
+    "bpm": 180,
+    "key": "待确认（从 tan8 谱面核对）",
+    "template": "失真节奏 Riff",
+    "difficulty": "初学（tan8 原版谱标注）",
+    "chords": "",
+    "note": "用户手上为酷狗 kgg 加密格式无法分析；曲谱资源：tan8、konotaku GTP",
+    "dataFrom": "osu 谱面数据 / tan8 / konotaku"
+  },
+  {
+    "id": "sora-no-hako",
+    "title": "空の箱",
+    "artist": "トゲナシトゲアリ",
+    "source": "哭泣少女乐队 GBC",
+    "bpm": 148,
+    "key": "A 大调（平行调 F# 小调）",
+    "template": "失真节奏 Riff",
+    "difficulty": "中",
+    "chords": "度数进行 1/5/1/3m/4/…（yopu 吉他谱）",
+    "note": "M0 对拍歌曲：spike BPM 147.6（-0.3%）、调性 F#m 与 Songdata 一致",
+    "dataFrom": "songdata / midishow / yopu"
+  },
+  {
+    "id": "killkiss",
+    "title": "KiLLKiSS",
+    "artist": "Ave Mujica",
+    "source": "BanG Dream! Ave Mujica OP",
+    "bpm": 200,
+    "key": "E 小调",
+    "template": "失真节奏 Riff",
+    "difficulty": "难（200 BPM 金属，先练慢速）",
+    "chords": "",
+    "note": "M0 对拍歌曲：spike 调性 E 小调命中；速度 198.8（-0.6%）",
+    "dataFrom": "Wikipedia / 百度百科 / CHUNITHM 谱面"
+  },
+  {
+    "id": "zattou",
+    "title": "雑踏、僕らの街",
+    "artist": "トゲナシトゲアリ",
+    "source": "哭泣少女乐队 GBC",
+    "bpm": 171,
+    "key": "E 小调（MIDI 谱标 G 大调，平行调）",
+    "template": "失真节奏 Riff",
+    "difficulty": "中偏难（有变拍子段落）",
+    "chords": "",
+    "note": "M0 对拍歌曲：spike BPM 172.3（+0.8%）、调性 E 小调命中",
+    "dataFrom": "songdata / midishow / songsterr"
+  },
+  {
+    "id": "seiza",
+    "title": "星座になれたら",
+    "artist": "結束バンド",
+    "source": "孤独摇滚 插曲",
+    "bpm": 123,
+    "key": "Ab 大调",
+    "template": "失真主音 Solo（待校准）",
+    "difficulty": "中（主旋律吉他曲）",
+    "chords": "",
+    "note": "M0 对拍歌曲：spike BPM 123.0 完全一致、调性 G#（=Ab）命中",
+    "dataFrom": "ChordWiki / midishow"
+  }
+]
