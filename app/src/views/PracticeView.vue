@@ -62,7 +62,7 @@ onUnmounted(() => timer.stop())
 </script>
 
 <template>
-  <div>
+  <div class="narrow">
     <h1 class="page-title">练习计时</h1>
 
     <div class="card clock-card">

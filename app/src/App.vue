@@ -20,15 +20,51 @@ function goBack() {
 
 <template>
   <div class="shell" :class="{ 'with-tabbar': route.meta.tab }">
-    <header v-if="!route.meta.tab" class="subhead">
+    <!-- 移动端：二级页返回栏 -->
+    <header v-if="!route.meta.tab" class="subhead mobile-only">
       <button class="back-btn" aria-label="返回" @click="goBack">
         <Icon name="chevron-left" :size="22" />
       </button>
     </header>
+
+    <!-- 桌面端：顶部导航栏 -->
+    <header class="topbar desktop-only">
+      <div class="topbar-left">
+        <button v-if="!route.meta.tab" class="back-btn" aria-label="返回" @click="goBack">
+          <Icon name="chevron-left" :size="20" />
+        </button>
+        <router-link to="/" class="brand">
+          <span class="brand-mark"><Icon name="guitar" :size="18" /></span>
+          <span class="brand-name">电吉他学习助手</span>
+        </router-link>
+      </div>
+      <nav class="topnav">
+        <router-link
+          v-for="t in tabs"
+          :key="t.path"
+          :to="t.path"
+          class="topnav-link"
+          :class="{ active: route.path === t.path }"
+        >
+          {{ t.label }}
+        </router-link>
+      </nav>
+      <div class="topbar-tools">
+        <router-link to="/metronome" class="tool-btn" title="节拍器" aria-label="节拍器">
+          <Icon name="metronome" :size="20" />
+        </router-link>
+        <router-link to="/tuner" class="tool-btn" title="调音器" aria-label="调音器">
+          <Icon name="tuner" :size="20" />
+        </router-link>
+      </div>
+    </header>
+
     <main class="page">
       <router-view />
     </main>
-    <nav v-if="route.meta.tab" class="tabbar">
+
+    <!-- 移动端：底部导航 -->
+    <nav v-if="route.meta.tab" class="tabbar mobile-only">
       <router-link
         v-for="t in tabs"
         :key="t.path"

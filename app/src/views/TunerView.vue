@@ -33,7 +33,7 @@ onUnmounted(() => tuner.stop())
 </script>
 
 <template>
-  <div>
+  <div class="narrow">
     <h1 class="page-title">调音器</h1>
     <div class="card tuner">
       <div class="tuner-note">{{ tuner.note.value }}</div>

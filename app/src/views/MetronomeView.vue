@@ -6,7 +6,7 @@ const presets = [60, 80, 100, 120, 140, 160, 180]
 </script>
 
 <template>
-  <div>
+  <div class="narrow">
     <h1 class="page-title">节拍器</h1>
     <div class="card metro">
       <div class="metro-bpm">{{ m.bpm.value }}</div>

@@ -2,10 +2,13 @@
 import { ref, computed, onUnmounted } from 'vue'
 import { usePracticeStore } from '../stores/practice'
 import { useSettingsStore } from '../stores/settings'
+import { useMediaQuery } from '../composables/useMediaQuery'
 import Icon from '../components/Icon.vue'
 
 const practice = usePracticeStore()
 const settings = useSettingsStore()
+
+const isDesktop = useMediaQuery('(min-width: 768px)')
 
 const tick = ref(0)
 const clockTimer = setInterval(() => tick.value++, 30000)
@@ -46,58 +49,74 @@ const tips = [
       <span>到点啦，今天还没练琴！10 分钟爬格子也好过没有。</span>
     </div>
 
-    <div class="card hero">
-      <div class="hero-main">
-        <div class="hero-num">{{ todayText }}</div>
-        <div class="dim small">今日累计练习</div>
-      </div>
-      <div class="hero-side">
-        <div class="hero-streak">{{ practice.streakDays }} 天</div>
-        <div class="dim small">连续打卡</div>
-      </div>
-    </div>
+    <div class="home-grid">
+      <div class="home-main">
+        <div class="card hero">
+          <div class="hero-main">
+            <div class="hero-num">{{ todayText }}</div>
+            <div class="dim small">今日累计练习</div>
+          </div>
+          <div v-if="!isDesktop" class="hero-side">
+            <div class="hero-streak">{{ practice.streakDays }} 天</div>
+            <div class="dim small">连续打卡</div>
+          </div>
+          <router-link v-if="isDesktop" to="/practice" class="btn btn-primary hero-btn">开始练习</router-link>
+        </div>
 
-    <router-link to="/practice" class="btn btn-primary btn-block">开始练习</router-link>
+        <router-link v-if="!isDesktop" to="/practice" class="btn btn-primary btn-block">开始练习</router-link>
 
-    <div class="card">
-      <h2>最近 7 天</h2>
-      <div class="week-bars">
-        <div v-for="(d, i) in practice.last7Days" :key="d.date" class="week-bar-wrap">
-          <div
-            class="week-bar"
-            :class="{ today: i === practice.last7Days.length - 1 }"
-            :style="{ height: Math.max(4, (d.seconds / max7) * 100) + '%' }"
-          ></div>
-          <div class="week-label dim">{{ d.date.slice(5) }}</div>
+        <div class="card">
+          <h2>最近 7 天</h2>
+          <div class="week-bars">
+            <div v-for="(d, i) in practice.last7Days" :key="d.date" class="week-bar-wrap">
+              <div
+                class="week-bar"
+                :class="{ today: i === practice.last7Days.length - 1 }"
+                :style="{ height: Math.max(4, (d.seconds / max7) * 100) + '%' }"
+              ></div>
+              <div class="week-label dim">{{ d.date.slice(5) }}</div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
 
-    <div class="card">
-      <h2>今日练习包（弹性）</h2>
-      <div v-for="t in tips" :key="t.dur" class="list-row">
-        <span class="tag">{{ t.dur }} 分钟</span>
-        <span class="small">{{ t.text }}</span>
+      <div class="home-side">
+        <div v-if="isDesktop" class="card">
+          <div class="streak-big">{{ practice.streakDays }} 天</div>
+          <div class="dim small">连续打卡</div>
+        </div>
+
+        <div class="card">
+          <h2>今日练习包（弹性）</h2>
+          <div v-for="t in tips" :key="t.dur" class="list-row">
+            <span class="tag">{{ t.dur }} 分钟</span>
+            <span class="small">{{ t.text }}</span>
+          </div>
+          <p class="muted" style="margin-top: 8px">
+            零基础阶段：先坚持每天摸琴 10 分钟，再逐步加量。学习计划完整版见 M3。
+          </p>
+        </div>
+
+        <div class="card">
+          <h2>练琴提醒</h2>
+          <p v-if="settings.reminders.enabled" class="small">每天 {{ settings.reminders.time }} 提醒（应用内）</p>
+          <p v-else class="small muted">未开启</p>
+          <router-link to="/reminders" class="small" style="color: var(--accent-dark)">去设置</router-link>
+        </div>
       </div>
-      <p class="muted" style="margin-top: 8px">
-        零基础阶段：先坚持每天摸琴 10 分钟，再逐步加量。学习计划完整版见 M3。
-      </p>
-    </div>
-
-    <div class="card">
-      <h2>练琴提醒</h2>
-      <p v-if="settings.reminders.enabled" class="small">每天 {{ settings.reminders.time }} 提醒（应用内）</p>
-      <p v-else class="small muted">未开启</p>
-      <router-link to="/reminders" class="small" style="color: var(--accent-dark)">去设置</router-link>
     </div>
   </div>
 </template>
 
 <style scoped>
+.home-grid { display: grid; grid-template-columns: 1fr; }
+.home-main, .home-side { min-width: 0; }
 .hero { display: flex; justify-content: space-between; align-items: center; }
 .hero-num { font-size: 32px; font-weight: 800; letter-spacing: -0.5px; }
 .hero-streak { font-size: 22px; font-weight: 800; color: var(--accent); }
 .hero-side { text-align: right; }
+.hero-btn { flex: none; }
+.streak-big { font-size: 28px; font-weight: 800; color: var(--accent); }
 .remind-banner {
   display: flex;
   align-items: center;
@@ -111,4 +130,10 @@ const tips = [
 .week-bar.today { background: var(--accent); }
 .week-label { font-size: 11px; }
 .list-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+
+@media (min-width: 768px) {
+  .home-grid { grid-template-columns: 2fr 1fr; gap: 16px; align-items: start; }
+  .home-side .card { margin-bottom: 16px; }
+  .hero-num { font-size: 36px; }
+}
 </style>

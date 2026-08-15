@@ -31,7 +31,6 @@ body {
   display: flex;
   flex-direction: column;
 }
-.shell.with-tabbar { padding-bottom: calc(60px + env(safe-area-inset-bottom)); }
 .page { flex: 1; padding: 20px 20px 28px; }
 
 /* 子页面顶部返回栏 */
@@ -177,3 +176,77 @@ label { font-size: 14px; color: var(--text-dim); display: block; margin: 10px 0 
 .dim { color: var(--text-dim); }
 .small { font-size: 13px; }
 .muted { color: var(--text-dim); font-size: 13px; }
+
+/* ---------- 桌面端外壳（≥768px） ---------- */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: #ffffff;
+  border-bottom: 1px solid var(--border);
+  height: 56px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.topbar-left { display: flex; align-items: center; gap: 2px; min-width: 0; }
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  text-decoration: none;
+  color: var(--text);
+  font-weight: 700;
+  font-size: 15px;
+  white-space: nowrap;
+}
+.brand-mark {
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  background: var(--accent);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+.topnav { display: flex; gap: 2px; flex: 1; min-width: 0; }
+.topnav-link {
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.topnav-link:hover { color: var(--text); background: var(--bg-input); }
+.topnav-link.active { color: var(--accent-dark); background: #fdeaea; }
+.topbar-tools { display: flex; gap: 6px; flex: none; }
+.tool-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-dim);
+  text-decoration: none;
+}
+.tool-btn:hover { background: var(--bg-input); color: var(--accent-dark); }
+
+/* 基础状态：桌面元素默认隐藏（须在 .topbar 等定义之后，保证同优先级下胜出） */
+.desktop-only { display: none; }
+
+@media (min-width: 768px) {
+  .mobile-only { display: none; }
+  .desktop-only { display: flex; }
+  .shell { max-width: 1120px; }
+  .page { padding: 24px 32px 40px; }
+  .narrow { max-width: 680px; margin: 0 auto; }
+}
+@media (max-width: 767.98px) {
+  .shell.with-tabbar { padding-bottom: calc(60px + env(safe-area-inset-bottom)); }
+}

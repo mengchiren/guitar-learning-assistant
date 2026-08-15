@@ -16,7 +16,7 @@ async function requestNotif() {
 </script>
 
 <template>
-  <div>
+  <div class="narrow">
     <h1 class="page-title">提醒设置</h1>
     <div class="card">
       <div class="switch-row">

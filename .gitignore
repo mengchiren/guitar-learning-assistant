@@ -17,3 +17,6 @@ spike/songs/
 .DS_Store
 Thumbs.db
 *.log
+
+# 工具会话文件
+.zcode/
