@@ -2,11 +2,9 @@
 import { ref, computed } from 'vue'
 import { usePracticeStore } from '../stores/practice'
 import { useTimerStore } from '../stores/timer'
-import { useMetronomeStore } from '../stores/metronome'
 
 const practice = usePracticeStore()
 const timer = useTimerStore()
-const metro = useMetronomeStore()
 
 // 用本地时区日期（toISOString 是 UTC，凌晨会差一天）
 function localDateStr(d = new Date()) {
@@ -73,18 +71,6 @@ function backfill() {
       <div class="dim small" style="margin-top: 4px">今日已打卡 {{ Math.floor(practice.todaySeconds / 60) }} 分钟</div>
     </div>
 
-    <div class="card mini-metro">
-      <div class="mini-metro-head">
-        <span class="small" style="font-weight: 700">节拍器</span>
-        <span class="mini-bpm">{{ metro.bpm }} <span class="dim small">BPM</span></span>
-      </div>
-      <input type="range" min="40" max="220" v-model.number="metro.bpm" />
-      <div class="btn-row">
-        <button class="btn btn-primary" @click="metro.toggle()">{{ metro.running ? '停止' : '开始' }}</button>
-        <button class="btn" @click="metro.tap()">打拍定速</button>
-      </div>
-    </div>
-
     <div v-if="!finished" class="btn-row">
       <button v-if="!timer.running" class="btn btn-primary" @click="timer.start()">开始</button>
       <button v-else class="btn" @click="timer.pause()">暂停</button>
@@ -128,6 +114,4 @@ function backfill() {
 <style scoped>
 .clock-card { text-align: center; padding: 24px 16px; }
 .clock { font-size: 56px; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -1px; margin-bottom: 6px; }
-.mini-metro-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
-.mini-bpm { font-size: 20px; font-weight: 800; font-variant-numeric: tabular-nums; }
 </style>
