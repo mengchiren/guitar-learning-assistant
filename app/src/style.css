@@ -237,6 +237,24 @@ label { font-size: 14px; color: var(--text-dim); display: block; margin: 10px 0 
 }
 .tool-btn:hover { background: var(--bg-input); color: var(--accent-dark); }
 
+/* 练习中胶囊（桌面在顶栏内，移动端悬浮） */
+.timer-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 13px;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 1px solid var(--accent);
+  color: var(--accent-dark);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.timer-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex: none; }
+
 /* 基础状态：桌面元素默认隐藏（须在 .topbar 等定义之后，保证同优先级下胜出） */
 .desktop-only { display: none; }
 
@@ -249,4 +267,13 @@ label { font-size: 14px; color: var(--text-dim); display: block; margin: 10px 0 
 }
 @media (max-width: 767.98px) {
   .shell.with-tabbar { padding-bottom: calc(60px + env(safe-area-inset-bottom)); }
+  .timer-chip--float {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 11;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+  }
+  .shell.with-tabbar .timer-chip--float { bottom: calc(68px + env(safe-area-inset-bottom)); }
+  .shell:not(.with-tabbar) .timer-chip--float { bottom: calc(16px + env(safe-area-inset-bottom)); }
 }

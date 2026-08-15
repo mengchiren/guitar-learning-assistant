@@ -23,8 +23,8 @@
 | `app/` | M1 应用（Vue 3 + Vite + vite-plugin-pwa），本工程主体 |
 | `app/src/data/` | 核心数据：`devices.js`（两套设备参数）、`templates.js`（5 套音色套路模板）、`seedSongs.json`（6 首种子歌曲，M0 校准过的数据） |
 | `app/src/utils/storage.js` | 本地存储抽象层（localStorage，key 前缀 `gla:v1:`），为将来换 Supabase 云同步预留 |
-| `app/src/stores/` | Pinia：`practice.js`（打卡记录/连续天数）、`settings.js`（提醒/当前设备） |
-| `app/src/composables/` | `useMetronome.js`（Web Audio 前瞻调度）、`useTuner.js`（麦克风 + ACF 基频检测）、`usePracticeTimer.js`（计时器）、`useMediaQuery.js`（桌面/移动断点 768px 响应式状态） |
+| `app/src/stores/` | Pinia：`practice.js`（打卡记录/连续天数）、`settings.js`（提醒/当前设备）、`timer.js`（练习计时，**全局，切页不停表**）、`metronome.js`（节拍器，**全局，切页不停声**） |
+| `app/src/composables/` | `useTuner.js`（麦克风 + ACF 基频检测）、`useMediaQuery.js`（桌面/移动断点 768px 响应式状态）。计时与节拍器已迁到 stores/ |
 | `app/src/components/Icon.vue` | 线性 SVG 图标组件（瑞士风图标集，别再用 emoji） |
 | `歌曲文件/`、`视频教程/` | 用户的歌曲与成田电吉他课程视频，**已 git 忽略**，勿提交 |
 
@@ -45,9 +45,11 @@ Git 历史（4 个提交）：`dbd6c39` 初始（文档+spike）→ `c862756` M1
 
 **桌面/移动分离布局（完成，已浏览器双视口实测）**：用户反馈电脑端像「手机页面硬贴大屏」，参考 B 站桌面版做了响应式拆分——断点 768px（`style.css` 媒体查询 + `useMediaQuery` composable）。**≥768px 桌面端**：顶部导航栏（品牌 + 四大导航 + 节拍器/调音器快捷钮 + 二级页返回键，`App.vue` 的 `.topbar`）、首页仪表盘多栏（主区今日时长/开始练习/7 天图，右栏连续天数/练习包/提醒）、工具页 3 列、歌曲库 2 列、设备 2 列、套路库 2 列、我的页 3 列、表单/工具类页面 `.narrow` 限宽 680px。**<768px 手机端**：与之前完全一致（底部导航 + 单栏 + 二级页返回栏），零改动。注意 CSS 层叠顺序：`.desktop-only { display:none }` 基础规则必须写在 `.topbar` 定义之后，否则同优先级下顶栏在手机上会漏出来。
 
+**跨页协作体验（完成，已浏览器实测）**：用户反馈「开始练习后就用不了其他功能」。计时与节拍器已提升为全局 store（`timer.js`/`metronome.js`，跨页面共享同一实例）：练习计时切页不断、回来续走；节拍器切页声音不断。外壳新增「练习中 mm:ss」胶囊（桌面在顶栏内、手机底部悬浮，`App.vue` 的 `timer-chip`），点击一键回练习页、练习页上自动隐藏；练习页内嵌迷你节拍器卡（与节拍器页同一实例，不会双响）。原 `usePracticeTimer.js`/`useMetronome.js` 已删除。
+
 ## 4. 当前卡在哪
 
-**没有技术阻塞，在等用户验收桌面端新布局。** 桌面/移动分离布局已完成并通过浏览器双视口实测（1280px 桌面 + 375px 手机），等待用户看效果：顶栏配色比例、仪表盘两栏的疏密、多栏列表的观感，以及手机端是否真的无感。**不要在他反馈前自作主张改设计**，等他给意见再动手。
+**没有技术阻塞，在等用户验收两轮改动。** ①桌面/移动分离布局（B 站式顶栏 + 仪表盘首页）；②跨页协作体验（计时/节拍器全局化 + 「练习中」胶囊 + 练习页迷你节拍器）。均已浏览器实测通过，等待用户看效果。**不要在他反馈前自作主张改设计**，等他给意见再动手。
 
 开发服务器在 `http://localhost:4174` 后台跑着（vite dev）。本会话结束后该进程可能被系统回收——如果用户说打不开，先跑 `cd F:/电吉他学习/app && npm run dev -- --port 4174` 再排查。
 
@@ -77,6 +79,7 @@ Git 历史（4 个提交）：`dbd6c39` 初始（文档+spike）→ `c862756` M1
 13. **设备参数来自网络检索**：GRX40/Jam Buddy 2 参数已写进 `devices.js`，但音箱 14 种箱头模拟的具体名单没核实全，做音色映射前要让用户对照实物面板/说明书确认。
 14. **浏览器测试的方法**：本机有 browser-use 技能（Node REPL 的 `mcp__node_repl__js` 工具），能开真浏览器验证。`playwright.evaluate` 会被安全策略拒绝（读脚本报错是正常的），用 `domSnapshot()` 读页面、用 `getByRole/getByText` 操作；aria-hidden 的 SVG 图标不会出现在快照里，别当成图标没渲染。截图存盘但本会话无法预览图片，视觉验收交给用户本人。
 15. **AGENTS.md 规矩**：编辑任何已有文本文件前用 chardet 检测编码（本工程文件都是 UTF-8）；新文件直接 UTF-8。
+16. **计时器/节拍器是全局 store**：`stores/timer.js`、`stores/metronome.js` 跨页面共享同一实例（切页不停表/不停声），外壳胶囊与练习页迷你节拍器都绑定它们。不要重新引入页面级 usePracticeTimer/useMetronome 这类写法——页面组件销毁会停表停声，之前的问题就是这么来的。
 
 ## 7. 与用户协作的注意事项
 

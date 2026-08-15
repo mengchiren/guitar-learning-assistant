@@ -1,10 +1,12 @@
 <script setup>
-import { ref, computed, onUnmounted } from 'vue'
+import { ref, computed } from 'vue'
 import { usePracticeStore } from '../stores/practice'
-import { usePracticeTimer } from '../composables/usePracticeTimer'
+import { useTimerStore } from '../stores/timer'
+import { useMetronomeStore } from '../stores/metronome'
 
 const practice = usePracticeStore()
-const timer = usePracticeTimer()
+const timer = useTimerStore()
+const metro = useMetronomeStore()
 
 // 用本地时区日期（toISOString 是 UTC，凌晨会差一天）
 function localDateStr(d = new Date()) {
@@ -24,7 +26,7 @@ const backfillMinutes = ref(30)
 const backfillDone = ref(false)
 
 const clock = computed(() => {
-  const total = Math.floor(timer.elapsedSec.value)
+  const total = Math.floor(timer.elapsedSec)
   const m = String(Math.floor(total / 60)).padStart(2, '0')
   const s = String(total % 60).padStart(2, '0')
   return `${m}:${s}`
@@ -42,12 +44,14 @@ function finish() {
 }
 
 function saveRecord() {
+  const secs = Math.max(1, Math.round(timer.elapsedSec))
   practice.addRecord({
     date: localDateStr(),
-    seconds: Math.max(1, Math.round(timer.elapsedSec.value)),
+    seconds: secs,
     tags: [...tags.value],
     note: note.value,
   })
+  timer.reset()
   saved.value = true
 }
 
@@ -57,8 +61,6 @@ function backfill() {
   backfillDone.value = true
   setTimeout(() => (backfillDone.value = false), 3000)
 }
-
-onUnmounted(() => timer.stop())
 </script>
 
 <template>
@@ -67,19 +69,31 @@ onUnmounted(() => timer.stop())
 
     <div class="card clock-card">
       <div class="clock">{{ clock }}</div>
-      <div class="dim small">{{ timer.running.value ? '练习中…' : '开始后计时，练完点「结束打卡」' }}</div>
+      <div class="dim small">{{ timer.running ? '练习中…（切到其他页面计时也不会停）' : '开始后计时，练完点「结束打卡」' }}</div>
       <div class="dim small" style="margin-top: 4px">今日已打卡 {{ Math.floor(practice.todaySeconds / 60) }} 分钟</div>
     </div>
 
+    <div class="card mini-metro">
+      <div class="mini-metro-head">
+        <span class="small" style="font-weight: 700">节拍器</span>
+        <span class="mini-bpm">{{ metro.bpm }} <span class="dim small">BPM</span></span>
+      </div>
+      <input type="range" min="40" max="220" v-model.number="metro.bpm" />
+      <div class="btn-row">
+        <button class="btn btn-primary" @click="metro.toggle()">{{ metro.running ? '停止' : '开始' }}</button>
+        <button class="btn" @click="metro.tap()">打拍定速</button>
+      </div>
+    </div>
+
     <div v-if="!finished" class="btn-row">
-      <button v-if="!timer.running.value" class="btn btn-primary" @click="timer.start()">开始</button>
+      <button v-if="!timer.running" class="btn btn-primary" @click="timer.start()">开始</button>
       <button v-else class="btn" @click="timer.pause()">暂停</button>
-      <button class="btn" @click="finish()" :disabled="timer.elapsedSec.value < 1">结束打卡</button>
+      <button class="btn" @click="finish()" :disabled="timer.elapsedSec < 1">结束打卡</button>
     </div>
 
     <div v-if="finished && !saved" class="card">
       <h2>这次练了什么？</h2>
-      <p class="small dim">时长 {{ Math.round(timer.elapsedSec.value / 60) }} 分钟</p>
+      <p class="small dim">时长 {{ Math.round(timer.elapsedSec / 60) }} 分钟</p>
       <div class="tag-row" style="margin-top: 8px">
         <span v-for="t in TAG_OPTIONS" :key="t" class="tag" :class="{ on: tags.includes(t) }" @click="toggleTag(t)">
           {{ t }}
@@ -114,4 +128,6 @@ onUnmounted(() => timer.stop())
 <style scoped>
 .clock-card { text-align: center; padding: 24px 16px; }
 .clock { font-size: 56px; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -1px; margin-bottom: 6px; }
+.mini-metro-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.mini-bpm { font-size: 20px; font-weight: 800; font-variant-numeric: tabular-nums; }
 </style>

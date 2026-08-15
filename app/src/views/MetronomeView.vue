@@ -1,7 +1,7 @@
 <script setup>
-import { useMetronome } from '../composables/useMetronome'
+import { useMetronomeStore } from '../stores/metronome'
 
-const m = useMetronome()
+const metro = useMetronomeStore()
 const presets = [60, 80, 100, 120, 140, 160, 180]
 </script>
 
@@ -9,12 +9,12 @@ const presets = [60, 80, 100, 120, 140, 160, 180]
   <div class="narrow">
     <h1 class="page-title">节拍器</h1>
     <div class="card metro">
-      <div class="metro-bpm">{{ m.bpm.value }}</div>
+      <div class="metro-bpm">{{ metro.bpm }}</div>
       <div class="dim small">BPM</div>
 
       <div class="beat-dots">
         <span
-          v-for="i in m.beats.value"
+          v-for="i in metro.beats"
           :key="i"
           class="beat-dot"
           :class="{ first: i === 1 }"
@@ -22,24 +22,24 @@ const presets = [60, 80, 100, 120, 140, 160, 180]
       </div>
 
       <div class="btn-row" style="margin-top: 12px">
-        <button class="btn" @click="m.bpm.value = Math.max(40, m.bpm.value - 5)">−5</button>
-        <button class="btn" @click="m.bpm.value = Math.min(220, m.bpm.value + 5)">+5</button>
+        <button class="btn" @click="metro.bpm = Math.max(40, metro.bpm - 5)">−5</button>
+        <button class="btn" @click="metro.bpm = Math.min(220, metro.bpm + 5)">+5</button>
       </div>
 
-      <input type="range" min="40" max="220" v-model.number="m.bpm.value" />
+      <input type="range" min="40" max="220" v-model.number="metro.bpm" />
 
       <div class="tag-row">
         <span
           v-for="p in presets"
           :key="p"
           class="tag"
-          :class="{ on: m.bpm.value === p }"
-          @click="m.bpm.value = p"
+          :class="{ on: metro.bpm === p }"
+          @click="metro.bpm = p"
         >{{ p }}</span>
       </div>
 
       <label>拍号</label>
-      <select v-model.number="m.beats.value">
+      <select v-model.number="metro.beats">
         <option :value="2">2/4</option>
         <option :value="3">3/4</option>
         <option :value="4">4/4</option>
@@ -47,8 +47,8 @@ const presets = [60, 80, 100, 120, 140, 160, 180]
       </select>
 
       <div class="btn-row" style="margin-top: 14px">
-        <button class="btn btn-primary" @click="m.toggle()">{{ m.running.value ? '停止' : '开始' }}</button>
-        <button class="btn" @click="m.tap()">打拍定速</button>
+        <button class="btn btn-primary" @click="metro.toggle()">{{ metro.running ? '停止' : '开始' }}</button>
+        <button class="btn" @click="metro.tap()">打拍定速</button>
       </div>
 
       <p class="muted small" style="margin-top: 10px">
