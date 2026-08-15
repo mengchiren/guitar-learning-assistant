@@ -17,13 +17,14 @@
 | 路径 | 作用 |
 |---|---|
 | `需求文档.md` | 需求规格 v0.2.5：功能需求、设备参数、成本评估、路线图（M0~M4）、待确认项 |
-| `spike/` | M0 可行性验证（Python）：`analyze.py` 音频分析脚本（BPM/调性/和弦/套路归类）、`key_check.py`、`make_synthetic.py`、`README.md`（含 5 首真实歌曲对拍表） |
+| `spike/` | M0 可行性验证（Python）：`analyze.py` 音频分析脚本（BPM/调性/和弦/套路归类）、`key_check.py`、`make_synthetic.py`、`README.md`（含 5 首真实歌曲对拍表）、`test_frontend_analyze.mjs`（前端引擎对拍单测，见坑 17） |
 | `spike/.venv/` | Python 3.13 虚拟环境（librosa 1.0.0 + imageio-ffmpeg），已被 git 忽略 |
 | `spike/songs/` | 用户的歌曲音频（mp3/flac/kgg），**已 git 忽略**，测试素材 |
 | `app/` | M1 应用（Vue 3 + Vite + vite-plugin-pwa），本工程主体 |
 | `app/src/data/` | 核心数据：`devices.js`（两套设备参数）、`templates.js`（5 套音色套路模板）、`seedSongs.json`（6 首种子歌曲，M0 校准过的数据） |
 | `app/src/utils/storage.js` | 本地存储抽象层（localStorage，key 前缀 `gla:v1:`），为将来换 Supabase 云同步预留 |
-| `app/src/stores/` | Pinia：`practice.js`（打卡记录/连续天数）、`settings.js`（提醒/当前设备）、`timer.js`（练习计时，**全局，切页不停表**）、`metronome.js`（节拍器，**全局，切页不停声**） |
+| `app/src/utils/analyze.js` | M2 前端音频分析引擎（纯函数、无 DOM、可 Node 单测）：BPM/响度/亮度/调性 Top3/粗略和弦/套路归类/置信度。算法移植自 spike，调性 chroma 用 STFT 逐八度归一化近似（非 CQT），阈值与置信度已按 5 首真实歌曲对拍校准 |
+| `app/src/stores/` | Pinia：`practice.js`（打卡记录/连续天数）、`settings.js`（提醒/当前设备）、`timer.js`（练习计时，**全局，切页不停表**）、`metronome.js`（节拍器，**全局，切页不停声**）、`songs.js`（用户歌单：分析结果/手动录入/纠错，localStorage key `songs`） |
 | `app/src/composables/` | `useTuner.js`（麦克风 + ACF 基频检测）、`useMediaQuery.js`（桌面/移动断点 768px 响应式状态）。计时与节拍器已迁到 stores/ |
 | `app/src/components/Icon.vue` | 线性 SVG 图标组件（瑞士风图标集，别再用 emoji） |
 | `歌曲文件/`、`视频教程/` | 用户的歌曲与成田电吉他课程视频，**已 git 忽略**，勿提交 |
@@ -47,20 +48,21 @@ Git 历史（4 个提交）：`dbd6c39` 初始（文档+spike）→ `c862756` M1
 
 **跨页协作体验（完成，已浏览器实测）**：用户反馈「开始练习后就用不了其他功能」。计时与节拍器已提升为全局 store（`timer.js`/`metronome.js`，跨页面共享同一实例）：练习计时切页不断、回来续走；节拍器切页声音不断。外壳新增「练习中 mm:ss」胶囊（桌面在顶栏内、手机底部悬浮，`App.vue` 的 `timer-chip`），点击一键回练习页、练习页上自动隐藏。原 `usePracticeTimer.js`/`useMetronome.js` 已删除。注意：曾按方案在练习页内嵌迷你节拍器卡，用户明确不要，已移除（v0.2.8）——别再往计时界面塞节拍器。
 
+**M2 歌曲分析第一批（完成，已 Node 对拍 + 浏览器实测）**：纯前端架构（用户确认「分析在浏览器本地跑」）。①分析引擎 `analyze.js`（纯函数）：BPM（onset 双特征包络自相关 + <100 半速加倍）、RMS/谱质心、调性 K-S Top3（STFT chroma 逐八度归一化 + 小数 midi 插值，非 librosa CQT）、三和弦模板粗略和弦、5 类套路归类（spike 阈值原样）、置信度徽章（BPM 用前后半段一致性、调性用 corr 差、套路用规则余量）。**对拍结果 5/5 全项通过**（BPM 误差 ≤3%、调性 Top3 内 5/5 命中，与 spike 结论一致）。②歌曲库：搜索 + 卡片进详情 + 添加歌曲。③详情页 `/songs/:id`：设备设置建议（模板按当前设备渲染）、「用此 BPM 开节拍器」联动、人工纠错（纠错值优先展示，seed 只读）。④添加页 `/songs/new`：上传本地分析（kgg/mflac 拒绝并引导换源）+ 手动录入兜底。用户歌单存 localStorage（`gla:v1:songs`）。已知取舍：调性 3 首 top1 有偏差（Top3 内命中），靠置信度 + 纠错 + 种子库兜底——符合「AI 参考 + 人工纠错」策略。
+
 ## 4. 当前卡在哪
 
-**没有技术阻塞，在等用户验收两轮改动。** ①桌面/移动分离布局（B 站式顶栏 + 仪表盘首页）；②跨页协作体验（计时/节拍器全局化 + 「练习中」胶囊 + 练习页迷你节拍器）。均已浏览器实测通过，等待用户看效果。**不要在他反馈前自作主张改设计**，等他给意见再动手。
+**没有技术阻塞，在等用户验收三轮改动。** ①桌面/移动分离布局（B 站式顶栏 + 仪表盘首页）；②跨页协作体验（计时/节拍器全局化 + 「练习中」胶囊）；③M2 歌曲分析第一批（搜索/详情/上传分析/手动录入/纠错）。均已实测通过，等待用户看效果。**不要在他反馈前自作主张改设计**，等他给意见再动手。
 
 开发服务器在 `http://localhost:4174` 后台跑着（vite dev）。本会话结束后该进程可能被系统回收——如果用户说打不开，先跑 `cd F:/电吉他学习/app && npm run dev -- --port 4174` 再排查。
 
 ## 5. 下一步计划（按路线图）
 
-1. **等用户反馈** → 按意见微调桌面端 CSS/交互（都是小改动）。
-2. **M2 歌曲分析**：把 spike 的音频分析能力接进网页——歌名搜种子库 + 上传音频（前端 Web Audio 或后端跑 analyze.py 的逻辑）→ 输出 BPM/调性/套路归类 → 套路模板映射出设备设置建议 + 置信度标注。注意上传的酷狗 mp3 要先转码（见坑 2）。
-3. **部署上线**（用户想在手机上用）：Cloudflare Pages / Vercel 免费档。部署后手机才有麦克风权限（HTTPS），PWA 才能安装。部署前用户要能验收。
-4. **M3**：学习计划规则引擎 + 成田课程进度跟踪 + 统计报表。
-5. **M4**：AI 答疑、Capacitor 安卓壳 + 桌面小组件、微信推送（推送加）、录音回听。
-6. 云同步（Supabase）在部署后按需接入，`storage.js` 抽象层已留好口。
+1. **等用户反馈** → 按意见微调 M2 页面（都是小改动）。
+2. **部署上线**（M2 验收后）：Cloudflare Pages / Vercel 免费档。部署后手机才有麦克风权限（HTTPS）、PWA 才能安装；注意部署前把 `vite.config.js` 的 PWA 配置再核对一遍，部署后用户要能验收。
+3. **M3**：学习计划规则引擎 + 成田课程进度跟踪 + 统计报表。
+4. **M4**：AI 答疑、Capacitor 安卓壳 + 桌面小组件、微信推送（推送加）、录音回听。
+5. 云同步（Supabase）在部署后按需接入，`storage.js` 抽象层已留好口。
 
 ## 6. 踩过的坑（绝对不要踩）
 
@@ -80,6 +82,8 @@ Git 历史（4 个提交）：`dbd6c39` 初始（文档+spike）→ `c862756` M1
 14. **浏览器测试的方法**：本机有 browser-use 技能（Node REPL 的 `mcp__node_repl__js` 工具），能开真浏览器验证。`playwright.evaluate` 会被安全策略拒绝（读脚本报错是正常的），用 `domSnapshot()` 读页面、用 `getByRole/getByText` 操作；aria-hidden 的 SVG 图标不会出现在快照里，别当成图标没渲染。截图存盘但本会话无法预览图片，视觉验收交给用户本人。
 15. **AGENTS.md 规矩**：编辑任何已有文本文件前用 chardet 检测编码（本工程文件都是 UTF-8）；新文件直接 UTF-8。
 16. **计时器/节拍器是全局 store**：`stores/timer.js`、`stores/metronome.js` 跨页面共享同一实例（切页不停表/不停声），外壳胶囊绑定它们。不要重新引入页面级 usePracticeTimer/useMetronome 这类写法——页面组件销毁会停表停声，之前的问题就是这么来的。练习页不要放节拍器控件（用户明确拒绝过）。
+17. **前端分析引擎的对拍与联调**：改 `analyze.js` 任何算法/阈值后，必须重跑 `node spike/test_frontend_analyze.mjs <ffmpeg路径>`（ffmpeg 路径用 `spike/.venv/Scripts/python.exe -c "import imageio_ffmpeg; print(imageio_ffmpeg.get_ffmpeg_exe())"` 取），5 首真实歌曲全项通过才算数。浏览器联调走添加歌曲页的「加载开发测试音频」按钮（仅 `import.meta.env.DEV` 显示，IAB 不支持文件选择器所以要有这个口子），它 fetch `app/public/test-audio.mp3`（已 gitignore，用 spike/songs 里任一歌曲拷贝即可，用完删）。
+18. **调性 chroma 是 STFT 近似非 CQT**：逐八度归一化 + 小数 midi 插值两个技巧缺一不可（去掉任一个，调性对拍立即掉到 2/5）。K-S 模板滚动方向要用 `(j - i + 12) % 12`（与 numpy 的 np.roll 同向），方向写反会让所有歌错判成 D# 调。
 
 ## 7. 与用户协作的注意事项
 

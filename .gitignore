@@ -20,3 +20,6 @@ Thumbs.db
 
 # 工具会话文件
 .zcode/
+
+# 开发测试音频（浏览器端分析联调用，用完即删）
+app/public/test-audio.mp3

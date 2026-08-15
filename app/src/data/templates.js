@@ -2,6 +2,16 @@
 // 参数按 JOYO Jam Buddy 2 + Ibanez GRX40 标注，是「参考起点」，实际弹奏时用耳朵微调。
 // M2 起：歌曲分析会把每首歌归类到这里的某个套路。
 
+// 按 id 或 name 查找套路模板。
+// seedSongs 的 template 字段存的是 name 且可能带「（待校准）」等括号后缀，
+// 统一剥掉全角括号再匹配，不依赖 id 硬匹配。
+export function findToneTemplate(nameOrId) {
+  const clean = (s) => (s || '').replace(/（.*?）/g, '').trim()
+  return TONE_TEMPLATES.find(
+    (t) => t.id === nameOrId || t.name === nameOrId || clean(t.name) === clean(nameOrId),
+  )
+}
+
 export const TONE_TEMPLATES = [
   {
     id: 'clean',
