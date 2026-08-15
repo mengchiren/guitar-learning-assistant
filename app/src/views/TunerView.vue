@@ -13,20 +13,23 @@ const STRINGS = [
   { name: '1 弦 E4', freq: 329.63 },
 ]
 
+// 复用同一个 AudioContext：浏览器对上下文数量有上限，每次新建连点多次会失声
+let refCtx = null
+
 function playRef(freq) {
-  const c = new (window.AudioContext || window.webkitAudioContext)()
-  c.resume()
-  const osc = c.createOscillator()
-  const gain = c.createGain()
+  if (!refCtx) refCtx = new (window.AudioContext || window.webkitAudioContext)()
+  refCtx.resume()
+  const osc = refCtx.createOscillator()
+  const gain = refCtx.createGain()
   osc.type = 'sine'
   osc.frequency.value = freq
-  gain.gain.setValueAtTime(0.35, c.currentTime)
-  gain.gain.setValueAtTime(0.35, c.currentTime + 1.3)
-  gain.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + 1.4)
+  gain.gain.setValueAtTime(0.35, refCtx.currentTime)
+  gain.gain.setValueAtTime(0.35, refCtx.currentTime + 1.3)
+  gain.gain.exponentialRampToValueAtTime(0.0001, refCtx.currentTime + 1.4)
   osc.connect(gain)
-  gain.connect(c.destination)
+  gain.connect(refCtx.destination)
   osc.start()
-  osc.stop(c.currentTime + 1.4)
+  osc.stop(refCtx.currentTime + 1.4)
 }
 
 onUnmounted(() => tuner.stop())
