@@ -12,7 +12,16 @@ const isDev = import.meta.env.DEV
 const PITCH = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
 const KEYS = PITCH.flatMap((p) => [`${p} 大调`, `${p} 小调`])
 const ENCRYPTED_EXTS = ['kgg', 'mflac', 'kgm', 'qmcflac', 'qmc0', 'qmc3']
-const MAX_SIZE = 30 * 1024 * 1024
+const MAX_SIZE = 100 * 1024 * 1024
+const TARGET_SR = 22050
+const MAX_PCM_BYTES = 300 * 1024 * 1024 // 解码后原始 PCM 数据量护栏（手机内存安全线）
+
+class MemoryLimitError extends Error {
+  constructor() {
+    super('memory limit')
+    this.name = 'MemoryLimitError'
+  }
+}
 
 const mode = ref('analyze') // analyze | manual
 const file = ref(null)
@@ -40,25 +49,30 @@ function onFileChange(e) {
   if (f && !title.value) title.value = f.name.replace(/\.[^.]+$/, '')
 }
 
-async function decodeFile(f) {
-  const buf = await f.arrayBuffer()
+// 解码并直接渲染成 22050Hz 单声道：不再持有全采样率双声道的工作副本，峰值内存省约 4 倍
+async function decodeArrayBuffer(arrayBuf) {
   const AC = window.AudioContext || window.webkitAudioContext
   const ctx = new AC()
+  let audio
   try {
-    const audio = await ctx.decodeAudioData(buf)
-    const n = audio.length
-    const out = new Float32Array(n)
-    const ch0 = audio.getChannelData(0)
-    if (audio.numberOfChannels > 1) {
-      const ch1 = audio.getChannelData(1)
-      for (let i = 0; i < n; i++) out[i] = (ch0[i] + ch1[i]) / 2
-    } else {
-      out.set(ch0)
-    }
-    return { samples: out, sampleRate: audio.sampleRate }
+    audio = await ctx.decodeAudioData(arrayBuf)
   } finally {
     ctx.close()
   }
+  const pcmBytes = audio.length * audio.numberOfChannels * 4
+  if (pcmBytes > MAX_PCM_BYTES) throw new MemoryLimitError()
+  const len = Math.max(1, Math.ceil((audio.length * TARGET_SR) / audio.sampleRate))
+  const off = new OfflineAudioContext(1, len, TARGET_SR)
+  const src = off.createBufferSource()
+  src.buffer = audio
+  src.connect(off.destination)
+  src.start()
+  const rendered = await off.startRendering()
+  return { samples: rendered.getChannelData(0), sampleRate: TARGET_SR }
+}
+
+async function decodeFile(f) {
+  return decodeArrayBuffer(await f.arrayBuffer())
 }
 
 async function runAnalyze() {
@@ -74,7 +88,7 @@ async function runAnalyze() {
     return
   }
   if (f.size > MAX_SIZE) {
-    error.value = '文件超过 30MB，手机内存可能吃紧。请换更小的文件（如已转码的 mp3）。'
+    error.value = '文件超过 100MB。一般无损单曲不会这么大，请确认文件或换更小的版本。'
     return
   }
   analyzing.value = true
@@ -83,7 +97,11 @@ async function runAnalyze() {
     result.value = analyzeAudio({ samples, sampleRate })
   } catch (err) {
     console.error(err)
-    error.value = '浏览器无法解码这个文件（可能是非标准编码）。请换源，或改用手动录入。'
+    if (err && err.name === 'MemoryLimitError') {
+      error.value = '这首歌解码后数据量太大，手机内存可能吃紧。请换更短的音频或 mp3 版本。'
+    } else {
+      error.value = '浏览器无法解码这个文件（可能是非标准编码）。请换源，或改用手动录入。'
+    }
   } finally {
     analyzing.value = false
   }
@@ -127,31 +145,21 @@ async function loadDevTest() {
   try {
     const resp = await fetch('/test-audio.mp3')
     if (!resp.ok) throw new Error('test audio not found')
-    const buf = await resp.arrayBuffer()
-    const AC = window.AudioContext || window.webkitAudioContext
-    const ctx = new AC()
-    let samples
-    let sampleRate
-    try {
-      const audio = await ctx.decodeAudioData(buf)
-      const n = audio.length
-      samples = new Float32Array(n)
-      const ch0 = audio.getChannelData(0)
-      if (audio.numberOfChannels > 1) {
-        const ch1 = audio.getChannelData(1)
-        for (let i = 0; i < n; i++) samples[i] = (ch0[i] + ch1[i]) / 2
-      } else {
-        samples.set(ch0)
-      }
-      sampleRate = audio.sampleRate
-    } finally {
-      ctx.close()
+    const arrayBuf = await resp.arrayBuffer()
+    if (arrayBuf.byteLength > MAX_SIZE) {
+      error.value = `文件超过 100MB（实际 ${(arrayBuf.byteLength / 1024 / 1024).toFixed(1)}MB）。`
+      return
     }
+    const { samples, sampleRate } = await decodeArrayBuffer(arrayBuf)
     title.value = title.value || '开发测试音频'
     result.value = analyzeAudio({ samples, sampleRate })
   } catch (err) {
     console.error(err)
-    error.value = '开发测试音频加载失败。'
+    if (err && err.name === 'MemoryLimitError') {
+      error.value = '这首歌解码后数据量太大，手机内存可能吃紧。请换更短的音频或 mp3 版本。'
+    } else {
+      error.value = '开发测试音频加载失败。'
+    }
   } finally {
     analyzing.value = false
   }
@@ -174,7 +182,7 @@ const confLabel = { 高: 'b-high', 中: 'b-mid', 低: 'b-low' }
         <h2>选择音频文件</h2>
         <input type="file" accept=".mp3,.flac,.wav,.m4a,.ogg,audio/*" @change="onFileChange" />
         <p class="muted small" style="margin-top: 8px">
-          支持 mp3 / flac / wav / m4a。文件只在你的浏览器里本地分析，不会上传。酷狗 kgg 等加密格式无法分析。
+          支持 mp3 / flac / wav / m4a，最大 100MB（无损单曲通常 20~40MB）。文件只在你的浏览器里本地分析，不会上传。酷狗 kgg 等加密格式无法分析。
         </p>
         <label>歌名</label>
         <input v-model="title" type="text" placeholder="例如：NO, Thank You!" />
