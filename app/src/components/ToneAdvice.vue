@@ -1,4 +1,5 @@
 <script setup>
+import { computed } from 'vue'
 import { useSettingsStore } from '../stores/settings'
 import { beginnerGuide } from '../utils/toneGuide'
 
@@ -8,7 +9,8 @@ const props = defineProps({
   tpl: { type: Object, required: true },
 })
 const settings = useSettingsStore()
-const beginner = beginnerGuide(props.tpl)
+// computed 而非一次性计算：同组件实例复用时（路由参数切换）tpl 会变，内容要跟着变
+const beginner = computed(() => beginnerGuide(props.tpl))
 </script>
 
 <template>

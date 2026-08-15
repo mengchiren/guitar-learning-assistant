@@ -111,28 +111,23 @@ function estimateTempo(env, frameRate) {
   const maxBpm = 200
   const minLag = Math.max(1, Math.floor((frameRate * 60) / maxBpm))
   const maxLag = Math.min(env.length - 1, Math.ceil((frameRate * 60) / minBpm))
-  if (maxLag < minLag) return { tempo: 0, prominence: 0, scores: [] }
+  if (maxLag < minLag) return { tempo: 0, scores: [], bestLag: minLag }
   let bestLag = minLag
   let bestScore = -1
-  let scoreSum = 0
-  let scoreCount = 0
   const scores = []
   for (let lag = minLag; lag <= maxLag; lag++) {
     let s = 0
     for (let t = lag; t < env.length; t++) s += env[t] * env[t - lag]
     // 按项数归一化：否则短 lag 天然多乘几项，分数随 lag 单调衰减，真峰被淹没
     s /= env.length - lag
-    scoreSum += s
-    scoreCount++
     scores.push({ lag, score: s, bpm: (60 * frameRate) / lag })
     if (s > bestScore) {
       bestScore = s
       bestLag = lag
     }
   }
-  const mean = scoreSum / (scoreCount || 1)
   const tempo = (60 * frameRate) / bestLag
-  return { tempo, prominence: bestScore / (mean || 1), scores, bestLag }
+  return { tempo, scores, bestLag }
 }
 
 // K-S 模板相关取 Top3（与 spike/analyze.py 的 estimate_key 一致）
@@ -373,7 +368,7 @@ export function analyzeAudio({ samples, sampleRate, debug = false }) {
     envS[t] = acc / Math.min(t + 1, 8)
   }
 
-  const { tempo, prominence, scores, bestLag } = estimateTempo(envS, frameRate)
+  const { tempo, scores, bestLag } = estimateTempo(envS, frameRate)
   const tempoBpm = Math.round(tempo * 10) / 10
   // 半速判定（节拍强度比较法）：测值 <100 时比较 lag 与 lag/2 的自相关强度。
   // 两者相当 → 快歌的半速测值（真实拍点在 lag/2）→ 加倍；

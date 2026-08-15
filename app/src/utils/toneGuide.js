@@ -1,6 +1,5 @@
 // 把套路模板翻译成新手友好的内容：
 // 1) 参数速览（最关键的 4 项）；2) 大白话操作流程（一步步照做）；3) 其余可先不动的参数。
-import { TONE_TEMPLATES } from '../data/templates'
 
 const isOff = (v) => !v || v === '关'
 
@@ -33,13 +32,4 @@ export function beginnerGuide(tpl) {
       `音箱：Reverb 混响开「${a.reverb}」`,
     ],
   }
-}
-
-// 兼容旧模板名：按 name 查找（带「（待校准）」等后缀也能命中）
-export function findGuide(nameOrId) {
-  const clean = (s) => (s || '').replace(/（.*?）/g, '').trim()
-  const tpl = TONE_TEMPLATES.find(
-    (t) => t.id === nameOrId || t.name === nameOrId || clean(t.name) === clean(nameOrId),
-  )
-  return tpl ? beginnerGuide(tpl) : null
 }
