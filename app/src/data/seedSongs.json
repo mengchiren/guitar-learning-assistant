@@ -76,5 +76,18 @@
     "chords": "",
     "note": "M0 对拍歌曲：spike BPM 123.0 完全一致、调性 G#（=Ab）命中",
     "dataFrom": "ChordWiki / midishow"
+  },
+  {
+    "id": "haruhikage",
+    "title": "春日影",
+    "artist": "MyGO!!!!!",
+    "source": "BanG Dream! It's MyGO!!!!!",
+    "bpm": 97,
+    "key": "B 大调",
+    "template": "清音伴奏",
+    "difficulty": "中（慢歌，注意节拍稳定与情绪表达）",
+    "chords": "",
+    "note": "慢歌典型：AI 测速易被 1.5 倍谐波带偏（前端实测 64.6，spike 加倍后 191.4），以本条目 97 为准",
+    "dataFrom": "社区 MIDI 多源交叉验证（96~97 BPM）+ spike/前端调性一致 B 大调"
   }
 ]

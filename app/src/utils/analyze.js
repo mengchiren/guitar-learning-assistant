@@ -132,7 +132,7 @@ function estimateTempo(env, frameRate) {
   }
   const mean = scoreSum / (scoreCount || 1)
   const tempo = (60 * frameRate) / bestLag
-  return { tempo, prominence: bestScore / (mean || 1), scores }
+  return { tempo, prominence: bestScore / (mean || 1), scores, bestLag }
 }
 
 // K-S 模板相关取 Top3（与 spike/analyze.py 的 estimate_key 一致）
@@ -373,10 +373,20 @@ export function analyzeAudio({ samples, sampleRate, debug = false }) {
     envS[t] = acc / Math.min(t + 1, 8)
   }
 
-  const { tempo, prominence, scores } = estimateTempo(envS, frameRate)
+  const { tempo, prominence, scores, bestLag } = estimateTempo(envS, frameRate)
   const tempoBpm = Math.round(tempo * 10) / 10
-  // 半速修正：<100 视为半速加倍（spike 规则，5 首实测误差 ≤1.5%；慢歌会误判，见 notes）
-  const tempoDoubled = tempoBpm < 100 && tempoBpm > 0
+  // 半速判定（节拍强度比较法）：测值 <100 时比较 lag 与 lag/2 的自相关强度。
+  // 两者相当 → 快歌的半速测值（真实拍点在 lag/2）→ 加倍；
+  // lag 处明显更强 → 真实慢歌，保持原值。
+  // 实测比值（lag/2 ÷ lag）：快歌 0.995~1.000，真实慢歌 <0.973，阈值取 0.98 两侧留足余量。
+  let tempoDoubled = false
+  if (tempoBpm > 0 && tempoBpm < 100) {
+    const sc = (lag) => scores.find((x) => x.lag === lag)?.score ?? 0
+    const halfLag = Math.floor(bestLag / 2)
+    const sFull = sc(bestLag)
+    const sHalf = halfLag >= 1 ? sc(halfLag) : 0
+    tempoDoubled = sHalf >= sFull * 0.98
+  }
   const tempoUseBpm = tempoDoubled ? Math.round(tempoBpm * 20) / 10 : tempoBpm
 
   const rmsDb = Math.round((20 * Math.log10(Math.sqrt(rmsSumSq / nFrames) + 1e-9)) * 10) / 10
@@ -408,12 +418,15 @@ export function analyzeAudio({ samples, sampleRate, debug = false }) {
     bpmConf = diff < 0.03 ? '高' : diff < 0.08 ? '中' : '低'
   }
   if (tempoDoubled && bpmConf === '高') bpmConf = '中' // 半速加倍是规则修正，不标高
+  // 真实慢歌（未加倍）也封顶「中」：慢歌测速容易偏（如 3/2 谐波），不给「高」
+  if (!tempoDoubled && tempoBpm > 0 && tempoBpm < 100 && bpmConf === '高') bpmConf = '中'
   const keyMargin = keyTop3.length >= 2 ? keyTop3[0].corr - keyTop3[1].corr : 0
   // 阈值按对拍校准：margin 0.15 仍可能选错（雑踏），0.2 以上才标高
   const keyConf = keyMargin >= 0.2 ? '高' : keyMargin >= 0.05 ? '中' : '低'
 
   const notes = []
-  if (tempoDoubled) notes.push('测速低于 100，已按「半速加倍」修正；真实慢歌（<100 BPM）可能被误判。')
+  if (tempoDoubled) notes.push('测速低于 100，节拍强度判断为快歌半速测值，已加倍；真实慢歌（<100 BPM）仍可能被误判。')
+  if (!tempoDoubled && tempoBpm > 0 && tempoBpm < 100) notes.push('测速低于 100 且判断为真实慢歌（未加倍）。慢歌测速容易偏差，建议对照节拍器或用种子库数值核对。')
   if (durationSec < 30) notes.push('音频不足 30 秒，BPM/调性估计不稳定。')
   if (keyConf === '低') notes.push('调性判据不强（Top2 差距小），建议以种子库或人工确认为准。')
   if (bpmConf === '低') notes.push('前后半段测速不一致或节奏复杂，BPM 仅供参考。')

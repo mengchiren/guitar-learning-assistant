@@ -77,7 +77,7 @@ Git 历史（4 个提交）：`dbd6c39` 初始（文档+spike）→ `c862756` M1
 5. **PWA Service Worker 缓存**：同一 origin 上 preview/旧构建的 SW 会缓存旧版本，刷新也不更新。开发调试要么换端口，要么用 dev server 全新源（4173 已被旧 SW 污染，现用 4174）。
 6. **测试音频来源**：archive.org、incompetech、GitHub raw 在本机网络全部连不上。需要样本音频时可用 Aliyun 镜像下 pygame-ce 的 wheel，解压后 `pygame/examples/data/` 里有 ogg/wav。
 7. **librosa 1.0 API 变了**：`librosa.feature.tempo_frequencies` 已移除，tempogram 速度轴要手算 `60*sr/(512*lag)`。
-8. **BPM「半速」修正用最简规则**：beat_track 对快歌常返回半速，直接 `tempo*2 if tempo<100`（5 首歌实测 ±1.5%）。**别用 tempogram 峰值法**——上一轮试过，它会把本来测准的值改坏。
+8. **BPM「半速」修正用节拍强度比较法**（v0.3.2 起）：测值 <100 时比较 lag 与 lag/2 的自相关强度，lag/2 ÷ lag 的比值 ≥0.98 才加倍（快歌半速测值两者相当：实测 0.995~1.000；真实慢歌 lag 处明显更强：<0.973）。**别再退回「一律 ×2」**——那会把 96 BPM 的春日影翻成 191（连 librosa 都栽在这）。**已知硬伤**：春日影类「1.5 倍谐波」慢歌（自相关峰值在 64.6 而非真值 96.7）无法自动纠正——试过 tempo 先验加权，会误伤 NO 这类快歌，不做；靠种子库权威值（春日影已入 seedSongs.json，97 BPM）+ 人工纠错兜底。改阈值必须重跑 `node spike/test_frontend_analyze.mjs`。
 9. **调性/和弦识别不是权威**：强力弦摇滚缺三音，聚合 chroma 有固有歧义（连 ChordU 都标错）。产品必须：种子库人工数据优先 → AI 结果标置信度 → 人工纠错入口。别把 AI 结果当精确数据呈现给用户。
 10. **音频/视频不进 git**：`.gitignore` 已排除 `歌曲文件/`、`视频教程/`、`spike/songs/`、`node_modules`、`spike/.venv`。用户歌曲和课程是版权内容，提交了就麻烦了。
 11. **Windows 端口残留**：后台任务被 kill 后 node 进程可能残留占端口（本会话就发生过，4173 被旧预览进程占着）。清理：`netstat -ano | grep :端口 | grep -i listen` 拿 PID → `taskkill //F //PID <PID>`。
@@ -86,7 +86,7 @@ Git 历史（4 个提交）：`dbd6c39` 初始（文档+spike）→ `c862756` M1
 14. **浏览器测试的方法**：本机有 browser-use 技能（Node REPL 的 `mcp__node_repl__js` 工具），能开真浏览器验证。`playwright.evaluate` 会被安全策略拒绝（读脚本报错是正常的），用 `domSnapshot()` 读页面、用 `getByRole/getByText` 操作；aria-hidden 的 SVG 图标不会出现在快照里，别当成图标没渲染。截图存盘但本会话无法预览图片，视觉验收交给用户本人。
 15. **AGENTS.md 规矩**：编辑任何已有文本文件前用 chardet 检测编码（本工程文件都是 UTF-8）；新文件直接 UTF-8。
 16. **计时器/节拍器是全局 store**：`stores/timer.js`、`stores/metronome.js` 跨页面共享同一实例（切页不停表/不停声），外壳胶囊绑定它们。不要重新引入页面级 usePracticeTimer/useMetronome 这类写法——页面组件销毁会停表停声，之前的问题就是这么来的。练习页不要放节拍器控件（用户明确拒绝过）。
-17. **前端分析引擎的对拍与联调**：改 `analyze.js` 任何算法/阈值后，必须重跑 `node spike/test_frontend_analyze.mjs <ffmpeg路径>`（ffmpeg 路径用 `spike/.venv/Scripts/python.exe -c "import imageio_ffmpeg; print(imageio_ffmpeg.get_ffmpeg_exe())"` 取），5 首真实歌曲全项通过才算数。浏览器联调走添加歌曲页的「加载开发测试音频」按钮（仅 `import.meta.env.DEV` 显示，IAB 不支持文件选择器所以要有这个口子），它 fetch `app/public/test-audio.mp3`（已 gitignore，用 spike/songs 里任一歌曲拷贝即可，用完删）。
+17. **前端分析引擎的对拍与联调**：改 `analyze.js` 任何算法/阈值后，必须重跑 `node spike/test_frontend_analyze.mjs <ffmpeg路径>`（ffmpeg 路径用 `spike/.venv/Scripts/python.exe -c "import imageio_ffmpeg; print(imageio_ffmpeg.get_ffmpeg_exe())"` 取），5 首真实歌曲全项通过才算数。单文件看 lag 谱用 `node spike/analyze_one.mjs <ffmpeg> <文件名>`。浏览器联调走添加歌曲页的「加载开发测试音频」按钮（仅 `import.meta.env.DEV` 显示，IAB 不支持文件选择器所以要有这个口子），它 fetch `app/public/test-audio.mp3`（已 gitignore，用 spike/songs 里任一歌曲拷贝即可，用完删）。
 18. **调性 chroma 是 STFT 近似非 CQT**：逐八度归一化 + 小数 midi 插值两个技巧缺一不可（去掉任一个，调性对拍立即掉到 2/5）。K-S 模板滚动方向要用 `(j - i + 12) % 12`（与 numpy 的 np.roll 同向），方向写反会让所有歌错判成 D# 调。
 
 ## 7. 与用户协作的注意事项
