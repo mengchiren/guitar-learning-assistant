@@ -31,7 +31,7 @@
 | `app/src/components/ToneAdvice.vue` | 设备设置建议共用组件：按「我的→新手模式」开关渲染「参数速览+大白话步骤」或「9 项参数表」，歌曲详情页与套路库页共用 |
 | `歌曲文件/`、`视频教程/` | 用户的歌曲与成田电吉他课程视频，**已 git 忽略**，勿提交 |
 
-Git 历史（4 个提交）：`dbd6c39` 初始（文档+spike）→ `c862756` M1 实现 → `07c9e76` 瑞士军刀风改版 → `faba473` 桌面/移动分离布局。
+Git 历史（4 个提交起步，目前已 15+）：`dbd6c39` 初始（文档+spike）→ `c862756` M1 实现 → `07c9e76` 瑞士军刀风改版 → `faba473` 桌面/移动分离布局 → ……（M2 分析、新手模式、部署等）。远程：`origin` = `github.com/mengchiren/guitar-learning-assistant`（**私有**），push 后 Cloudflare Pages 自动部署。
 
 ## 3. 已完成的工作
 
@@ -56,17 +56,16 @@ Git 历史（4 个提交）：`dbd6c39` 初始（文档+spike）→ `c862756` M1
 
 ## 4. 当前卡在哪
 
-**没有技术阻塞，在等用户验收四轮改动。** ①桌面/移动分离布局（B 站式顶栏 + 仪表盘首页）；②跨页协作体验（计时/节拍器全局化 + 「练习中」胶囊）；③M2 歌曲分析第一批（搜索/详情/上传分析/手动录入/纠错）；④显示偏好（新手模式大白话设备建议）。均已实测通过，等待用户看效果。**不要在他反馈前自作主张改设计**，等他给意见再动手。
+**没有技术阻塞。线上已部署，等用户手机上验收。** ①~⑤已完成改动（布局/跨页协作/M2 分析/新手模式/慢歌修复）均已实测；⑥部署上线完成：`https://guitar-learning-assistant.pages.dev`（Cloudflare Pages + GitHub 自动部署，构建配置：根目录 `app`、`npm run build`、输出 `dist`、`NODE_VERSION=22`）。等用户手机实测（安装 PWA、调音器麦克风、上传分析）反馈。**不要在他反馈前自作主张改设计**，等他给意见再动手。
 
 开发服务器在 `http://localhost:4174` 后台跑着（vite dev）。本会话结束后该进程可能被系统回收——如果用户说打不开，先跑 `cd F:/电吉他学习/app && npm run dev -- --port 4174` 再排查。
 
 ## 5. 下一步计划（按路线图）
 
-1. **等用户反馈** → 按意见微调 M2 页面（都是小改动）。
-2. **部署上线**（M2 验收后）：Cloudflare Pages / Vercel 免费档。部署后手机才有麦克风权限（HTTPS）、PWA 才能安装；注意部署前把 `vite.config.js` 的 PWA 配置再核对一遍，部署后用户要能验收。
-3. **M3**：学习计划规则引擎 + 成田课程进度跟踪 + 统计报表。
-4. **M4**：AI 答疑、Capacitor 安卓壳 + 桌面小组件、微信推送（推送加）、录音回听。
-5. 云同步（Supabase）在部署后按需接入，`storage.js` 抽象层已留好口。
+1. **等用户手机验收线上版** → 按意见微调。
+2. **M3**：学习计划规则引擎 + 成田课程进度跟踪 + 统计报表。
+3. **M4**：AI 答疑、Capacitor 安卓壳 + 桌面小组件、微信推送（推送加）、录音回听。
+4. 云同步（Supabase）在部署后按需接入，`storage.js` 抽象层已留好口。
 
 ## 6. 踩过的坑（绝对不要踩）
 
@@ -88,6 +87,7 @@ Git 历史（4 个提交）：`dbd6c39` 初始（文档+spike）→ `c862756` M1
 16. **计时器/节拍器是全局 store**：`stores/timer.js`、`stores/metronome.js` 跨页面共享同一实例（切页不停表/不停声），外壳胶囊绑定它们。不要重新引入页面级 usePracticeTimer/useMetronome 这类写法——页面组件销毁会停表停声，之前的问题就是这么来的。练习页不要放节拍器控件（用户明确拒绝过）。
 17. **前端分析引擎的对拍与联调**：改 `analyze.js` 任何算法/阈值后，必须重跑 `node spike/test_frontend_analyze.mjs <ffmpeg路径>`（ffmpeg 路径用 `spike/.venv/Scripts/python.exe -c "import imageio_ffmpeg; print(imageio_ffmpeg.get_ffmpeg_exe())"` 取），5 首真实歌曲全项通过才算数。单文件看 lag 谱用 `node spike/analyze_one.mjs <ffmpeg> <文件名>`。浏览器联调走添加歌曲页的「加载开发测试音频」按钮（仅 `import.meta.env.DEV` 显示，IAB 不支持文件选择器所以要有这个口子），它 fetch `app/public/test-audio.mp3`（已 gitignore，用 spike/songs 里任一歌曲拷贝即可，用完删）。
 18. **调性 chroma 是 STFT 近似非 CQT**：逐八度归一化 + 小数 midi 插值两个技巧缺一不可（去掉任一个，调性对拍立即掉到 2/5）。K-S 模板滚动方向要用 `(j - i + 12) % 12`（与 numpy 的 np.roll 同向），方向写反会让所有歌错判成 D# 调。
+19. **部署**：站点 `https://guitar-learning-assistant.pages.dev`，Cloudflare Pages 连 GitHub 私有仓库 `mengchiren/guitar-learning-assistant` 自动部署（push 即发）。构建配置：**根目录 `app`**（漏了会报 `Could not read package.json`——仓库根目录没有 Node 项目）、`npm run build`、输出 `dist`、`NODE_VERSION=22`（Vite 8 需要 Node ≥20.19）。SPA 深链接回退靠 `app/public/_redirects`（`/* /index.html 200`）。pages.dev 免费域名国内访问时好时坏，用户已知。
 
 ## 7. 与用户协作的注意事项
 
