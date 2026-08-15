@@ -52,11 +52,3 @@ async function requestNotif() {
     </div>
   </div>
 </template>
-
-<style scoped>
-.switch-row { display: flex; justify-content: space-between; align-items: center; }
-.switch { width: 52px; height: 30px; border-radius: 999px; background: var(--bg-input); border: 1px solid var(--border); position: relative; cursor: pointer; }
-.switch .knob { position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: var(--text-dim); transition: 0.2s; }
-.switch.on { background: #fdeaea; border-color: var(--accent); }
-.switch.on .knob { left: 25px; background: var(--accent); }
-</style>

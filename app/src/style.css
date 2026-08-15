@@ -177,6 +177,13 @@ label { font-size: 14px; color: var(--text-dim); display: block; margin: 10px 0 
 .small { font-size: 13px; }
 .muted { color: var(--text-dim); font-size: 13px; }
 
+/* 开关（提醒设置 / 显示偏好共用） */
+.switch-row { display: flex; justify-content: space-between; align-items: center; }
+.switch { width: 52px; height: 30px; border-radius: 999px; background: var(--bg-input); border: 1px solid var(--border); position: relative; cursor: pointer; }
+.switch .knob { position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: var(--text-dim); transition: 0.2s; }
+.switch.on { background: #fdeaea; border-color: var(--accent); }
+.switch.on .knob { left: 25px; background: var(--accent); }
+
 /* ---------- 桌面端外壳（≥768px） ---------- */
 .topbar {
   position: sticky;

@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useSongsStore, effectiveSong } from '../stores/songs'
 import { findToneTemplate, TONE_TEMPLATES } from '../data/templates'
 import { useMetronomeStore } from '../stores/metronome'
+import ToneAdvice from '../components/ToneAdvice.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -125,17 +126,7 @@ const confLabel = { 高: 'b-high', 中: 'b-mid', 低: 'b-low' }
         <span class="tag">{{ tpl.适用 }}</span>
       </div>
       <div class="small dim" style="margin-top: 6px">示例：{{ tpl.示例 }}</div>
-      <div class="tpl-grid">
-        <div class="tpl-item"><b>吉他档位</b>{{ tpl.guitar.pickup }}</div>
-        <div class="tpl-item"><b>音色旋钮</b>{{ tpl.guitar.tone }}</div>
-        <div class="tpl-item"><b>通道</b>{{ tpl.amp.channel }}</div>
-        <div class="tpl-item"><b>箱模</b>{{ tpl.amp.model }}</div>
-        <div class="tpl-item"><b>Gain</b>{{ tpl.amp.gain }} / 10</div>
-        <div class="tpl-item"><b>EQ</b>B{{ tpl.amp.eq.b }} · M{{ tpl.amp.eq.m }} · T{{ tpl.amp.eq.t }}</div>
-        <div class="tpl-item"><b>MOD</b>{{ tpl.amp.mod }}</div>
-        <div class="tpl-item"><b>Delay</b>{{ tpl.amp.delay }}</div>
-        <div class="tpl-item"><b>Reverb</b>{{ tpl.amp.reverb }}</div>
-      </div>
+      <ToneAdvice :tpl="tpl" />
       <p class="muted small" style="margin-top: 8px">{{ tpl.说明 }}</p>
       <button v-if="eff.bpm" class="btn btn-block" style="margin-top: 12px" @click="openMetronome">
         用此 BPM 开节拍器（{{ Math.round(eff.bpm) }} BPM）
@@ -201,7 +192,4 @@ const confLabel = { 高: 'b-high', 中: 'b-mid', 低: 'b-low' }
 
 .tpl-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
 .tpl-name { font-size: 18px; font-weight: 700; }
-.tpl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
-.tpl-item { background: var(--bg-input); border-radius: 10px; padding: 8px 10px; font-size: 14px; }
-.tpl-item b { display: block; color: var(--text-dim); font-size: 12px; margin-bottom: 2px; font-weight: 600; }
 </style>

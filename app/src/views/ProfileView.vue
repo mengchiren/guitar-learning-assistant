@@ -1,5 +1,13 @@
 <script setup>
 import Icon from '../components/Icon.vue'
+import { useSettingsStore } from '../stores/settings'
+
+const settings = useSettingsStore()
+
+function toggleDisplayMode() {
+  settings.displayMode = settings.displayMode === 'beginner' ? 'full' : 'beginner'
+  settings.saveDisplayMode()
+}
 </script>
 
 <template>
@@ -27,6 +35,22 @@ import Icon from '../components/Icon.vue'
           <div class="dim small">5 套常用音色设置</div>
         </div>
       </router-link>
+    </div>
+    <div class="card">
+      <div class="switch-row">
+        <div>
+          <div class="small" style="font-weight: 600">新手模式（设备建议）</div>
+          <div class="dim small">参数速览 + 大白话操作流程；关掉后显示全部参数表</div>
+        </div>
+        <button
+          class="switch"
+          :class="{ on: settings.displayMode === 'beginner' }"
+          @click="toggleDisplayMode"
+        >
+          <span class="knob"></span>
+        </button>
+      </div>
+      <p class="muted small" style="margin-top: 8px">影响歌曲详情页与音色套路库的参数展示。</p>
     </div>
     <div class="card">
       <h2>关于</h2>

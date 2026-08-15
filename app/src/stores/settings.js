@@ -8,6 +8,8 @@ export const useSettingsStore = defineStore('settings', {
       guitarId: 'ibanez-grx40-lgy',
       ampId: 'joyo-jam-buddy-2',
     }),
+    // 设备建议显示方式：beginner = 参数速览 + 大白话操作流程；full = 全部参数表
+    displayMode: load('display-mode', 'beginner'),
   }),
   actions: {
     saveReminders() {
@@ -15,6 +17,9 @@ export const useSettingsStore = defineStore('settings', {
     },
     saveActiveDevices() {
       save('active-devices', this.activeDevices)
+    },
+    saveDisplayMode() {
+      save('display-mode', this.displayMode)
     },
   },
 })
