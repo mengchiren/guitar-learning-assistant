@@ -47,7 +47,7 @@ function goBack() {
         </button>
         <router-link to="/" class="brand">
           <span class="brand-mark"><Icon name="guitar" :size="18" /></span>
-          <span class="brand-name">电吉他学习助手</span>
+          <span class="brand-name">练琴搭子</span>
         </router-link>
       </div>
       <nav class="topnav">

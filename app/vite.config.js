@@ -9,9 +9,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg'],
       manifest: {
-        name: '电吉他学习助手',
-        short_name: '练琴助手',
-        description: '歌曲分析、音色设置、练琴打卡的个人电吉他学习助手',
+        name: '练琴搭子',
+        short_name: '练琴搭子',
+        description: '陪你练琴的个人助手：歌曲分析、音色设置、练琴打卡',
         lang: 'zh-CN',
         display: 'standalone',
         start_url: '/',
