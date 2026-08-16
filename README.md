@@ -1,10 +1,10 @@
 # 练琴搭子 · PickBuddy
 
-> 陪你练琴的个人助手：歌曲分析、音色设置、练琴打卡。为一位电吉他零基础学习者（本人）量身打造。
+> 陪你练琴的个人助手：歌曲分析、音色设置、练琴打卡、学习计划、曲谱、录音回听、AI 答疑。为一位电吉他零基础学习者（本人）量身打造。
 
 ## 这是什么
 
-「练琴搭子」是一个**纯前端的个人电吉他学习助手**（响应式 PWA）：电脑浏览器和安卓手机都能用，可安装到手机桌面。核心思路是「AI 参考 + 种子曲库校准 + 人工纠错」——自动分析给出参考结果和置信度，人工数据（种子曲库、手动纠错）始终优先。
+「练琴搭子」是一个**以纯前端为主的个人电吉他学习助手**（响应式 PWA）：电脑浏览器和安卓手机都能用，可安装到手机桌面。核心思路是「AI 参考 + 种子曲库校准 + 人工纠错」——自动分析给出参考结果和置信度，人工数据（种子曲库、手动纠错）始终优先。
 
 **目标设备**：Ibanez GRX40-LGY 电吉他 + JOYO Jam Buddy 2 音箱。所有音色建议都按这套设备标注。
 
@@ -14,8 +14,13 @@
 
 - 🎵 **歌曲分析**（纯前端，音频不出设备）：上传 mp3/flac/wav/m4a，本地分析出 BPM、调性 Top3、粗略和弦、音色套路归类，每项带置信度徽章；酷狗 kgg 等加密格式会引导换源或手动录入。
 - 🎸 **设备设置建议**：把套路模板映射到具体设备参数；两种显示模式——「新手模式」是大白话分步操作流程（参数速览 + 照做步骤 + 可先不动的旋钮），「完整模式」是全部参数表。
-- 📚 **歌曲库**：种子曲库（人工校准的权威数据）+ 你自己的歌单；搜索、详情、人工纠错（纠错值优先展示）。
+- 📚 **歌曲库**：种子曲库 **29 首**（人工校准数据 + 引擎分析标注「待人工校准」）+ 你自己的歌单；搜索、详情、人工纠错（纠错值优先展示）。
+- 📖 **曲谱（和弦谱）**：**19 首种子曲谱**（分段和弦进行 + 节奏提示 + 来源与校准状态标注，宁缺毋滥）+ 用户自录曲谱（存本机）；谱中和弦自动配指法图。
+- 🎼 **和弦图库**：**82 个常用和弦**指法图（6 组展示，点开放大，横按/转位标注）。
+- 📅 **学习计划（M3）**：规则引擎生成弹性练习包（10/30/60 分钟三档，每项带「为什么」解释）；基本功清单与达标标记；歌曲「练习中/已掌握」与同套路推荐；统计报表（周报/热力图）；成田课程进度跟踪（194 课）。
 - ⏱ **练琴打卡**：计时切页不断、补卡、连续天数、最近 7 天统计；练琴时切去别的页面有「练习中」胶囊一键回来。
+- 🎙 **录音回听**：练习页/工具页录音（存本机 IndexedDB，不出设备），录完自动测 BPM 对拍（置信度 + 手动改），回听播放/删除，分类与打卡一致。
+- 🤖 **AI 答疑**：练琴问题随时问（DeepSeek/豆包/通义千问可切换），歌曲/练习详情页「问 AI」自动带上当前上下文；经 Cloudflare Pages Functions 代理，API Key 只存环境变量、不进前端。
 - 🥁 **节拍器**：前瞻调度的 Web Audio 节拍器（切页声音不断）、打拍定速；歌曲详情一键「用此 BPM 开节拍器」。
 - 🎚 **调音器**：麦克风收音 + 参考音（EADGBE）。
 - ⏰ **练琴提醒**：应用内定时提醒。
@@ -25,21 +30,26 @@
 
 - Vue 3 + Vite + Pinia + Vue Router + vite-plugin-pwa
 - **自研纯前端音频分析引擎**（`app/src/utils/analyze.js`）：手写 FFT/onset 包络/自相关/K-S 调性模板，无任何 ML/音频库依赖，Node 与浏览器通用
-- 本地存储（localStorage 抽象层，为将来云同步预留）
+- 本地存储：localStorage 抽象层（云同步预留）+ IndexedDB（录音）
+- Cloudflare Pages Functions：AI 答疑代理（`app/functions/api/ask.js`，Key 存环境变量）
 
 ## 目录结构
 
 ```
 ├── app/                  # 应用主体（Vue 3 + Vite + PWA）
+│   ├── functions/        # CF Pages Functions：api/ask.js（AI 答疑代理）
 │   └── src/
-│       ├── components/   # Icon、ToneAdvice（设备建议卡）等
+│       ├── components/   # Icon、ToneAdvice、ChordChart、FretboardMap、RecordPanel 等
 │       ├── composables/  # useMediaQuery、useTuner
-│       ├── data/         # devices.js（设备参数）、templates.js（5 套音色套路）、seedSongs.json（种子曲库）
-│       ├── stores/       # Pinia：practice/timer/metronome/songs/settings
-│       ├── utils/        # analyze.js（分析引擎）、toneGuide.js（新手文案）、storage.js
+│       ├── data/         # devices、templates、seedSongs（29 首）、chords（82 个）、
+│       │                 # songSheets（19 首曲谱）、fundamentals、courseCatalog
+│       ├── stores/       # Pinia：practice/timer/metronome/songs/settings/plan/course/sheets/recordings/chat
+│       ├── utils/        # analyze.js（分析引擎）、planEngine.js（规则引擎）、
+│       │                 # recordingsDb.js（IndexedDB）、recordAnalyze.js、toneGuide.js、storage.js
 │       └── views/        # 页面
-├── spike/                # M0 可行性验证（Python librosa 版）+ 前端引擎对拍单测
+├── spike/                # M0 可行性验证（Python librosa 版）+ 各引擎对拍单测
 ├── 需求文档.md           # 需求规格（唯一权威来源，含修订记录）
+├── 验收指南.md           # 手机验收清单 + 常见问题
 └── HANDOFF.md            # 开发交接文档
 ```
 
@@ -66,12 +76,14 @@ npm run dev        # 默认端口 4173，可用 -- --port 4174
 
 已知局限：强力弦摇滚缺三音，调性存在固有歧义；慢歌（尤其「1.5 倍谐波」型）测速可能偏差——因此产品策略是**种子库优先 → AI 参考 + 置信度 → 人工纠错**。
 
-对拍单测（改引擎算法后必须重跑）：
+测试（改引擎/规则/数据后必须重跑）：
 
 ```bash
 # ffmpeg 路径（来自 spike 虚拟环境）
 FFMPEG=$(spike/.venv/Scripts/python.exe -c "import imageio_ffmpeg; print(imageio_ffmpeg.get_ffmpeg_exe())")
-node spike/test_frontend_analyze.mjs "$FFMPEG"
+node spike/test_frontend_analyze.mjs "$FFMPEG"   # 分析引擎 5 首对拍
+node spike/test_plan_engine.mjs                  # 规则引擎 25 项
+node spike/test_sheets.mjs                       # 曲谱/和弦数据 767 项
 ```
 
 ## 部署
@@ -81,17 +93,22 @@ Cloudflare Pages + GitHub 自动部署（push 即发）：
 - 站点：<https://guitar-learning-assistant.pages.dev>
 - 构建配置：根目录 `app`、构建命令 `npm run build`、输出目录 `dist`、环境变量 `NODE_VERSION=22`
 - SPA 深链接回退：`app/public/_redirects`
+- AI 答疑环境变量：`AI_KEY_DEEPSEEK`（必配）、`AI_KEY_ARK`+`AI_MODEL_ARK`、`AI_KEY_QWEN`（按需）；改动后需 Retry deployment
 
 ## 隐私
 
-所有数据（打卡记录、歌单、设置）只存在本机浏览器；上传的音频**不会离开设备**，仅在浏览器本地解码分析。无账号、无追踪、无后端。
+- 打卡记录、歌单、录音、设置、聊天记录**只存在本机浏览器**；上传的音频**不会离开设备**，仅在浏览器本地解码分析。
+- 唯一的上行数据：AI 答疑时，提问文字经 Cloudflare Pages Functions 代理转发给大模型（无账号、无追踪；API Key 只存在 Cloudflare 环境变量）。
 
 ## 路线图
 
 - ✅ M0 可行性验证（BPM/调性/套路识别）
 - ✅ M1 基础功能（设备档案、套路库、节拍器、调音器、打卡、提醒）
 - ✅ M2 歌曲分析（搜索、上传分析、详情、纠错）
-- 🔜 M3 学习计划（规则引擎 + 课程进度 + 统计报表）
-- 🔜 M4 AI 答疑、安卓壳 + 桌面小组件、微信推送、录音回听
+- ✅ M3 学习计划（规则引擎 + 课程进度 + 统计报表 + 曲谱与和弦图库）
+- ✅ M4-1 录音回听 + 自动对拍
+- ✅ M4-2 AI 答疑（多模型切换 + 上下文入口）
+- 🔜 M4-3 微信推送（推送加）/ Capacitor 安卓壳 + 桌面小组件（待排期）
+- 🔜 云同步（Supabase，按需）、成就徽章
 
 *个人项目，未开源。*
