@@ -1,0 +1,582 @@
+[
+  {
+    "file": "Ave Mujica - Ave Mujica.mp3",
+    "durationSec": 256,
+    "bpm": 215.3,
+    "bpmRaw": 215.3,
+    "doubled": false,
+    "bpmConf": "低",
+    "keyTop": [
+      {
+        "key": "D 小调",
+        "corr": 0.818
+      },
+      {
+        "key": "G 小调",
+        "corr": 0.615
+      }
+    ],
+    "template": "失真节奏 Riff",
+    "rmsDb": -6.7
+  },
+  {
+    "file": "Ave Mujica - KiLLKiSS.flac",
+    "durationSec": 208.8,
+    "bpm": 198.8,
+    "bpmRaw": 198.8,
+    "doubled": false,
+    "bpmConf": "高",
+    "keyTop": [
+      {
+        "key": "E 小调",
+        "corr": 0.527
+      },
+      {
+        "key": "G 大调",
+        "corr": 0.499
+      }
+    ],
+    "template": "失真节奏 Riff",
+    "rmsDb": -6.2
+  },
+  {
+    "file": "Ave Mujica - 黒のバースデイ.mp3",
+    "durationSec": 225.7,
+    "bpm": 198.8,
+    "bpmRaw": 99.4,
+    "doubled": true,
+    "bpmConf": "中",
+    "keyTop": [
+      {
+        "key": "A# 大调",
+        "corr": 0.82
+      },
+      {
+        "key": "D 小调",
+        "corr": 0.605
+      }
+    ],
+    "template": "失真节奏 Riff",
+    "rmsDb": -5.4
+  },
+  {
+    "file": "MyGO!!!!! - Deathly Loneliness Attacks (Cover).mp3",
+    "durationSec": 254.3,
+    "bpm": 152,
+    "bpmRaw": 152,
+    "doubled": false,
+    "bpmConf": "高",
+    "keyTop": [
+      {
+        "key": "A# 大调",
+        "corr": 0.423
+      },
+      {
+        "key": "D# 小调",
+        "corr": 0.411
+      }
+    ],
+    "template": "失真节奏 Riff",
+    "rmsDb": -4.1
+  },
+  {
+    "file": "MyGO!!!!! - タネビ.mp3",
+    "durationSec": 244.2,
+    "bpm": 191.4,
+    "bpmRaw": 95.7,
+    "doubled": true,
+    "bpmConf": "中",
+    "keyTop": [
+      {
+        "key": "A 小调",
+        "corr": 0.681
+      },
+      {
+        "key": "A 大调",
+        "corr": 0.588
+      }
+    ],
+    "template": "失真节奏 Riff",
+    "rmsDb": -4.6
+  },
+  {
+    "file": "MyGO!!!!! - 壱雫空.mp3",
+    "durationSec": 189.6,
+    "bpm": 198.8,
+    "bpmRaw": 198.8,
+    "doubled": false,
+    "bpmConf": "低",
+    "keyTop": [
+      {
+        "key": "F 小调",
+        "corr": 0.74
+      },
+      {
+        "key": "G# 大调",
+        "corr": 0.545
+      }
+    ],
+    "template": "失真节奏 Riff",
+    "rmsDb": -4.8
+  },
+  {
+    "file": "MyGO!!!!! - 影色舞.mp3",
+    "durationSec": 209.5,
+    "bpm": 161.5,
+    "bpmRaw": 161.5,
+    "doubled": false,
+    "bpmConf": "高",
+    "keyTop": [
+      {
+        "key": "F 小调",
+        "corr": 0.716
+      },
+      {
+        "key": "F 大调",
+        "corr": 0.704
+      }
+    ],
+    "template": "失真节奏 Riff",
+    "rmsDb": -6.7
+  },
+  {
+    "file": "MyGO!!!!! - 春日影.mp3",
+    "durationSec": 256.6,
+    "bpm": 64.6,
+    "bpmRaw": 64.6,
+    "doubled": false,
+    "bpmConf": "中",
+    "keyTop": [
+      {
+        "key": "B 大调",
+        "corr": 0.532
+      },
+      {
+        "key": "D# 小调",
+        "corr": 0.501
+      }
+    ],
+    "template": "轻过载节奏",
+    "rmsDb": -5.8
+  },
+  {
+    "file": "MyGO!!!!! - 詩超絆.mp3",
+    "durationSec": 237.2,
+    "bpm": 147.6,
+    "bpmRaw": 73.8,
+    "doubled": true,
+    "bpmConf": "低",
+    "keyTop": [
+      {
+        "key": "F 大调",
+        "corr": 0.873
+      },
+      {
+        "key": "C 大调",
+        "corr": 0.82
+      }
+    ],
+    "template": "失真节奏 Riff",
+    "rmsDb": -6.2
+  },
+  {
+    "file": "MyGO!!!!! - 迷星叫.mp3",
+    "durationSec": 211.4,
+    "bpm": 184.6,
+    "bpmRaw": 184.6,
+    "doubled": false,
+    "bpmConf": "低",
+    "keyTop": [
+      {
+        "key": "C 小调",
+        "corr": 0.797
+      },
+      {
+        "key": "D# 大调",
+        "corr": 0.744
+      }
+    ],
+    "template": "失真节奏 Riff",
+    "rmsDb": -5.3
+  },
+  {
+    "file": "アヴェ ムジカ - カオ.mp3",
+    "durationSec": 242.6,
+    "bpm": 143.6,
+    "bpmRaw": 143.6,
+    "doubled": false,
+    "bpmConf": "高",
+    "keyTop": [
+      {
+        "key": "D 小调",
+        "corr": 0.539
+      },
+      {
+        "key": "D 大调",
+        "corr": 0.47
+      }
+    ],
+    "template": "失真节奏 Riff",
+    "rmsDb": -5.5
+  },
+  {
+    "file": "アヴェ ムジカ - ソラノムジカ.mp3",
+    "durationSec": 279.5,
+    "bpm": 129.2,
+    "bpmRaw": 129.2,
+    "doubled": false,
+    "bpmConf": "低",
+    "keyTop": [
+      {
+        "key": "F 大调",
+        "corr": 0.85
+      },
+      {
+        "key": "A 小调",
+        "corr": 0.842
+      }
+    ],
+    "template": "失真主音 Solo",
+    "rmsDb": -5.8
+  },
+  {
+    "file": "トゲナシトゲアリ - 声なき魚.mp3",
+    "durationSec": 180.9,
+    "bpm": 191.4,
+    "bpmRaw": 95.7,
+    "doubled": true,
+    "bpmConf": "中",
+    "keyTop": [
+      {
+        "key": "F 大调",
+        "corr": 0.802
+      },
+      {
+        "key": "A 小调",
+        "corr": 0.752
+      }
+    ],
+    "template": "失真节奏 Riff",
+    "rmsDb": -6.6
+  },
+  {
+    "file": "トゲナシトゲアリ - 爆ぜて咲く.mp3",
+    "durationSec": 221.4,
+    "bpm": 198.8,
+    "bpmRaw": 99.4,
+    "doubled": true,
+    "bpmConf": "中",
+    "keyTop": [
+      {
+        "key": "D 大调",
+        "corr": 0.689
+      },
+      {
+        "key": "G 大调",
+        "corr": 0.667
+      }
+    ],
+    "template": "失真节奏 Riff",
+    "rmsDb": -6.5
+  },
+  {
+    "file": "トゲナシトゲアリ - 空の箱 (空箱)(井芹仁菜、河原木桃香).mp3",
+    "durationSec": 184.5,
+    "bpm": 143.6,
+    "bpmRaw": 143.6,
+    "doubled": false,
+    "bpmConf": "高",
+    "keyTop": [
+      {
+        "key": "C# 小调",
+        "corr": 0.404
+      },
+      {
+        "key": "A 大调",
+        "corr": 0.403
+      }
+    ],
+    "template": "失真节奏 Riff",
+    "rmsDb": -7.5
+  },
+  {
+    "file": "トゲナシトゲアリ - 誰にもなれない私だから.mp3",
+    "durationSec": 189.8,
+    "bpm": 191.4,
+    "bpmRaw": 95.7,
+    "doubled": true,
+    "bpmConf": "中",
+    "keyTop": [
+      {
+        "key": "F 大调",
+        "corr": 0.815
+      },
+      {
+        "key": "C 大调",
+        "corr": 0.792
+      }
+    ],
+    "template": "失真节奏 Riff",
+    "rmsDb": -8.6
+  },
+  {
+    "file": "トゲナシトゲアリ - 雑踏、僕らの街 (熙熙攘攘、我们的城市).flac",
+    "durationSec": 184.2,
+    "bpm": 172.2,
+    "bpmRaw": 86.1,
+    "doubled": true,
+    "bpmConf": "中",
+    "keyTop": [
+      {
+        "key": "A 小调",
+        "corr": 0.62
+      },
+      {
+        "key": "E 小调",
+        "corr": 0.469
+      }
+    ],
+    "template": "失真节奏 Riff",
+    "rmsDb": -7
+  },
+  {
+    "file": "放課後ティータイム - NO, Thank You!.mp3",
+    "durationSec": 257.5,
+    "bpm": 178.2,
+    "bpmRaw": 89.1,
+    "doubled": true,
+    "bpmConf": "中",
+    "keyTop": [
+      {
+        "key": "A 小调",
+        "corr": 0.665
+      },
+      {
+        "key": "D 小调",
+        "corr": 0.492
+      }
+    ],
+    "template": "失真节奏 Riff",
+    "rmsDb": -6.7
+  },
+  {
+    "file": "放課後ティータイム - U&I.mp3",
+    "durationSec": 275.8,
+    "bpm": 215.3,
+    "bpmRaw": 215.3,
+    "doubled": false,
+    "bpmConf": "高",
+    "keyTop": [
+      {
+        "key": "A 大调",
+        "corr": 0.705
+      },
+      {
+        "key": "A 小调",
+        "corr": 0.678
+      }
+    ],
+    "template": "失真节奏 Riff",
+    "rmsDb": -7.6
+  },
+  {
+    "file": "放課後ティータイム - ふわふわ時間.mp3",
+    "durationSec": 236.1,
+    "bpm": 184.6,
+    "bpmRaw": 184.6,
+    "doubled": false,
+    "bpmConf": "高",
+    "keyTop": [
+      {
+        "key": "A 小调",
+        "corr": 0.492
+      },
+      {
+        "key": "E 大调",
+        "corr": 0.384
+      }
+    ],
+    "template": "失真节奏 Riff",
+    "rmsDb": -9.4
+  },
+  {
+    "file": "放課後ティータイム - 天使にふれたよ!.mp3",
+    "durationSec": 281.9,
+    "bpm": 78.3,
+    "bpmRaw": 78.3,
+    "doubled": false,
+    "bpmConf": "低",
+    "keyTop": [
+      {
+        "key": "F 大调",
+        "corr": 0.866
+      },
+      {
+        "key": "D 小调",
+        "corr": 0.789
+      }
+    ],
+    "template": "轻过载节奏",
+    "rmsDb": -9.1
+  },
+  {
+    "file": "春日影-《MyGo》.flac",
+    "durationSec": 256.6,
+    "bpm": 64.6,
+    "bpmRaw": 64.6,
+    "doubled": false,
+    "bpmConf": "中",
+    "keyTop": [
+      {
+        "key": "B 大调",
+        "corr": 0.533
+      },
+      {
+        "key": "D# 小调",
+        "corr": 0.501
+      }
+    ],
+    "template": "轻过载节奏",
+    "rmsDb": -5.8
+  },
+  {
+    "file": "結束バンド - Distortion!!.mp3",
+    "durationSec": 203.5,
+    "bpm": 172.3,
+    "bpmRaw": 172.3,
+    "doubled": false,
+    "bpmConf": "中",
+    "keyTop": [
+      {
+        "key": "F 大调",
+        "corr": 0.574
+      },
+      {
+        "key": "A 小调",
+        "corr": 0.487
+      }
+    ],
+    "template": "失真节奏 Riff",
+    "rmsDb": -6.2
+  },
+  {
+    "file": "結束バンド - なにが悪い.mp3",
+    "durationSec": 227.4,
+    "bpm": 123,
+    "bpmRaw": 61.5,
+    "doubled": true,
+    "bpmConf": "中",
+    "keyTop": [
+      {
+        "key": "D 小调",
+        "corr": 0.666
+      },
+      {
+        "key": "C 大调",
+        "corr": 0.584
+      }
+    ],
+    "template": "轻过载节奏",
+    "rmsDb": -6.5
+  },
+  {
+    "file": "結束バンド - カラカラ.mp3",
+    "durationSec": 265.1,
+    "bpm": 191.4,
+    "bpmRaw": 95.7,
+    "doubled": true,
+    "bpmConf": "中",
+    "keyTop": [
+      {
+        "key": "E 大调",
+        "corr": 0.502
+      },
+      {
+        "key": "A 小调",
+        "corr": 0.442
+      }
+    ],
+    "template": "失真节奏 Riff",
+    "rmsDb": -6.6
+  },
+  {
+    "file": "結束バンド - ギターと孤独と蒼い惑星.mp3",
+    "durationSec": 229,
+    "bpm": 198.8,
+    "bpmRaw": 198.8,
+    "doubled": false,
+    "bpmConf": "中",
+    "keyTop": [
+      {
+        "key": "D 小调",
+        "corr": 0.733
+      },
+      {
+        "key": "A 小调",
+        "corr": 0.451
+      }
+    ],
+    "template": "失真节奏 Riff",
+    "rmsDb": -6.7
+  },
+  {
+    "file": "結束バンド - 忘れてやらない.mp3",
+    "durationSec": 223.4,
+    "bpm": 184.6,
+    "bpmRaw": 184.6,
+    "doubled": false,
+    "bpmConf": "高",
+    "keyTop": [
+      {
+        "key": "A 小调",
+        "corr": 0.388
+      },
+      {
+        "key": "G# 小调",
+        "corr": 0.36
+      }
+    ],
+    "template": "失真节奏 Riff",
+    "rmsDb": -6.1
+  },
+  {
+    "file": "結束バンド - 星座になれたら (若能化作星座).flac",
+    "durationSec": 258.2,
+    "bpm": 123,
+    "bpmRaw": 61.5,
+    "doubled": true,
+    "bpmConf": "中",
+    "keyTop": [
+      {
+        "key": "C 小调",
+        "corr": 0.705
+      },
+      {
+        "key": "D# 大调",
+        "corr": 0.657
+      }
+    ],
+    "template": "失真主音 Solo",
+    "rmsDb": -7.8
+  },
+  {
+    "file": "結束バンド - 青春コンプレックス.mp3",
+    "durationSec": 205.1,
+    "bpm": 184.6,
+    "bpmRaw": 184.6,
+    "doubled": false,
+    "bpmConf": "高",
+    "keyTop": [
+      {
+        "key": "F 大调",
+        "corr": 0.719
+      },
+      {
+        "key": "D 小调",
+        "corr": 0.666
+      }
+    ],
+    "template": "失真节奏 Riff",
+    "rmsDb": -6.4
+  }
+]
