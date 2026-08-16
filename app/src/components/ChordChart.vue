@@ -5,6 +5,7 @@ import { findChord } from '../data/chords.js'
 // 和弦指法图：自绘 SVG（6 弦 5 品，顶部 x/o 标记，按弦点显示品位）
 const props = defineProps({
   name: { type: String, required: true },
+  size: { type: Number, default: 84 }, // 图宽 px（高按比例），放大查看时调大
 })
 
 const chord = computed(() => findChord(props.name))
@@ -34,8 +35,8 @@ const topMarks = computed(() => {
 </script>
 
 <template>
-  <div class="chord-chart">
-    <svg :viewBox="`0 0 84 ${BOTTOM_Y + 30}`" width="84" height="112" aria-hidden="true">
+  <div class="chord-chart" :style="{ width: size + 12 + 'px' }">
+    <svg :viewBox="`0 0 84 ${BOTTOM_Y + 30}`" :width="size" :height="Math.round(size * 1.33)" aria-hidden="true">
       <template v-if="chord">
         <!-- 顶部 x/o 标记 -->
         <text
@@ -101,7 +102,6 @@ const topMarks = computed(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 96px;
 }
 .chord-name {
   font-weight: 700;

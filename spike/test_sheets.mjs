@@ -1,6 +1,6 @@
 // 曲谱/和弦图数据完整性校验：node spike/test_sheets.mjs
 // 改 chords.js / songSheets.js / fundamentals.js 任何数据后必须重跑，全部通过才算数。
-import { CHORD_CHARTS, findChord } from '../app/src/data/chords.js'
+import { CHORD_CHARTS, findChord, CHORD_GROUPS } from '../app/src/data/chords.js'
 import { SEED_SHEETS } from '../app/src/data/songSheets.js'
 import { FUNDAMENTALS } from '../app/src/data/fundamentals.js'
 import seedSongs from '../app/src/data/seedSongs.json' with { type: 'json' }
@@ -21,6 +21,8 @@ function check(name, cond, detail = '') {
 {
   const names = CHORD_CHARTS.map((c) => c.name)
   check('和弦图库无重名', new Set(names).size === names.length)
+  check('和弦图库数量 ≥ 40', CHORD_CHARTS.length >= 40, `got ${CHORD_CHARTS.length}`)
+  const validCats = new Set(CHORD_GROUPS.map((g) => g.key))
   for (const c of CHORD_CHARTS) {
     const maxFret = (c.baseFret || 1) + 4
     check(
@@ -32,6 +34,14 @@ function check(name, cond, detail = '') {
       `${c.name} frets 值合法`,
       c.frets.every((f) => f === 'x' || f === 0 || (typeof f === 'number' && f >= (c.baseFret || 1) && f <= maxFret)),
       JSON.stringify(c.frets),
+    )
+    check(`${c.name} 分组合法`, validCats.has(c.category), c.category)
+  }
+  // 每组至少 1 个和弦
+  for (const g of CHORD_GROUPS) {
+    check(
+      `分组「${g.label}」有和弦`,
+      CHORD_CHARTS.some((c) => c.category === g.key),
     )
   }
 }

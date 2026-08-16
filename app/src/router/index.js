@@ -9,6 +9,7 @@ const routes = [
   { path: '/tools', component: () => import('../views/ToolsView.vue'), meta: { tab: true } },
   { path: '/metronome', component: () => import('../views/MetronomeView.vue'), meta: { title: '节拍器' } },
   { path: '/tuner', component: () => import('../views/TunerView.vue'), meta: { title: '调音器' } },
+  { path: '/chords', component: () => import('../views/ChordLibraryView.vue'), meta: { title: '和弦图库' } },
   { path: '/songs', component: () => import('../views/SongsView.vue'), meta: { tab: true } },
   { path: '/songs/new', component: () => import('../views/SongAnalyzeView.vue'), meta: { title: '添加歌曲' } },
   { path: '/songs/:id', component: () => import('../views/SongDetailView.vue'), meta: { title: '歌曲详情' } },

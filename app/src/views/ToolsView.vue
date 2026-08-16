@@ -20,6 +20,13 @@ import Icon from '../components/Icon.vue'
           <div class="dim small">麦克风收音 + 参考音</div>
         </div>
       </router-link>
+      <router-link to="/chords" class="card tool-card">
+        <span class="tool-icon"><Icon name="chord" :size="24" /></span>
+        <div>
+          <div class="tool-name">和弦图库</div>
+          <div class="dim small">50+ 常用和弦指法图 · 点开可放大</div>
+        </div>
+      </router-link>
       <router-link to="/templates" class="card tool-card">
         <span class="tool-icon"><Icon name="sliders" :size="24" /></span>
         <div>

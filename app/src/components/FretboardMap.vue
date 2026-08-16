@@ -1,52 +1,69 @@
 <script setup>
-// 指板图（爬格子用）：横向 6 弦 × 4 品，每品标注指法数字 1-2-3-4
+// 指板图（爬格子用）：竖版——琴头朝上，1 品在最上面，往下递推 2/3/4 品。
+// 6 条竖弦线 + 品丝横线，每格标指法数字（1=食指 2=中指 3=无名指 4=小指）。
 defineProps({
   position: { type: Number, default: 1 },
 })
 
-const YS = [14, 25, 36, 47, 58, 69] // 6 弦 → 1 弦
-const FRET_X = [22, 46, 70, 94]
-const W = 118
+const XS = [12, 24, 36, 48, 60, 72] // 6 弦（低音 E）→ 1 弦（高音 e）
+const NUT_Y = 30 // 顶部琴枕线
+const FRET_H = 20 // 每品高度
+const BOTTOM_Y = NUT_Y + FRET_H * 4
 </script>
 
 <template>
   <div class="fretboard">
-    <svg :viewBox="`0 0 ${W} 86`" width="200" height="120" aria-hidden="true">
+    <svg :viewBox="`0 0 84 ${BOTTOM_Y + 26}`" width="150" height="190" aria-hidden="true">
+      <!-- 琴枕（顶部粗线） -->
+      <line :x1="XS[0] - 6" :y1="NUT_Y" :x2="XS[5] + 6" :y2="NUT_Y" stroke="#333" stroke-width="3" />
+      <!-- 品丝（1 品往下：2、3、4 品丝 + 底边） -->
+      <line
+        v-for="y in [NUT_Y + FRET_H, NUT_Y + FRET_H * 2, NUT_Y + FRET_H * 3, BOTTOM_Y]"
+        :key="y"
+        :x1="XS[0] - 6"
+        :y1="y"
+        :x2="XS[5] + 6"
+        :y2="y"
+        stroke="#999"
+        stroke-width="1"
+      />
       <!-- 弦 -->
       <line
-        v-for="(y, i) in YS"
-        :key="'s' + i"
-        :x1="10"
-        :y1="y"
-        :x2="W - 4"
-        :y2="y"
+        v-for="x in XS"
+        :key="'s' + x"
+        :x1="x"
+        :y1="NUT_Y"
+        :x2="x"
+        :y2="BOTTOM_Y"
         stroke="#333"
-        :stroke-width="i === 0 ? 2.4 : i === 5 ? 1.4 : 1.8"
+        stroke-width="1.2"
       />
-      <!-- 品丝 -->
-      <line v-for="(x, i) in [10, ...FRET_X, W - 4]" :key="'f' + i" :x1="x" :y1="YS[0] - 8" :x2="x" :y2="YS[5] + 8" stroke="#999" stroke-width="1" />
-      <!-- 指法数字 -->
-      <template v-for="(x, fi) in FRET_X" :key="'p' + fi">
+      <!-- 每格指法数字：1 品全 1、2 品全 2 … -->
+      <template v-for="f in [1, 2, 3, 4]" :key="'f' + f">
         <text
-          v-for="(y, si) in YS"
-          :key="si"
-          :x="x + 12"
-          :y="y + 4"
+          v-for="x in XS"
+          :key="'n' + x"
+          :x="x"
+          :y="NUT_Y + FRET_H * (f - 0.5) + 4"
           text-anchor="middle"
-          font-size="13"
+          font-size="12"
           font-weight="700"
           fill="#e30613"
         >
-          {{ fi + 1 }}
+          {{ f }}
+        </text>
+        <!-- 品数标在左侧 -->
+        <text :x="XS[0] - 9" :y="NUT_Y + FRET_H * (f - 0.5) + 4" font-size="9" fill="#8b8881" text-anchor="end">
+          {{ position + f - 1 }} 品
         </text>
       </template>
-      <!-- 弦名 -->
-      <text v-for="(label, i) in ['6', '5', '4', '3', '2', '1']" :key="'n' + i" :x="6" :y="YS[i] + 4" font-size="10" fill="#8b8881" text-anchor="end">
+      <!-- 弦号标在顶部 -->
+      <text v-for="(label, i) in ['6', '5', '4', '3', '2', '1']" :key="'c' + i" :x="XS[i]" :y="NUT_Y - 10" font-size="10" fill="#8b8881" text-anchor="middle">
         {{ label }}
       </text>
     </svg>
     <div class="dim small" style="text-align: center">
-      从 {{ position }} 品开始：食指按 1、中指按 2、无名指按 3、小指按 4
+      上面 1 品往下递推：食指按 1 品、中指按 2 品、无名指按 3 品、小指按 4 品
     </div>
   </div>
 </template>

@@ -87,5 +87,10 @@ defineProps({
       <circle cx="12" cy="12" r="8.5" />
       <path d="m8.2 12.3 2.6 2.6 5-5.4" />
     </template>
+    <template v-else-if="name === 'chord'">
+      <path d="M7 4v16M12 4v16M17 4v16" />
+      <path d="M4.5 9h15M4.5 15h15" />
+      <circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none" />
+    </template>
   </svg>
 </template>
