@@ -8,8 +8,14 @@ const recordings = useRecordingsStore()
 const playingId = ref(null)
 const audioUrl = ref('')
 const loadingId = ref('')
-const confirmId = ref('')
-const audioEl = ref(null)
+const pendingDelete = ref(null) // 待确认删除的录音
+const deleteError = ref('')
+
+// v-for 里的模板 ref 会被 Vue 收集成数组（不是元素），必须用函数式 ref 拿当前唯一的 audio 元素
+let audioElement = null
+function setAudioEl(el) {
+  audioElement = el
+}
 
 onMounted(() => {
   recordings.load()
@@ -33,7 +39,7 @@ async function togglePlay(r) {
     audioUrl.value = URL.createObjectURL(blob)
     playingId.value = r.id
     await nextTick()
-    audioEl.value?.play().catch(() => {})
+    audioElement?.play().catch(() => {})
   } catch {
     // 音频数据损坏：提示后继续
   }
@@ -41,20 +47,33 @@ async function togglePlay(r) {
 }
 
 function stopPlay() {
-  audioEl.value?.pause()
+  audioElement?.pause()
   if (audioUrl.value) URL.revokeObjectURL(audioUrl.value)
   audioUrl.value = ''
   playingId.value = null
 }
 
 function remove(r) {
-  if (confirmId.value === r.id) {
+  // 两段式按钮在播放状态下点击会失效（列表重渲染干扰），改为独立弹层确认
+  deleteError.value = ''
+  pendingDelete.value = r
+}
+
+async function doDelete() {
+  const r = pendingDelete.value
+  if (!r) return
+  try {
     if (playingId.value === r.id) stopPlay()
-    recordings.remove(r.id)
-    confirmId.value = ''
-  } else {
-    confirmId.value = r.id
+    await recordings.remove(r.id)
+    pendingDelete.value = null
+  } catch (e) {
+    deleteError.value = '删除失败：' + (e?.message || e?.name || '未知错误')
   }
+}
+
+function cancelDelete() {
+  pendingDelete.value = null
+  deleteError.value = ''
 }
 
 onUnmounted(stopPlay)
@@ -87,15 +106,13 @@ onUnmounted(stopPlay)
           <button class="btn small-btn" @click="togglePlay(r)" :disabled="loadingId === r.id">
             {{ loadingId === r.id ? '…' : playingId === r.id ? '停止' : '播放' }}
           </button>
-          <button class="btn small-btn" @click="remove(r)">
-            {{ confirmId === r.id ? '确认删除？' : '删除' }}
-          </button>
+          <button class="btn small-btn" @click="remove(r)">删除</button>
         </div>
       </div>
 
       <audio
         v-if="playingId === r.id"
-        ref="audioEl"
+        :ref="setAudioEl"
         :src="audioUrl"
         controls
         class="rec-audio"
@@ -110,6 +127,21 @@ onUnmounted(stopPlay)
       </p>
       <p v-if="r.note" class="small dim" style="margin-top: 4px">{{ r.note }}</p>
     </div>
+
+    <!-- 删除确认弹层（独立固定层，播放中也能正常点击） -->
+    <div v-if="pendingDelete" class="del-overlay" @click.self="cancelDelete">
+      <div class="del-card">
+        <p style="margin-bottom: 4px"><b>删除这条录音？</b></p>
+        <p class="small dim" style="margin-bottom: 12px">
+          {{ pendingDelete.date }} · {{ fmtSec(pendingDelete.seconds) }}，删除后不能恢复。
+        </p>
+        <p v-if="deleteError" class="small" style="color: var(--danger); margin-bottom: 8px">{{ deleteError }}</p>
+        <div class="btn-row">
+          <button class="btn btn-primary" @click="doDelete">确认删除</button>
+          <button class="btn" @click="cancelDelete">取消</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -119,4 +151,22 @@ onUnmounted(stopPlay)
 .rec-actions { display: flex; gap: 6px; }
 .small-btn { padding: 4px 10px; font-size: 13px; }
 .rec-audio { width: 100%; margin-top: 10px; }
+
+.del-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 60;
+  padding: 24px;
+}
+.del-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  width: 100%;
+  max-width: 340px;
+}
 </style>
