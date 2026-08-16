@@ -3,6 +3,11 @@ import vue from '@vitejs/plugin-vue'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
+  // fix-webm-duration 是纯 CJS 包：动态 import 不会自动预构建，dev 模式下浏览器执行报错，
+  // 显式列入预构建列表（生产构建不受影响，仍是按需 chunk）
+  optimizeDeps: {
+    include: ['fix-webm-duration'],
+  },
   plugins: [
     vue(),
     VitePWA({

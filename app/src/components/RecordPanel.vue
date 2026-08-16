@@ -104,8 +104,18 @@ function stopRec() {
 }
 
 async function onStop() {
-  const blob = new Blob(chunks, { type: lastMime.value })
+  let blob = new Blob(chunks, { type: lastMime.value })
   chunks = []
+  // MediaRecorder 录的 webm 文件头不带时长 → 原生播放器进度条拖不动、总时长显示异常。
+  // 保存前补写 Duration 字段（iPhone 的 mp4 没这个问题）。补写失败就保留原文件，不影响保存。
+  if (lastMime.value.startsWith('audio/webm')) {
+    try {
+      const { default: fixWebmDuration } = await import('fix-webm-duration')
+      blob = await fixWebmDuration(blob, secs.value * 1000)
+    } catch {
+      // 忽略：极端格式补写失败仍按原 blob 保存
+    }
+  }
   lastBlob.value = blob
   status.value = 'saving'
   analyzing.value = true
