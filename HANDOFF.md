@@ -7,7 +7,7 @@
 给一位**电吉他零基础初学者**（用户本人）做个人学习助手 PWA「练琴搭子」（Vue 3 + Vite + vite-plugin-pwa）：
 
 - **产品形态**：响应式网页 PWA，电脑浏览器 + 安卓手机都能用，可安装到手机桌面。**已部署上线**（Cloudflare Pages + GitHub 自动部署）。
-- **核心功能**：①上传想练的歌 → 纯前端本地分析（BPM/调性/套路）→ 给出**他这套设备**（依班娜 GRX40-LGY 电吉他 + JOYO Jam Buddy 2 音箱）的设置建议，新手模式是大白话分步操作流程；②练琴打卡计时、连续天数、提醒；③**M3 学习计划**：规则引擎生成弹性练习包（10/30/60 分钟三档）、基本功清单与达标标记、歌曲「练习中/已掌握」状态与同套路推荐、统计报表（周报/热力图）、成田课程进度跟踪；④练习项详情页（基本功任务分解 + 图示）与**和弦谱**（种子曲谱 + 用户自录曲谱 + 和弦图库）。
+- **核心功能**：①上传想练的歌 → 纯前端本地分析（BPM/调性/套路）→ 给出**他这套设备**（依班娜 GRX40-LGY 电吉他 + JOYO Jam Buddy 2 音箱）的设置建议，新手模式是大白话分步操作流程；②练琴打卡计时、连续天数、提醒；③**M3 学习计划**：规则引擎生成弹性练习包（10/30/60 分钟三档）、基本功清单与达标标记、歌曲「练习中/已掌握」状态与同套路推荐、统计报表（周报/热力图）、成田课程进度跟踪；④练习项详情页（基本功任务分解 + 图示）与**和弦谱**（种子曲谱 + 用户自录曲谱 + 和弦图库）；⑤**录音回听（v0.4.0）**：练习页/工具页双入口录音（麦克风、存本机 IndexedDB），录完自动复用分析引擎测 BPM（置信度 + 手动改），回听页播放/删除，分类与打卡一致。
 - **产品策略（三层）**：种子库人工数据优先 → AI 分析作参考并标置信度 → 人工纠错兜底。**别把 AI 结果当精确数据呈现。**
 - **目标歌曲**：日系动漫乐队歌（轻音、孤独摇滚、MyGO!!!!!、Ave Mujica、哭泣少女乐队）+ Beyond 经典。
 
@@ -26,14 +26,14 @@
 | `spike/songs/`、`歌曲文件/`、`视频教程/` | 用户音频/视频，**git 忽略**，勿提交（版权内容） |
 | `app/` | 应用主体（Vue 3 + Vite + PWA） |
 | `app/src/data/` | `devices.js`（设备参数）、`templates.js`（5 套音色套路）、`seedSongs.json`（7 首种子歌）、**`fundamentals.js`（5 项基本功：任务分解/图示/bpm）**、**`chords.js`（49 个和弦指法图数据 + 分组，`findChord`/`CHORD_GROUPS`）**、**`songSheets.js`（种子曲谱，首批 2 首）**、**`courseCatalog.js`（194 课成田课程目录，由脚本生成勿手改）** |
-| `app/src/stores/` | Pinia：`practice.js`（打卡）、`settings.js`（提醒/设备/新手模式）、`timer.js`（计时全局）、`metronome.js`（节拍器全局，含 currentBeat）、`songs.js`（用户歌单）、**`plan.js`（基本功达标/歌曲状态 + plan getter）**、**`course.js`（课程进度）**、**`sheets.js`（用户自录曲谱）** |
+| `app/src/stores/` | Pinia：`practice.js`（打卡）、`settings.js`（提醒/设备/新手模式）、`timer.js`（计时全局）、`metronome.js`（节拍器全局，含 currentBeat）、`songs.js`（用户歌单，getter 叫 **allSongs**、歌名字段叫 **title**）、**`plan.js`（基本功达标/歌曲状态 + plan getter）**、**`course.js`（课程进度）**、**`sheets.js`（用户自录曲谱）**、**`recordings.js`（录音元数据列表，分类常量 `RECORD_CATEGORIES`）** |
 | `app/src/composables/` | `useMediaQuery.js`（768px 断点）、`useTuner.js`（麦克风 ACF 调音） |
-| `app/src/utils/` | `analyze.js`（**自研音频分析引擎**）、`toneGuide.js`（新手大白话文案）、`storage.js`（localStorage 抽象，key 前缀 `gla:v1:`）、**`planEngine.js`（规则引擎纯函数，改后必须重跑对拍）** |
-| `app/src/components/` | `Icon.vue`（线性 SVG 图标集，含 calendar/chart/book/chord/check-circle 等）、`ToneAdvice.vue`（设备建议卡双模式）、**`ChordChart.vue`（自绘 SVG 和弦指法图，支持 size/baseFret/无图占位）**、**`FretboardMap.vue`（竖版指板图：1 品在上往下递推）** |
-| `app/src/views/` | Home/Tools/Songs/SongDetail/SongAnalyze/Practice/Metronome/Tuner/Templates/Devices/Reminders/Profile + **Plan（计划页）/Stats（统计）/Course（课程）/PlanItem（基本功详情）/ChordLibrary（和弦图库）** |
+| `app/src/utils/` | `analyze.js`（**自研音频分析引擎**）、`toneGuide.js`（新手大白话文案）、`storage.js`（localStorage 抽象，key 前缀 `gla:v1:`）、**`planEngine.js`（规则引擎纯函数，改后必须重跑对拍）**、**`recordingsDb.js`（IndexedDB 封装：meta 与 blob 分 store）**、**`recordAnalyze.js`（录音→BPM，复用 analyze.js，只分析前 3 分钟）** |
+| `app/src/components/` | `Icon.vue`（线性 SVG 图标集，含 calendar/chart/book/chord/check-circle/mic 等）、`ToneAdvice.vue`（设备建议卡双模式）、**`ChordChart.vue`（自绘 SVG 和弦指法图，支持 size/baseFret/无图占位）**、**`FretboardMap.vue`（竖版指板图：1 品在上往下递推）**、**`RecordPanel.vue`（录音面板：状态机 idle/recording/saving，练习页与回听页复用）** |
+| `app/src/views/` | Home/Tools/Songs/SongDetail/SongAnalyze/Practice/Metronome/Tuner/Templates/Devices/Reminders/Profile + **Plan（计划页）/Stats（统计）/Course（课程）/PlanItem（基本功详情）/ChordLibrary（和弦图库）/Recordings（录音回听）** |
 | `app/public/_redirects` | SPA 深链接回退（CF Pages 需要，别删） |
 
-**路由全景**：`/`(tab) `/plan`(tab) `/practice` `/tools`(tab) `/metronome` `/tuner` `/chords` `/songs`(tab) `/songs/new` `/songs/:id` `/profile`(tab) `/stats` `/course` `/devices` `/reminders` `/templates` `/plan-item/basic/:id`。`meta.tab` = 显示底部导航（手机 5 标签：首页/计划/工具/歌曲/我的）。
+**路由全景**：`/`(tab) `/plan`(tab) `/practice` `/tools`(tab) `/metronome` `/tuner` `/chords` `/recordings` `/songs`(tab) `/songs/new` `/songs/:id` `/profile`(tab) `/stats` `/course` `/devices` `/reminders` `/templates` `/plan-item/basic/:id`。`meta.tab` = 显示底部导航（手机 5 标签：首页/计划/工具/歌曲/我的）。
 
 **Git 与部署**：远程 `origin` = `github.com/mengchiren/guitar-learning-assistant`（**私有**）。**push 后 Cloudflare Pages 自动部署**到 `https://guitar-learning-assistant.pages.dev`。构建配置：根目录 `app`、`npm run build`、输出 `dist`、环境变量 `NODE_VERSION=22`。本机到 GitHub 的推送会**间歇性失败**（国内网络抖动：Recv failure: Connection was reset / 443 超时），**重试 3~4 次通常能成**（间隔 30~120 秒），提交在本地不会丢。
 
@@ -51,25 +51,27 @@
 - **M3 学习计划（v0.3.6）**：底部导航加「计划」（5 标签）；规则引擎 `planEngine.js`（纯函数，25 项对拍）：三档练习包、每项含练法/达标标准/「为什么」解释、动态调整（上周 ≤2 天减半、连续 3 周达标 +10%、上周练得少默认 10 分钟档）；基本功清单 5 项 + 达标标记；歌曲「练习中/已掌握」+ 同套路推荐；统计报表页（周概览/4 周趋势/月度热力图/清单状态/歌曲掌握）；成田课程进度页（194 课目录由 `gen_course_catalog.py` 扫描视频文件名生成，逐课勾选/学到第几课/进度百分比）；首页练习包读引擎真实输出。
 - **计划项详情页 + 曲谱（v0.3.7）**：基本功详情页 `/plan-item/basic/:id`（任务分解 4 步 + 图示 + 目标速度节拍器联动 + 达标切换）；自绘 SVG 和弦图组件 + 19 个和弦图库；歌曲详情页「曲谱（和弦谱）」区（分段和弦谱，谱中和弦自动配指法图）；种子曲谱 2 首（NO, Thank You! 完整分段、空の箱标注校准）；用户自录曲谱（分段表单，localStorage，优先显示）；数据校验 `test_sheets.mjs`。
 - **爬格子竖版 + 和弦图库（v0.3.8）**：FretboardMap 改竖版（1 品在上往下递推）；和弦图库扩到 **49 个**（6 组：开放/七和弦/挂留延伸/横按/强力和弦/转位低音，全部标准按法）；「和弦图库」页 `/chords`（工具页第 4 张卡片进入，点任意和弦放大查看）；校验升级 212 项断言。
-- 全程约 27 个提交，git 历史即详细变更记录；需求文档修订记录完整到 v0.3.8。
+- **录音回听 + 自动对拍（v0.4.0，M4-1）**：录音面板 `RecordPanel.vue`（练习页 + 工具页「录音回听」双入口）；MediaRecorder 兼容选 mimeType（webm/opus 优先、mp4 兜底，覆盖安卓 Chrome 与 iPhone Safari）；单次最长 10 分钟；录完自动复用 `analyze.js` 测 BPM（只分析前 3 分钟，秒级出结果），标置信度可手动改；本地存 IndexedDB（`recordingsDb.js`，meta 与 blob 分 store，列表页不载入音频）；回听页 `/recordings`（列表/行内播放/两段式删除）；分类与打卡一致（歌曲/基本功/课程/自由练习），选「歌曲」可关联歌（store getter 是 `allSongs`、字段是 `title`）；工具页第 5 张卡片 + mic 图标。**验收中抓到并修了一个真 bug**：关联歌曲下拉最初写成 `songs.songs`/`s.name`（应为 `allSongs`/`title`），下拉只有「不关联」——浏览器实测发现后修正。
+- 全程约 29 个提交，git 历史即详细变更记录；需求文档修订记录完整到 v0.4.0。
 
 ## 4. 当前卡在哪
 
-**没有技术阻塞。** 最新版（v0.3.8）已全部上线（本次推送一次成功）。在等用户**使用反馈**：
+**没有技术阻塞。** 最新版（v0.4.0 录音回听）代码已提交（`5de8089`），推送因国内网络抖动暂未成功（**重试 3~4 次通常能成，间隔 30~120 秒**，见坑 23）。等用户**使用反馈**：
 
 1. 计划页的练习包建议、基本功达标标准难度是否合适（用户实际练几天才知道）
 2. 曲谱准确性：《空の箱》标注了「请对照原曲校准」，其余 5 首种子歌暂无曲谱（宁缺毋滥原则），用户练到哪首需要谱再补
 3. 和弦图库 49 个指法是否有标错的（用户对照实物弹发现不对就改数据）
-4. 用户手机验收新版（刷新两三次避开 SW 旧缓存）
+4. **录音回听：手机真实录音效果、自动对拍准不准（练琴录音是清音，节拍检测有效性待实测）、录音格式在安卓/iPhone 上是否都能录能放**
+5. 用户手机验收新版（刷新两三次避开 SW 旧缓存）
 
 **不要在他反馈前自作主张改设计**，等他给意见再动手。用户的工作方式（本会话确认）：**大功能先问清需求**——他会要求先指出「架构问题、扩展性问题、安全问题和维护成本」再一起重新设计方案，然后才让动手。
 
 ## 5. 下一步计划（按路线图）
 
-1. **等用户使用反馈** → 按意见微调（练习包规则/达标标准/曲谱内容/和弦图数据）。
+1. **推送上 v0.4.0**（本地已 commit，网络抖动重试即可）→ **等用户使用反馈** → 按意见微调（练习包规则/达标标准/曲谱内容/和弦图数据/录音体验）。
 2. **曲谱扩充**：用户练到哪首歌需要谱 → 按「宁缺毋滥、人工整理、标注来源与校准状态」原则补 `songSheets.js`；谱里出现新和弦时同步补 `chords.js` 图库（`test_sheets.mjs` 会强制校验：谱中和弦必须在图库有定义）。用户也可自己在应用里录谱（存本地）。
-3. **M4**：AI 答疑、Capacitor 安卓壳 + 桌面小组件、微信推送（推送加）、录音回听。
-4. 云同步（Supabase）按需接入，`storage.js` 抽象层已留好口。
+3. **录音功能扩展**（按反馈）：录音关联统计（这首歌录了几遍、BPM 趋势）、录音导出、云同步（Supabase 按需，`recordingsDb.js` 是 IDB 实现可整体替换）。
+4. **M4 剩余**（用户已按「架构/安全/成本」分析法选定录音回听为 M4 第一项，其余待排期）：AI 答疑（需 CF Pages Functions 代理防 API Key 泄露）、微信推送（推送加，token 需代理）、Capacitor 安卓壳 + 桌面小组件（维护成本最高，等核心稳定）。
 5. pages.dev 免费域名国内访问不稳定，后续可选自定义域名。
 6. P2 成就徽章/等级（统计页做了一部分，徽章未做）。
 
@@ -99,6 +101,7 @@
 22. **课程目录是生成数据**：`app/src/data/courseCatalog.js` 由 `spike/gen_course_catalog.py` 扫描 `视频教程/` 文件名生成（解析规则见脚本注释），**勿手改**；课程文件增删后重跑脚本。网页无法读用户本地文件路径，课程页只是课名清单对照勾选。
 23. **部署配置**：CF Pages 构建必须设**根目录 `app`**、`NODE_VERSION=22`、输出 `dist`；SPA 回退靠 `app/public/_redirects`。push 即自动部署；推送失败是网络抖动，**重试 3~4 次**（间隔 30~120 秒），别把「没推上去」当「没提交」。
 24. **项目名**：「练琴搭子 · PickBuddy」（v0.3.4 定名），品牌名出现在 App.vue 顶栏、index.html 标题、vite.config.js manifest、ProfileView 关于文案、README、仓库描述——改名要全同步。
+25. **录音功能（v0.4.0 新增）**：①录音存 IndexedDB（`recordingsDb.js`），meta 与 blob 分两个 object store，列表页只读 meta——不要把音频全量塞 localStorage（5MB 上限）也不要让 getAll 拖回全部 blob；②MediaRecorder 的 mimeType 要先 `isTypeSupported` 探测（webm/opus → webm → mp4 依次降级），iPhone Safari 只支持 mp4/aac；③分析录音用 `decodeAudioData` 后混单声道再喂 `analyzeAudio`（引擎内部会重采样，不用自己 resample）；只分析前 3 分钟保证秒出；④**songs store 的 getter 叫 `allSongs`、歌名字段叫 `title`**（不是 songs/name），本会话在这里踩过真 bug（关联歌曲下拉空）；⑤麦克风需要安全上下文（HTTPS），与调音器同坑；⑥IAB 浏览器验收时「录音中」每秒 UI 更新会让 Playwright 点击永远等不到元素稳定（超时），改用新 tab + dom_cua/cua 坐标点击；IAB 里 getUserMedia 可能直接放行（能真录环境噪音，测出低置信度 BPM 是正常的，不是 bug）。
 
 ## 7. 与用户协作的注意事项
 
