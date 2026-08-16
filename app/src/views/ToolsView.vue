@@ -34,6 +34,13 @@ import Icon from '../components/Icon.vue'
           <div class="dim small">录练习 · 自动对拍 · 回听</div>
         </div>
       </router-link>
+      <router-link to="/ask" class="card tool-card">
+        <span class="tool-icon"><Icon name="sparkle" :size="24" /></span>
+        <div>
+          <div class="tool-name">AI 答疑</div>
+          <div class="dim small">练琴问题随时问 · 多模型切换</div>
+        </div>
+      </router-link>
       <router-link to="/templates" class="card tool-card">
         <span class="tool-icon"><Icon name="sliders" :size="24" /></span>
         <div>

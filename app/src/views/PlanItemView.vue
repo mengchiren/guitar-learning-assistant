@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { FUNDAMENTALS } from '../data/fundamentals.js'
 import { usePlanStore } from '../stores/plan'
 import { useMetronomeStore } from '../stores/metronome'
+import { stashAskContext } from '../stores/chat'
 import ChordChart from '../components/ChordChart.vue'
 import FretboardMap from '../components/FretboardMap.vue'
 
@@ -19,6 +20,19 @@ function openMetronome() {
   if (!item.value) return
   metro.bpm = item.value.bpm || 60
   router.push('/metronome')
+}
+
+function askAi() {
+  if (!item.value) return
+  stashAskContext(
+    `用户正在看基本功练习「${item.value.name}」：
+- 练法：${item.value.desc}
+- 达标标准：${item.value.goal}
+- 目标速度：${item.value.bpm} BPM
+- 当前状态：${done.value ? '已达标' : '还没达标'}
+- 用户设备：依班娜 GRX40 电吉他 + JOYO Jam Buddy 2 音箱`,
+  )
+  router.push('/ask')
 }
 </script>
 
@@ -40,6 +54,7 @@ function openMetronome() {
             {{ done ? '✓ 已达标（点此撤销）' : '标记已达标' }}
           </button>
         </div>
+        <button class="btn btn-block" style="margin-top: 10px" @click="askAi">问 AI 这个练习怎么练</button>
       </div>
 
       <div class="card">

@@ -6,6 +6,7 @@ import { findToneTemplate, TONE_TEMPLATES } from '../data/templates'
 import { useMetronomeStore } from '../stores/metronome'
 import { usePlanStore } from '../stores/plan'
 import { useSheetsStore } from '../stores/sheets'
+import { stashAskContext } from '../stores/chat'
 import ToneAdvice from '../components/ToneAdvice.vue'
 import ChordChart from '../components/ChordChart.vue'
 
@@ -61,6 +62,21 @@ function openMetronome() {
   const bpm = Math.min(220, Math.max(40, Math.round(eff.value?.bpm || 100)))
   metro.bpm = bpm
   router.push('/metronome')
+}
+
+function askAi() {
+  if (!song.value || !eff.value) return
+  const st = planStore.songStatus[song.value.id]?.state || '未标记'
+  const statusText = st === 'practicing' ? '练习中' : st === 'mastered' ? '已掌握' : '还没开始练'
+  const chordsText = song.value.chords || song.value.analysis?.chordsRough?.join(' ') || '未知'
+  stashAskContext(
+    `用户正在看歌曲《${song.value.title}》：
+- BPM：${eff.value.bpm ?? '未知'}，调性：${eff.value.key ?? '未知'}，套路：${eff.value.template ?? '未知'}
+- 难度：${song.value.difficulty ?? '未知'}；和弦：${chordsText}
+- 这首歌的练习状态：${statusText}
+- 用户设备：依班娜 GRX40 电吉他 + JOYO Jam Buddy 2 音箱`,
+  )
+  router.push('/ask')
 }
 
 function removeSong() {
@@ -169,6 +185,7 @@ const confLabel = { 高: 'b-high', 中: 'b-mid', 低: 'b-low' }
       <div v-if="song.analysis && song.analysis.notes.length" style="margin-top: 10px">
         <p v-for="n in song.analysis.notes" :key="n" class="muted small" style="margin-bottom: 4px">· {{ n }}</p>
       </div>
+      <button class="btn btn-block" style="margin-top: 12px" @click="askAi">问 AI 这首歌怎么练</button>
     </div>
 
     <div class="card">

@@ -97,5 +97,9 @@ defineProps({
       <path d="M5.5 11.5a6.5 6.5 0 0 0 13 0" />
       <path d="M12 18v2.5M9.5 20.5h5" />
     </template>
+    <template v-else-if="name === 'sparkle'">
+      <path d="M12 4l1.9 5.1L19 11l-5.1 1.9L12 18l-1.9-5.1L5 11l5.1-1.9Z" />
+      <path d="M19 16.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8Z" />
+    </template>
   </svg>
 </template>
