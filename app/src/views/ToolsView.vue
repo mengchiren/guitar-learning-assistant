@@ -27,6 +27,13 @@ import Icon from '../components/Icon.vue'
           <div class="dim small">49 个常用和弦指法图 · 点开可放大</div>
         </div>
       </router-link>
+      <router-link to="/recordings" class="card tool-card">
+        <span class="tool-icon"><Icon name="mic" :size="24" /></span>
+        <div>
+          <div class="tool-name">录音回听</div>
+          <div class="dim small">录练习 · 自动对拍 · 回听</div>
+        </div>
+      </router-link>
       <router-link to="/templates" class="card tool-card">
         <span class="tool-icon"><Icon name="sliders" :size="24" /></span>
         <div>

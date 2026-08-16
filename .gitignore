@@ -23,3 +23,6 @@ Thumbs.db
 
 # 开发测试音频（浏览器端分析联调用，用完即删）
 app/public/test-audio.mp3
+
+# 验收截图（本地证据，不进仓库）
+gui-test-screenshots/

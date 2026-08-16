@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import { usePracticeStore } from '../stores/practice'
 import { useTimerStore } from '../stores/timer'
+import RecordPanel from '../components/RecordPanel.vue'
 
 const practice = usePracticeStore()
 const timer = useTimerStore()
@@ -96,6 +97,11 @@ function backfill() {
         今日累计 {{ Math.floor(practice.todaySeconds / 60) }} 分钟，连续 {{ practice.streakDays }} 天
       </p>
       <router-link to="/" class="btn btn-block">回首页</router-link>
+    </div>
+
+    <div v-if="!finished" class="card">
+      <h2>练琴录音</h2>
+      <RecordPanel />
     </div>
 
     <div v-if="!finished" class="card">

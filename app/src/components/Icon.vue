@@ -92,5 +92,10 @@ defineProps({
       <path d="M4.5 9h15M4.5 15h15" />
       <circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none" />
     </template>
+    <template v-else-if="name === 'mic'">
+      <rect x="8.5" y="3.5" width="7" height="11" rx="3.5" />
+      <path d="M5.5 11.5a6.5 6.5 0 0 0 13 0" />
+      <path d="M12 18v2.5M9.5 20.5h5" />
+    </template>
   </svg>
 </template>
