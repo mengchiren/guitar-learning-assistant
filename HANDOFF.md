@@ -7,90 +7,105 @@
 给一位**电吉他零基础初学者**（用户本人）做个人学习助手 PWA「练琴搭子」（Vue 3 + Vite + vite-plugin-pwa）：
 
 - **产品形态**：响应式网页 PWA，电脑浏览器 + 安卓手机都能用，可安装到手机桌面。**已部署上线**（Cloudflare Pages + GitHub 自动部署）。
-- **核心功能**：①上传想练的歌 → 纯前端本地分析（BPM/调性/套路）→ 给出**他这套设备**（依班娜 GRX40-LGY 电吉他 + JOYO Jam Buddy 2 音箱）该怎么设置（琴的拾音器档位、音箱通道/箱模/旋钮参数），新手模式是大白话分步操作流程；②练琴打卡计时、连续天数、提醒；③歌曲库（种子曲库 + 用户歌单 + 人工纠错）。
+- **核心功能**：①上传想练的歌 → 纯前端本地分析（BPM/调性/套路）→ 给出**他这套设备**（依班娜 GRX40-LGY 电吉他 + JOYO Jam Buddy 2 音箱）的设置建议，新手模式是大白话分步操作流程；②练琴打卡计时、连续天数、提醒；③**M3 学习计划**：规则引擎生成弹性练习包（10/30/60 分钟三档）、基本功清单与达标标记、歌曲「练习中/已掌握」状态与同套路推荐、统计报表（周报/热力图）、成田课程进度跟踪；④练习项详情页（基本功任务分解 + 图示）与**和弦谱**（种子曲谱 + 用户自录曲谱 + 和弦图库）。
 - **产品策略（三层）**：种子库人工数据优先 → AI 分析作参考并标置信度 → 人工纠错兜底。**别把 AI 结果当精确数据呈现。**
 - **目标歌曲**：日系动漫乐队歌（轻音、孤独摇滚、MyGO!!!!!、Ave Mujica、哭泣少女乐队）+ Beyond 经典。
 
-**需求的唯一权威来源是 `需求文档.md`（当前 v0.3.4，含完整修订记录）**，任何功能争议以它为准，改需求必须先改它。
+**需求的唯一权威来源是 `需求文档.md`（当前 v0.3.8，含完整修订记录）**，任何功能争议以它为准，改需求必须先改它。
 
 ## 2. 关键文件地图
 
 | 路径 | 作用 |
 |---|---|
-| `需求文档.md` | 需求规格 v0.3.4：功能需求、设备参数、成本评估、路线图（M0~M4）、修订记录 |
-| `README.md` | GitHub 项目主页（项目简介/功能/技术栈/对拍结果/部署/隐私/路线图） |
-| `spike/` | M0 可行性验证（Python librosa 版 `analyze.py`、`key_check.py`、`make_synthetic.py`、`README.md` 对拍表）+ **前端引擎对拍单测 `test_frontend_analyze.mjs`**、单文件分析工具 `analyze_one.mjs` |
-| `spike/.venv/` | Python 3.13 虚拟环境（librosa 1.0.0 + imageio-ffmpeg 提供 ffmpeg），git 忽略 |
-| `spike/songs/` | 用户的歌曲音频（mp3/flac/kgg），**git 忽略**，测试素材（含春日影） |
+| `需求文档.md` | 需求规格 v0.3.8：功能需求、设备参数、成本评估、路线图（M0~M4）、修订记录 |
+| `HANDOFF.md` | 本交接文档 |
+| `验收指南.md` | 手把手手机验收清单 + 反馈模板 + 常见问题（给用户看的） |
+| `README.md` | GitHub 项目主页 |
+| `spike/` | 验证与测试：Python librosa 版 `analyze.py`、`make_synthetic.py`、**前端引擎对拍 `test_frontend_analyze.mjs`**、**规则引擎对拍 `test_plan_engine.mjs`**、**数据校验 `test_sheets.mjs`**、**课程目录生成 `gen_course_catalog.py`**、单文件分析工具 `analyze_one.mjs` |
+| `spike/.venv/` | Python 3.13 虚拟环境（librosa + imageio-ffmpeg），git 忽略 |
+| `spike/songs/`、`歌曲文件/`、`视频教程/` | 用户音频/视频，**git 忽略**，勿提交（版权内容） |
 | `app/` | 应用主体（Vue 3 + Vite + PWA） |
-| `app/src/data/` | `devices.js`（设备参数）、`templates.js`（5 套音色套路 + `findToneTemplate`）、`seedSongs.json`（7 首种子歌，含春日影 97 BPM） |
-| `app/src/stores/` | Pinia：`practice.js`（打卡记录）、`settings.js`（提醒/当前设备/`displayMode` 新手模式）、`timer.js`（计时全局）、`metronome.js`（节拍器全局）、`songs.js`（用户歌单） |
+| `app/src/data/` | `devices.js`（设备参数）、`templates.js`（5 套音色套路）、`seedSongs.json`（7 首种子歌）、**`fundamentals.js`（5 项基本功：任务分解/图示/bpm）**、**`chords.js`（49 个和弦指法图数据 + 分组，`findChord`/`CHORD_GROUPS`）**、**`songSheets.js`（种子曲谱，首批 2 首）**、**`courseCatalog.js`（194 课成田课程目录，由脚本生成勿手改）** |
+| `app/src/stores/` | Pinia：`practice.js`（打卡）、`settings.js`（提醒/设备/新手模式）、`timer.js`（计时全局）、`metronome.js`（节拍器全局，含 currentBeat）、`songs.js`（用户歌单）、**`plan.js`（基本功达标/歌曲状态 + plan getter）**、**`course.js`（课程进度）**、**`sheets.js`（用户自录曲谱）** |
 | `app/src/composables/` | `useMediaQuery.js`（768px 断点）、`useTuner.js`（麦克风 ACF 调音） |
-| `app/src/utils/` | `analyze.js`（**自研音频分析引擎**）、`toneGuide.js`（新手大白话文案）、`storage.js`（localStorage 抽象，key 前缀 `gla:v1:`） |
-| `app/src/components/` | `Icon.vue`（线性 SVG 图标集）、`ToneAdvice.vue`（设备建议卡，新手/完整双模式） |
-| `app/src/views/` | Home/Tools/Songs/SongDetail/SongAnalyze/Practice/Metronome/Tuner/Templates/Devices/Reminders/Profile |
+| `app/src/utils/` | `analyze.js`（**自研音频分析引擎**）、`toneGuide.js`（新手大白话文案）、`storage.js`（localStorage 抽象，key 前缀 `gla:v1:`）、**`planEngine.js`（规则引擎纯函数，改后必须重跑对拍）** |
+| `app/src/components/` | `Icon.vue`（线性 SVG 图标集，含 calendar/chart/book/chord/check-circle 等）、`ToneAdvice.vue`（设备建议卡双模式）、**`ChordChart.vue`（自绘 SVG 和弦指法图，支持 size/baseFret/无图占位）**、**`FretboardMap.vue`（竖版指板图：1 品在上往下递推）** |
+| `app/src/views/` | Home/Tools/Songs/SongDetail/SongAnalyze/Practice/Metronome/Tuner/Templates/Devices/Reminders/Profile + **Plan（计划页）/Stats（统计）/Course（课程）/PlanItem（基本功详情）/ChordLibrary（和弦图库）** |
 | `app/public/_redirects` | SPA 深链接回退（CF Pages 需要，别删） |
-| `歌曲文件/`、`视频教程/` | 用户的歌曲与成田课程视频，**git 忽略**，勿提交 |
 
-**Git 与部署**：远程 `origin` = `github.com/mengchiren/guitar-learning-assistant`（**私有**）。**push 后 Cloudflare Pages 自动部署**到 `https://guitar-learning-assistant.pages.dev`。构建配置：根目录 `app`、`npm run build`、输出 `dist`、环境变量 `NODE_VERSION=22`。注意：本机到 GitHub 的推送会**间歇性失败**（国内网络抖动），推送失败就重试几次，提交在本地不会丢。
+**路由全景**：`/`(tab) `/plan`(tab) `/practice` `/tools`(tab) `/metronome` `/tuner` `/chords` `/songs`(tab) `/songs/new` `/songs/:id` `/profile`(tab) `/stats` `/course` `/devices` `/reminders` `/templates` `/plan-item/basic/:id`。`meta.tab` = 显示底部导航（手机 5 标签：首页/计划/工具/歌曲/我的）。
+
+**Git 与部署**：远程 `origin` = `github.com/mengchiren/guitar-learning-assistant`（**私有**）。**push 后 Cloudflare Pages 自动部署**到 `https://guitar-learning-assistant.pages.dev`。构建配置：根目录 `app`、`npm run build`、输出 `dist`、环境变量 `NODE_VERSION=22`。本机到 GitHub 的推送会**间歇性失败**（国内网络抖动：Recv failure: Connection was reset / 443 超时），**重试 3~4 次通常能成**（间隔 30~120 秒），提交在本地不会丢。
 
 ## 3. 已经完成了什么
 
-- **M0 可行性验证**（Python spike）：5 首真实歌曲对拍——BPM「半速加倍」误差 ≤1.5%；调性 4/5；套路归类 4/5；和弦识别薄弱。
+- **M0 可行性验证**（Python spike）：5 首真实歌曲对拍——BPM「半速加倍」误差 ≤1.5%；调性 4/5；套路归类 4/5；和弦识别薄弱（结论：免费工具链承担 BPM/调性参考/套路归类）。
 - **M1 基础功能**：设备档案、音色套路库（5 套）、节拍器、调音器、练琴打卡/补卡/提醒、种子歌曲库。瑞士军刀风视觉（米白底 `#f4f3ef`、细线卡片、瑞士红 `#e30613` 只做强调、线性 SVG 图标、二级页返回键）。
-- **桌面/移动分离布局**（断点 768px）：≥768px 桌面端为 B 站式顶栏 + 首页仪表盘多栏 + 多栏列表；<768px 保持手机布局（底部导航 + 单栏）。
-- **跨页协作体验**：计时与节拍器提升为全局 store——切页不停表/不停声；外壳「练习中 mm:ss」胶囊（桌面顶栏内、手机底部悬浮）一键回练习页。
-- **M2 歌曲分析**（纯前端，音频不出设备）：自研引擎 `analyze.js`（手写 FFT/onset 包络/自相关/K-S 调性模板，无 ML 依赖），**5 首真实歌曲对拍 5/5 全项通过**（BPM 误差 ≤3%、调性 Top3 内 5/5、套路 5/5）；歌曲库搜索、详情页（设备建议 + 「用此 BPM 开节拍器」联动 + 人工纠错）、添加歌曲（上传分析 + 手动录入兜底，kgg 拒绝）。上传上限 100MB，解码用 OfflineAudioContext 直出 22050 单声道 + PCM 内存护栏。
-- **新手模式显示偏好**（「我的」页开关，默认开）：设备建议显示为「参数速览 4 芯片 + 大白话分步操作 + 可先不动清单」。
+- **桌面/移动分离布局**（断点 768px）：≥768px 桌面端顶栏 + 多栏布局；<768px 手机布局（底部导航 + 单栏）。
+- **跨页协作**：计时与节拍器为全局 store——切页不停表/不停声；「练习中 mm:ss」胶囊（桌面顶栏内、手机底部悬浮）一键回练习页。
+- **M2 歌曲分析**（纯前端，音频不出设备）：自研引擎 `analyze.js`（手写 FFT/onset 包络/自相关/K-S 调性模板），**5 首真实歌曲对拍 5/5 全项通过**；歌曲库搜索、详情页（设备建议 + 节拍器联动 + 人工纠错）、添加歌曲（上传分析 + 手动录入兜底，kgg 拒绝）。上传上限 100MB，OfflineAudioContext 直出 22050 单声道 + PCM 内存护栏。
+- **新手模式显示偏好**（默认开）：参数速览 4 芯片 + 大白话分步操作 + 可先不动清单。
 - **慢歌测速修复**：半速加倍改为**节拍强度比较法**；春日影入种子库（权威 97 BPM / B 大调 / 清音伴奏）。
-- **部署上线**：Cloudflare Pages + GitHub 自动部署，站点已上线并验证（首页/深链接/SW/manifest/JS）。
-- **定名**：「练琴搭子 · PickBuddy」，品牌名已同步到应用（顶栏/标题/PWA manifest/关于页）、仓库描述、README。
-- 全程约 20 个提交，git 历史即详细变更记录。
+- **部署上线**（CF Pages）+ **定名**「练琴搭子 · PickBuddy」（品牌名同步到顶栏/标题/manifest/关于页/README/仓库描述）。
+- **v0.3.5 验收反馈修复**（用户手机验收提的 3 个问题）：路由滚动位置重置（scrollBehavior：前进回顶、后退恢复）；节拍器圆点按拍跳动（store 加 currentBeat，声音排拍同一时刻驱动视觉）；提醒时间改「时/分」双下拉（time input 部分浏览器弹不出选择器）。另修：保存纠错后「已保存」提示被 watch 深层依赖连带清掉（改监听歌曲 id）。**全程浏览器模拟手机/桌面双视口验收通过**（browser-use IAB，视口 390×844 与 1280×800）。
+- **M3 学习计划（v0.3.6）**：底部导航加「计划」（5 标签）；规则引擎 `planEngine.js`（纯函数，25 项对拍）：三档练习包、每项含练法/达标标准/「为什么」解释、动态调整（上周 ≤2 天减半、连续 3 周达标 +10%、上周练得少默认 10 分钟档）；基本功清单 5 项 + 达标标记；歌曲「练习中/已掌握」+ 同套路推荐；统计报表页（周概览/4 周趋势/月度热力图/清单状态/歌曲掌握）；成田课程进度页（194 课目录由 `gen_course_catalog.py` 扫描视频文件名生成，逐课勾选/学到第几课/进度百分比）；首页练习包读引擎真实输出。
+- **计划项详情页 + 曲谱（v0.3.7）**：基本功详情页 `/plan-item/basic/:id`（任务分解 4 步 + 图示 + 目标速度节拍器联动 + 达标切换）；自绘 SVG 和弦图组件 + 19 个和弦图库；歌曲详情页「曲谱（和弦谱）」区（分段和弦谱，谱中和弦自动配指法图）；种子曲谱 2 首（NO, Thank You! 完整分段、空の箱标注校准）；用户自录曲谱（分段表单，localStorage，优先显示）；数据校验 `test_sheets.mjs`。
+- **爬格子竖版 + 和弦图库（v0.3.8）**：FretboardMap 改竖版（1 品在上往下递推）；和弦图库扩到 **49 个**（6 组：开放/七和弦/挂留延伸/横按/强力和弦/转位低音，全部标准按法）；「和弦图库」页 `/chords`（工具页第 4 张卡片进入，点任意和弦放大查看）；校验升级 212 项断言。
+- 全程约 27 个提交，git 历史即详细变更记录；需求文档修订记录完整到 v0.3.8。
 
 ## 4. 当前卡在哪
 
-**没有技术阻塞。** 在等用户**手机验收线上版**（安装 PWA、调音器麦克风权限、上传分析）。注意两件事：
+**没有技术阻塞。** 最新版（v0.3.8）已全部上线（本次推送一次成功）。在等用户**使用反馈**：
 
-1. **GitHub 推送间歇性失败**：本机到 github.com 的网络会抖动（连接重置/超时），本地若有未推送提交，重试推送即可；推送成功后 CF 自动部署。
-2. 开发服务器在 `http://localhost:4174`（vite dev），会话结束后可能被系统回收——用户说打不开就 `cd F:/电吉他学习/app && npm run dev -- --port 4174`。
+1. 计划页的练习包建议、基本功达标标准难度是否合适（用户实际练几天才知道）
+2. 曲谱准确性：《空の箱》标注了「请对照原曲校准」，其余 5 首种子歌暂无曲谱（宁缺毋滥原则），用户练到哪首需要谱再补
+3. 和弦图库 49 个指法是否有标错的（用户对照实物弹发现不对就改数据）
+4. 用户手机验收新版（刷新两三次避开 SW 旧缓存）
 
-**不要在他反馈前自作主张改设计**，等他给意见再动手。
+**不要在他反馈前自作主张改设计**，等他给意见再动手。用户的工作方式（本会话确认）：**大功能先问清需求**——他会要求先指出「架构问题、扩展性问题、安全问题和维护成本」再一起重新设计方案，然后才让动手。
 
 ## 5. 下一步计划（按路线图）
 
-1. **等用户手机验收线上版** → 按意见微调。
-2. **M3 学习计划**：规则引擎（弹性练习包，用户时间不固定）+ 成田课程进度跟踪 + 统计报表。
+1. **等用户使用反馈** → 按意见微调（练习包规则/达标标准/曲谱内容/和弦图数据）。
+2. **曲谱扩充**：用户练到哪首歌需要谱 → 按「宁缺毋滥、人工整理、标注来源与校准状态」原则补 `songSheets.js`；谱里出现新和弦时同步补 `chords.js` 图库（`test_sheets.mjs` 会强制校验：谱中和弦必须在图库有定义）。用户也可自己在应用里录谱（存本地）。
 3. **M4**：AI 答疑、Capacitor 安卓壳 + 桌面小组件、微信推送（推送加）、录音回听。
 4. 云同步（Supabase）按需接入，`storage.js` 抽象层已留好口。
 5. pages.dev 免费域名国内访问不稳定，后续可选自定义域名。
+6. P2 成就徽章/等级（统计页做了一部分，徽章未做）。
 
 ## 6. 踩过的坑（绝对不要踩）
 
 1. **包管理镜像**：pip 必须加 `-i https://mirrors.aliyun.com/pypi/simple/`；`app/.npmrc` 配的 npmmirror **别删**。
-2. **酷狗音频**：mp3 若读不动用 ffmpeg 转 wav（ffmpeg 在 imageio-ffmpeg 包里，路径用 `spike/.venv/Scripts/python.exe -c "import imageio_ffmpeg; print(imageio_ffmpeg.get_ffmpeg_exe())"` 取）。**kgg 是加密格式，解不开，不要碰解密**（法律灰色），引导用户换源或歌名检索。
-3. **日期必须用本地时区**：`toISOString()` 是 UTC，中国时区凌晨差一天。新代码用 PracticeView 里的 `localDateStr()` 模式。
+2. **酷狗音频**：mp3 读不动用 ffmpeg 转 wav（ffmpeg 路径：`spike/.venv/Scripts/python.exe -c "import imageio_ffmpeg; print(imageio_ffmpeg.get_ffmpeg_exe())"`）。**kgg 是加密格式，解不开，不要碰解密**（法律灰色），引导用户换源或歌名检索。
+3. **日期必须用本地时区**：`toISOString()` 是 UTC，中国时区凌晨差一天。新代码用 PracticeView 的 `localDateStr()` / planEngine 的 `fmt()` 模式。
 4. **Vue computed 依赖**：非响应式源（`Date.now()`）必须显式读每秒 tick 的 ref 才触发更新。
-5. **PWA Service Worker 缓存**：同 origin 旧 SW 会缓存旧版本，开发换端口（4173 已被污染，现用 4174）。
-6. **测试音频来源**：archive.org、incompetech、GitHub raw 本机都连不上；需要样本可解包 pygame-ce wheel 拿 `pygame/examples/data/`，或用 `spike/songs/` 里的真实歌曲。
+5. **PWA Service Worker 缓存**：同 origin 旧 SW 会缓存旧版本，开发换端口（4173 已被污染，现用 4174）；线上更新后用户需刷新两三次或清缓存。
+6. **测试音频来源**：archive.org、incompetech、GitHub raw 本机连不上；需要样本用 `spike/make_synthetic.py` 生成（C-G-Am-F 120BPM），或用 `spike/songs/` 真实歌曲。
 7. **librosa 1.0 API 变了**：`tempo_frequencies` 已移除等，参考现有 spike 代码。
-8. **BPM 半速用节拍强度比较法**（v0.3.2 起）：测值 <100 时比较 lag 与 lag/2 的自相关强度，lag/2 ÷ lag ≥0.98 才加倍（快歌半速测值两者相当 0.995~1.000；真实慢歌 <0.973）。**别再退回一律 ×2**（会把 96 BPM 的春日影翻成 191，连 librosa 都栽）。**已知硬伤**：春日影类「1.5 倍谐波」慢歌无法自动纠正（试过 tempo 先验，会误伤快歌），靠种子库 + 人工纠错兜底。
+8. **BPM 半速用节拍强度比较法**（v0.3.2 起）：测值 <100 时比较 lag 与 lag/2 自相关强度，lag/2 ÷ lag ≥0.98 才加倍。**别再退回一律 ×2**（会把 96 BPM 的春日影翻成 191）。**已知硬伤**：春日影类「1.5 倍谐波」慢歌无法自动纠正，靠种子库 + 人工纠错兜底。
 9. **调性/和弦识别不是权威**：强力弦摇滚缺三音有固有歧义。产品必须种子库优先 → AI 标置信度 → 人工纠错。
 10. **音频/视频不进 git**：`.gitignore` 已排除 `歌曲文件/`、`视频教程/`、`spike/songs/`、`node_modules`、`spike/.venv`、`app/public/test-audio.mp3`。用户歌曲是版权内容。
 11. **Windows 端口残留**：任务被 kill 后 node 可能占端口：`netstat -ano | grep :端口 | grep -i listen` 拿 PID → `taskkill //F //PID <PID>`。
-12. **手机调音器需要 HTTPS**：getUserMedia 要求安全上下文。线上已部署 HTTPS；局域网 IP 的 http 不行。
-13. **设备参数来自网络检索**：GRX40/Jam Buddy 2 参数在 `devices.js`，音箱 14 种箱头模拟名单未核实全，做音色映射前让用户对照实物/说明书确认。
-14. **浏览器测试方法**：browser-use 技能（`mcp__node_repl__js` 工具）开真浏览器；`playwright.evaluate` 会被安全策略拒绝，用 `domSnapshot()` 读页面、`getByRole/getByText` 操作；aria-hidden 的 SVG 图标不在快照里；截图本会话无法预览，视觉验收交用户；**IAB 不支持文件选择器**——上传分析联调用添加歌曲页 dev-only 的「加载开发测试音频」按钮（fetch `app/public/test-audio.mp3`，用完删）。
+12. **手机调音器需要 HTTPS**：getUserMedia 要求安全上下文。线上已 HTTPS；局域网 IP 的 http 不行。
+13. **设备参数来自网络检索**：GRX40/Jam Buddy 2 参数在 `devices.js`，音箱 14 种箱头模拟名单未核实全。
+14. **浏览器测试方法**（browser-use 技能，`mcp__node_repl__js` 工具）：开 IAB 浏览器，`setViewportSize` 模拟手机（390×844）与桌面（1280×800）；`playwright.evaluate` 会被安全策略拒绝（读 `window.scrollY` 可行，读 localStorage 被拒，删 localStorage 更不可能）；用 `domSnapshot()` 读页面、`getByRole/getByText/locator` 操作；**aria-hidden 的 SVG 内容不在快照里**（验证 SVG 用 locator 计数/getAttribute）；`fill('')` 对 search 输入框不生效（用 click + Control+A + Backspace 清空）；**HMR 会重置组件局部状态**（如 PlanView 的档位 ref 会弹回默认值，验收时注意）；**IAB 不支持文件选择器**——上传分析联调用添加歌曲页 dev-only 的「加载开发测试音频」按钮（fetch `app/public/test-audio.mp3`，用完删）；截图用 `nodeRepl.emitImage(await tab.screenshot())` 才能给用户看。
 15. **AGENTS.md 规矩**：编辑任何已有文本文件前用 chardet 检测编码（本工程都是 UTF-8）；新文件直接 UTF-8。
 16. **计时器/节拍器是全局 store**：切页不停表/不停声靠 `stores/timer.js`、`stores/metronome.js` 共享实例。不要写回页面级 composable。**练习页不要放节拍器控件**（用户明确拒绝过）。
-17. **分析引擎对拍**：改 `analyze.js` 任何算法/阈值后必须重跑 `node spike/test_frontend_analyze.mjs <ffmpeg路径>`，5 首全项通过才算数；单文件看 lag 谱用 `analyze_one.mjs`。
+17. **分析引擎对拍**：改 `analyze.js` 任何算法/阈值后必须重跑 `node spike/test_frontend_analyze.mjs <ffmpeg路径>`，5 首全项通过才算数。
 18. **调性 chroma 是 STFT 近似非 CQT**：逐八度归一化 + 小数 midi 插值两个技巧缺一不可（去掉任一个对拍掉到 2/5）；K-S 模板滚动方向用 `(j - i + 12) % 12`（与 np.roll 同向），写反会全歌误判 D# 调。
-19. **部署配置**：CF Pages 构建必须设**根目录 `app`**（漏了报 `Could not read package.json`）、`NODE_VERSION=22`（Vite 8 需要 Node ≥20.19）、输出 `dist`；SPA 回退靠 `app/public/_redirects`。push 即自动部署；本机推送失败是网络抖动，重试即可。
-20. **项目名**：「练琴搭子 · PickBuddy」（v0.3.4 定名），品牌名出现在 App.vue 顶栏、index.html 标题、vite.config.js manifest、ProfileView 关于文案、README、仓库描述——改名要全同步。
+19. **规则引擎与数据对拍（v0.3.6~v0.3.8 新增）**：改 `planEngine.js` 任何规则/阈值后必须重跑 `node spike/test_plan_engine.mjs`（25 项断言）；改 `chords.js`/`songSheets.js`/`fundamentals.js` 数据后必须重跑 `node spike/test_sheets.mjs`（212 项断言：图库数量 ≥40、分组合法、**谱中出现的每个和弦必须在图库有定义**——这是硬约束，加谱不补图会挂）。两个测试都是纯 node ESM，**import 必须带 `.js` 扩展名**（Vite 可省略但 node 不行）。
+20. **Vue watch 深层依赖陷阱（本会话实战教训）**：`watch(computedSong)` 回调里若读了 song 的深层响应式字段（如 `effectiveSong(s)`），保存修改后 watch 会连带触发——曾导致纠错「已保存」提示永远不显示。**watch 源要选浅层稳定的值（如 `() => song.value?.id`）**。
+21. **曲谱合规红线**：不从第三方曲谱网站抓谱/嵌图（版权风险）；谱子 = 人工整理的学习笔记（标注来源与校准状态），**仅存本地浏览器、无分享/导出/公开功能**（用户已确认）。宁缺毋滥，没把握的歌不录谱。
+22. **课程目录是生成数据**：`app/src/data/courseCatalog.js` 由 `spike/gen_course_catalog.py` 扫描 `视频教程/` 文件名生成（解析规则见脚本注释），**勿手改**；课程文件增删后重跑脚本。网页无法读用户本地文件路径，课程页只是课名清单对照勾选。
+23. **部署配置**：CF Pages 构建必须设**根目录 `app`**、`NODE_VERSION=22`、输出 `dist`；SPA 回退靠 `app/public/_redirects`。push 即自动部署；推送失败是网络抖动，**重试 3~4 次**（间隔 30~120 秒），别把「没推上去」当「没提交」。
+24. **项目名**：「练琴搭子 · PickBuddy」（v0.3.4 定名），品牌名出现在 App.vue 顶栏、index.html 标题、vite.config.js manifest、ProfileView 关于文案、README、仓库描述——改名要全同步。
 
 ## 7. 与用户协作的注意事项
 
 - 用户中文交流、非开发者、零吉他基础，解释方案用「呈现形式/优缺点」的通俗方式。
-- 已确认的决定不要重复征求：PWA 形态、推送加、Capacitor（M4）、种子库自建、录音本地优先、瑞士军刀风、纯前端分析、新手模式默认开、项目名。
-- 用户时间不固定，学习计划要做成弹性「练习包」而不是固定日历（M3）。
+- **用户的工作方式（本会话明确）**：①大功能先问清需求再动手，他会要求先指出「架构问题、扩展性问题、安全问题和维护成本」再一起重新设计——照做，别直接写代码；②GitHub 提交不用勤，「大版本一次提交」——但验收中发现的 bug 修复需及时推送让他手机生效（他会理解）；③验收能交给代理做（浏览器模拟手机/桌面视口），他说「你帮我验收」就全流程走一遍出报告。
+- 已确认的决定不要重复征求：PWA 形态、推送加、Capacitor（M4）、种子库自建、录音本地优先、瑞士军刀风、纯前端分析、新手模式默认开、项目名、谱子人工整理+仅本地、和弦谱形式、图库页样式。
+- 用户时间不固定，学习计划是弹性「练习包」不是固定日历；练习包每项要带「为什么这么建议」（规则透明是验收标准）。
 - 用户会自己上传歌曲到 `spike/songs/`，flac/mp3/kgg 混着来，kgg 按坑 2 处理；慢歌测速不准的（如春日影）加种子库权威条目。
-- 每改完一轮 git commit；需求变更同步进 `需求文档.md` 修订记录；推送失败要重试，别把「没推上去」当「没提交」。
+- 每改完一轮 git commit；需求变更同步进 `需求文档.md` 修订记录（现在到 v0.3.8）；推送失败要重试。
+- 开发服务器 `http://localhost:4174`（`cd F:/电吉他学习/app && npm run dev -- --port 4174`），会话结束后可能被系统回收。
