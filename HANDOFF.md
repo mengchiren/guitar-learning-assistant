@@ -25,7 +25,7 @@
 | `spike/.venv/` | Python 3.13 虚拟环境（librosa + imageio-ffmpeg），git 忽略 |
 | `spike/songs/`、`歌曲文件/`、`视频教程/` | 用户音频/视频，**git 忽略**，勿提交（版权内容） |
 | `app/` | 应用主体（Vue 3 + Vite + PWA） |
-| `app/src/data/` | `devices.js`（设备参数）、`templates.js`（5 套音色套路）、`seedSongs.json`（7 首种子歌）、**`fundamentals.js`（5 项基本功：任务分解/图示/bpm）**、**`chords.js`（49 个和弦指法图数据 + 分组，`findChord`/`CHORD_GROUPS`）**、**`songSheets.js`（种子曲谱，首批 2 首）**、**`courseCatalog.js`（194 课成田课程目录，由脚本生成勿手改）** |
+| `app/src/data/` | `devices.js`（设备参数）、`templates.js`（5 套音色套路）、`seedSongs.json`（29 首种子歌）、**`fundamentals.js`（5 项基本功：任务分解/图示/bpm）**、**`chords.js`（82 个和弦指法图数据 + 分组，`findChord`/`CHORD_GROUPS`）**、**`songSheets.js`（种子曲谱，19 首）**、**`courseCatalog.js`（194 课成田课程目录，由脚本生成勿手改）** |
 | `app/src/stores/` | Pinia：`practice.js`（打卡）、`settings.js`（提醒/设备/新手模式）、`timer.js`（计时全局）、`metronome.js`（节拍器全局，含 currentBeat）、`songs.js`（用户歌单，getter 叫 **allSongs**、歌名字段叫 **title**）、**`plan.js`（基本功达标/歌曲状态 + plan getter）**、**`course.js`（课程进度）**、**`sheets.js`（用户自录曲谱）**、**`recordings.js`（录音元数据列表，分类常量 `RECORD_CATEGORIES`）**、**`chat.js`（AI 聊天历史/模型选择，`AI_PROVIDERS`、`stashAskContext`/`takeAskContext` 跨路由传上下文）** |
 | `app/src/composables/` | `useMediaQuery.js`（768px 断点）、`useTuner.js`（麦克风 ACF 调音） |
 | `app/src/utils/` | `analyze.js`（**自研音频分析引擎**）、`toneGuide.js`（新手大白话文案）、`storage.js`（localStorage 抽象，key 前缀 `gla:v1:`）、**`planEngine.js`（规则引擎纯函数，改后必须重跑对拍）**、**`recordingsDb.js`（IndexedDB 封装：meta 与 blob 分 store）**、**`recordAnalyze.js`（录音→BPM，复用 analyze.js，只分析前 3 分钟）** |
@@ -53,6 +53,7 @@
 - **计划项详情页 + 曲谱（v0.3.7）**：基本功详情页 `/plan-item/basic/:id`（任务分解 4 步 + 图示 + 目标速度节拍器联动 + 达标切换）；自绘 SVG 和弦图组件 + 19 个和弦图库；歌曲详情页「曲谱（和弦谱）」区（分段和弦谱，谱中和弦自动配指法图）；种子曲谱 2 首（NO, Thank You! 完整分段、空の箱标注校准）；用户自录曲谱（分段表单，localStorage，优先显示）；数据校验 `test_sheets.mjs`。
 - **爬格子竖版 + 和弦图库（v0.3.8）**：FretboardMap 改竖版（1 品在上往下递推）；和弦图库扩到 **49 个**（6 组：开放/七和弦/挂留延伸/横按/强力和弦/转位低音，全部标准按法）；「和弦图库」页 `/chords`（工具页第 4 张卡片进入，点任意和弦放大查看）；校验升级 212 项断言。
 - **录音回听 + 自动对拍（v0.4.0，M4-1）**：录音面板 `RecordPanel.vue`（练习页 + 工具页「录音回听」双入口）；MediaRecorder 兼容选 mimeType（webm/opus 优先、mp4 兜底，覆盖安卓 Chrome 与 iPhone Safari）；单次最长 10 分钟；录完自动复用 `analyze.js` 测 BPM（只分析前 3 分钟，秒级出结果），标置信度可手动改；本地存 IndexedDB（`recordingsDb.js`，meta 与 blob 分 store，列表页不载入音频）；回听页 `/recordings`（列表/行内播放/两段式删除）；分类与打卡一致（歌曲/基本功/课程/自由练习），选「歌曲」可关联歌（store getter 是 `allSongs`、字段是 `title`）；工具页第 5 张卡片 + mic 图标。**验收中抓到并修了一个真 bug**：关联歌曲下拉最初写成 `songs.songs`/`s.name`（应为 `allSongs`/`title`），下拉只有「不关联」——浏览器实测发现后修正。
+- **曲谱大扩充 + 新歌入库（v0.4.2）**：用户提供 23 首歌曲文件——`歌曲文件/` 按 ID3 元数据重命名「歌手 - 歌名」，`spike/batch_analyze_songs.mjs` 批量分析（结果 `batch_analyze_result.json`）；种子库 7→29 首（分析值入库标「待人工校准」）；曲谱 2→19 首（5 个搜索代理并行，多源交叉验证，来源与校准状态全标注；10 首无可靠谱不录）；和弦图库 49→82（升/降号调标准按法）；校验升级 767 项断言。生成脚本：`spike/write_sheets.py`（改谱后重跑）。
 - **AI 答疑（v0.4.1，M4-2）**：`functions/api/ask.js` CF Pages Functions 代理（**Key 只存 CF 环境变量，不进 git 不下发浏览器**）；三平台 OpenAI 兼容一张表（deepseek/ark/qwen）；聊天页 `/ask`（气泡对话、模型切换 chips、历史 localStorage `gla:v1:ai-history` 20 条滚动窗口、清空、Enter 发送）；歌曲详情页「问 AI 这首歌怎么练」+ 基本功详情页「问 AI 这个练习怎么练」入口（上下文经 sessionStorage `gla:v1:ask-context` 跨路由传递，随 system 一起发）；工具页第 6 张卡片 + sparkle 图标。**注意：Functions 需要用户在 CF 控制台配 Key 才真正可用**（`AI_KEY_DEEPSEEK` 等，配法见验收指南），未配时前端显示明确提示。本地 dev 请求线上 Functions（`import.meta.env.DEV` 分支），所以**本地联调必须先部署 Functions**。
 - 全程约 30 个提交，git 历史即详细变更记录；需求文档修订记录完整到 v0.4.1。
 
