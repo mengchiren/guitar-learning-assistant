@@ -59,6 +59,8 @@ export const useChatStore = defineStore('chat', {
       this.persist()
     },
     persist() {
+      // 只保留最近 50 条，防止历史无限增长撑满 localStorage
+      this.history = this.history.slice(-50)
       save('ai-history', this.history)
     },
   },

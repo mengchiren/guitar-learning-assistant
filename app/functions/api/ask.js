@@ -32,48 +32,64 @@ const PROVIDERS = {
 const SYSTEM_PROMPT = `你是「练琴搭子」应用里的电吉他学习助手。用户是零基础初学者，设备是依班娜 GRX40 电吉他 + JOYO Jam Buddy 2 音箱。
 回答要求：中文、大白话、按步骤组织（一步步能照着做）；针对电吉他；建议要具体（练什么、几遍、目标速度）；不要展开无关内容；默认简洁，除非用户要求详细。如果用户没有指定歌曲，可以结合上下文里给的歌曲/练习数据回答。`
 
-const CORS = {
-  'Access-Control-Allow-Origin': '*', // 本地开发（localhost:4174）跨域调线上 Functions 用；生产同源不受影响
+// 来源白名单：只有我们自己的站点和本地开发端口能调用这个接口，
+// 防止别人发现接口地址后白嫖你的 API Key 额度。
+// 换自定义域名时记得把新域名加进来。
+const ALLOWED_ORIGINS = [
+  'https://guitar-learning-assistant.pages.dev',
+  'http://localhost:4174',
+  'http://localhost:5173',
+]
+
+const CORS = (origin) => ({
+  'Access-Control-Allow-Origin': origin,
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type',
-}
+})
 
-function json(data, status = 200) {
+function json(data, status = 200, origin = '') {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS },
+    headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS(origin) },
   })
 }
 
-export async function onRequestOptions() {
-  return new Response(null, { status: 204, headers: CORS })
+export async function onRequestOptions({ request }) {
+  const origin = request.headers.get('Origin') || ''
+  if (!ALLOWED_ORIGINS.includes(origin)) return new Response(null, { status: 403 })
+  return new Response(null, { status: 204, headers: CORS(origin) })
 }
 
 export async function onRequestPost({ request, env }) {
+  const origin = request.headers.get('Origin') || ''
+  if (!ALLOWED_ORIGINS.includes(origin)) {
+    return json({ ok: false, error: '请求来源不被允许' }, 403)
+  }
+
   let body
   try {
     body = await request.json()
   } catch {
-    return json({ ok: false, error: '请求格式不对' }, 400)
+    return json({ ok: false, error: '请求格式不对' }, 400, origin)
   }
 
   const provider = PROVIDERS[body.provider]
-  if (!provider) return json({ ok: false, error: '未知的模型平台' }, 400)
+  if (!provider) return json({ ok: false, error: '未知的模型平台' }, 400, origin)
 
   const key = env[provider.keyEnv]
   if (!key) {
-    return json({ ok: false, code: 'NO_KEY', provider: body.provider, error: '这个平台的 API Key 还没配置（需要在 Cloudflare 后台设置环境变量）' }, 503)
+    return json({ ok: false, code: 'NO_KEY', provider: body.provider, error: '这个平台的 API Key 还没配置（需要在 Cloudflare 后台设置环境变量）' }, 503, origin)
   }
 
   const model = provider.model || env[provider.modelEnv]
-  if (!model) return json({ ok: false, code: 'NO_MODEL', error: '模型未配置' }, 503)
+  if (!model) return json({ ok: false, code: 'NO_MODEL', error: '模型未配置' }, 503, origin)
 
   // 输入护栏：只收 20 条以内的文本消息，每条不超过 4000 字
   const messages = Array.isArray(body.messages) ? body.messages.slice(-20) : []
-  if (!messages.length) return json({ ok: false, error: '没有消息内容' }, 400)
+  if (!messages.length) return json({ ok: false, error: '没有消息内容' }, 400, origin)
   for (const m of messages) {
-    if (typeof m.content !== 'string' || m.content.length > 4000) return json({ ok: false, error: '消息太长' }, 400)
-    if (m.role !== 'user' && m.role !== 'assistant') return json({ ok: false, error: '消息角色不合法' }, 400)
+    if (typeof m.content !== 'string' || m.content.length > 4000) return json({ ok: false, error: '消息太长' }, 400, origin)
+    if (m.role !== 'user' && m.role !== 'assistant') return json({ ok: false, error: '消息角色不合法' }, 400, origin)
   }
 
   const contextText = typeof body.contextText === 'string' ? body.contextText.slice(0, 2000) : ''
@@ -89,6 +105,8 @@ export async function onRequestPost({ request, env }) {
   }
 
   try {
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), 25000) // 上游 25 秒无响应就放弃
     const resp = await fetch(provider.url, {
       method: 'POST',
       headers: {
@@ -96,15 +114,17 @@ export async function onRequestPost({ request, env }) {
         Authorization: `Bearer ${key}`,
       },
       body: JSON.stringify(payload),
+      signal: controller.signal,
     })
+    clearTimeout(timer)
     if (!resp.ok) {
       const text = await resp.text()
-      return json({ ok: false, error: `模型服务返回 ${resp.status}`, detail: text.slice(0, 300) }, 502)
+      return json({ ok: false, error: `模型服务返回 ${resp.status}`, detail: text.slice(0, 300) }, 502, origin)
     }
     const data = await resp.json()
     const reply = data.choices?.[0]?.message?.content || ''
-    return json({ ok: true, reply, model })
+    return json({ ok: true, reply, model }, 200, origin)
   } catch (e) {
-    return json({ ok: false, error: '请求模型服务失败，请稍后再试' }, 502)
+    return json({ ok: false, error: '请求模型服务失败，请稍后再试' }, 502, origin)
   }
 }
