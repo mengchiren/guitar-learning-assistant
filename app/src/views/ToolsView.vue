@@ -24,7 +24,7 @@ import Icon from '../components/Icon.vue'
         <span class="tool-icon"><Icon name="chord" :size="24" /></span>
         <div>
           <div class="tool-name">和弦图库</div>
-          <div class="dim small">50+ 常用和弦指法图 · 点开可放大</div>
+          <div class="dim small">49 个常用和弦指法图 · 点开可放大</div>
         </div>
       </router-link>
       <router-link to="/templates" class="card tool-card">

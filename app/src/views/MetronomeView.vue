@@ -52,7 +52,7 @@ const presets = [60, 80, 100, 120, 140, 160, 180]
       </div>
 
       <p class="muted small" style="margin-top: 10px">
-        提示：歌曲分析会给每首歌目标速度（M2 上线）。目前歌曲库里的目标 BPM 可在「歌曲」页查看。
+        提示：每首歌的目标 BPM 在歌曲详情页里，点「用此 BPM 开节拍器」可一键联动。
       </p>
     </div>
   </div>
