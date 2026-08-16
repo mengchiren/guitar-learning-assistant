@@ -24,14 +24,20 @@ const cKey = ref('')
 const cTemplate = ref('')
 const savedFlash = ref(false)
 
-watch(song, (s) => {
-  if (!s) return
-  const e = effectiveSong(s)
-  cBpm.value = e.bpm ?? null
-  cKey.value = e.key ?? ''
-  cTemplate.value = e.template ?? ''
-  savedFlash.value = false
-}, { immediate: true })
+// 只监听歌曲 id 变化（切歌时重填表单）；监听整个 song 会因 effectiveSong 读深层字段，
+// 保存纠错后连带触发并立刻清掉「已保存」提示
+watch(
+  () => (song.value ? song.value.id : null),
+  (id) => {
+    if (!id || !song.value) return
+    const e = effectiveSong(song.value)
+    cBpm.value = e.bpm ?? null
+    cKey.value = e.key ?? ''
+    cTemplate.value = e.template ?? ''
+    savedFlash.value = false
+  },
+  { immediate: true },
+)
 
 function saveCorrections() {
   if (!song.value || song.value.isSeed) return
