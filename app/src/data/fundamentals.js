@@ -1,5 +1,7 @@
 // 零基础基本功清单（M3 学习计划的数据资产）。
-// 每项：id、名称、练法（大白话）、达标标准、建议时长（10 分钟档单元）。
+// 每项：id、名称、练法（大白话）、达标标准、建议时长（10 分钟档单元）、
+// bpm（目标节拍器速度）、tasks（任务分解步骤）、visuals（详情页图示配置）。
+// visuals.type：'chords'（和弦指法图，chords 列名）| 'strum'（节奏型符号，pattern 数组）| 'spider'（指板图）。
 // 达标状态由用户在计划页打勾标记，规则引擎据此排序与建议。
 export const FUNDAMENTALS = [
   {
@@ -8,6 +10,14 @@ export const FUNDAMENTALS = [
     desc: '低把位 1-2-3-4 指依次按弦，一根弦一根弦往上爬',
     goal: '节拍器 60 速度十六分音符，稳定 1 分钟不糊',
     minutes: 5,
+    bpm: 60,
+    tasks: [
+      { title: '第 1 步：预热按弦', detail: '只弹 6 弦：1-2-3-4 指依次按 1-2-3-4 品，每个音拨一下听清楚（30 秒 ×3 组）' },
+      { title: '第 2 步：上行爬完六根弦', detail: '从 6 弦爬到 1 弦，每根弦都按 1-2-3-4，右手交替拨弦（5 分钟）' },
+      { title: '第 3 步：下行回来', detail: '从 1 弦往回爬 4-3-2-1，注意抬指时手指不离弦太远（5 分钟）' },
+      { title: '第 4 步：跟节拍器达标', detail: '节拍器 60 速度，十六分音符（每拍 4 个音）稳定 1 分钟不糊、不抢拍' },
+    ],
+    visuals: { type: 'spider', position: 1 },
   },
   {
     id: 'chord-switch',
@@ -15,6 +25,14 @@ export const FUNDAMENTALS = [
     desc: 'C / G / Am / F 两两来回转换',
     goal: '每 2 秒换一个和弦，手指不慌、音不闷',
     minutes: 5,
+    bpm: 60,
+    tasks: [
+      { title: '第 1 步：单个和弦按响', detail: 'C、G、Am、F 每个按稳后，六根弦依次拨响，全部出声才算按好（每个 30 秒 ×3 组）' },
+      { title: '第 2 步：两两转换', detail: 'C ↔ G 每 2 秒换一次，右手匀速下拨不停（2 分钟）' },
+      { title: '第 3 步：加入 Am 和 F', detail: 'C → Am → F → G 循环，转换瞬间手指同步到位（3 分钟）' },
+      { title: '第 4 步：达标', detail: '节拍器 60 每 2 秒换一个，连续 1 分钟不慌、音不闷' },
+    ],
+    visuals: { type: 'chords', chords: ['C', 'G', 'Am', 'F'] },
   },
   {
     id: 'strum',
@@ -22,6 +40,14 @@ export const FUNDAMENTALS = [
     desc: '下下上下的基础节奏型，手腕放松',
     goal: '节拍器 100 速度稳定扫 2 分钟，节奏不乱',
     minutes: 5,
+    bpm: 100,
+    tasks: [
+      { title: '第 1 步：只练下拨', detail: '手腕放松，拨片吃弦别太深，声音干净不刮（1 分钟）' },
+      { title: '第 2 步：加一个上拨', detail: '「下 下上」为一组：第二个下拨后立刻上拨，口念「哒 哒-哒」（2 分钟）' },
+      { title: '第 3 步：完整节奏型', detail: '下 下上 下 下上 循环，全程手腕动、手臂不动（3 分钟）' },
+      { title: '第 4 步：跟节拍器达标', detail: '100 速度稳定扫 2 分钟，节奏不乱、力度均匀' },
+    ],
+    visuals: { type: 'strum', pattern: ['↓', '↓ ↑', '↓', '↓ ↑'] },
   },
   {
     id: 'mute-down',
@@ -29,6 +55,14 @@ export const FUNDAMENTALS = [
     desc: '强力和弦 + 右手小鱼际闷音，全部下拨',
     goal: '节拍器 120 速度八分音符稳定 1 分钟',
     minutes: 5,
+    bpm: 120,
+    tasks: [
+      { title: '第 1 步：强力和弦按法', detail: '按 E5：食指按 5 弦 2 品，无名指按 4 弦 2 品，只弹这两根弦（1 分钟）' },
+      { title: '第 2 步：闷音', detail: '右手小鱼际轻贴琴桥处的弦，全部下拨，声音「嚓嚓」闷闷的就对了（2 分钟）' },
+      { title: '第 3 步：换把位保持闷音', detail: 'E5 → A5 来回移动，闷音不断（3 分钟）' },
+      { title: '第 4 步：跟节拍器达标', detail: '120 速度八分音符（每拍 2 个音）稳定 1 分钟' },
+    ],
+    visuals: { type: 'chords', chords: ['E5', 'A5'] },
   },
   {
     id: 'power-move',
@@ -36,5 +70,13 @@ export const FUNDAMENTALS = [
     desc: 'E 型 / A 型强力和弦在低把位换位置',
     goal: '换把位按得稳、弦不跑音、动作干净',
     minutes: 5,
+    bpm: 80,
+    tasks: [
+      { title: '第 1 步：E 型定位', detail: 'E5 形状：食指定位 6 弦，无名指隔一根弦按 2 品（1 分钟）' },
+      { title: '第 2 步：A 型定位', detail: 'A5 形状：同样的形状从 5 弦开始（1 分钟）' },
+      { title: '第 3 步：移动练习', detail: 'E5 → F5 → G5 依次换把位，食指先到、无名指跟上（3 分钟）' },
+      { title: '第 4 步：达标', detail: '节拍器 80 每两拍换一次位置，按得稳、弦不跑音、动作干净' },
+    ],
+    visuals: { type: 'chords', chords: ['E5', 'A5', 'F5', 'G5'] },
   },
 ]

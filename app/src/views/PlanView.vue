@@ -67,6 +67,9 @@ function onToggle(item) {
             <router-link v-if="item.kind === 'song'" :to="`/songs/${item.ref}`" class="song-link">
               {{ item.title }}
             </router-link>
+            <router-link v-else-if="item.kind === 'basic'" :to="`/plan-item/basic/${item.ref}`" class="song-link">
+              {{ item.title }}
+            </router-link>
             <template v-else>{{ item.title }}</template>
           </span>
           <span class="tag item-min">{{ item.minutes }} 分钟</span>

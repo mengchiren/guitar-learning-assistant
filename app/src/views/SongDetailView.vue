@@ -5,13 +5,16 @@ import { useSongsStore, effectiveSong } from '../stores/songs'
 import { findToneTemplate, TONE_TEMPLATES } from '../data/templates'
 import { useMetronomeStore } from '../stores/metronome'
 import { usePlanStore } from '../stores/plan'
+import { useSheetsStore } from '../stores/sheets'
 import ToneAdvice from '../components/ToneAdvice.vue'
+import ChordChart from '../components/ChordChart.vue'
 
 const route = useRoute()
 const router = useRouter()
 const songs = useSongsStore()
 const metro = useMetronomeStore()
 const planStore = usePlanStore()
+const sheetsStore = useSheetsStore()
 
 const PITCH = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
 const KEYS = PITCH.flatMap((p) => [`${p} 大调`, `${p} 小调`])
@@ -65,6 +68,47 @@ function removeSong() {
   songs.removeUserSong(song.value.id)
   router.replace('/songs')
 }
+
+// 曲谱：种子谱只读展示；用户自录谱优先显示、可编辑删除
+const sheetInfo = computed(() => (song.value ? sheetsStore.sheetOf(song.value.id) : null))
+const editingSheet = ref(false)
+const sheetForm = ref([])
+
+function startSheetEdit() {
+  sheetForm.value = (sheetInfo.value?.sheet.sections || []).map((s) => ({ ...s }))
+  if (!sheetForm.value.length) sheetForm.value.push({ name: '主歌', chords: '', pattern: '', note: '' })
+  editingSheet.value = true
+}
+function addSection() {
+  sheetForm.value.push({ name: '', chords: '', pattern: '', note: '' })
+}
+function removeSection(i) {
+  sheetForm.value.splice(i, 1)
+}
+function saveSheet() {
+  if (!song.value) return
+  const sections = sheetForm.value
+    .map((s) => ({ name: s.name.trim(), chords: s.chords.trim(), pattern: s.pattern.trim(), note: (s.note || '').trim() }))
+    .filter((s) => s.name && s.chords)
+  if (!sections.length) return
+  sheetsStore.saveSheet(song.value.id, sections)
+  editingSheet.value = false
+}
+function removeSheet() {
+  if (!song.value) return
+  sheetsStore.removeSheet(song.value.id)
+  editingSheet.value = false
+}
+// 谱里出现的和弦（去重）→ 渲染指法图
+const sheetChords = computed(() => {
+  const set = []
+  for (const s of sheetInfo.value?.sheet.sections || []) {
+    for (const c of (s.chords || '').split(/\s+/)) {
+      if (c && !set.includes(c)) set.push(c)
+    }
+  }
+  return set
+})
 
 const confLabel = { 高: 'b-high', 中: 'b-mid', 低: 'b-low' }
 </script>
@@ -149,6 +193,59 @@ const confLabel = { 高: 'b-high', 中: 'b-mid', 低: 'b-low' }
       </div>
     </div>
 
+    <div class="card">
+      <h2>曲谱（和弦谱）</h2>
+
+      <template v-if="sheetInfo && !editingSheet">
+        <p class="dim small">
+          {{ sheetInfo.isUser ? '我的曲谱（本机保存）' : `种子曲谱 · ${sheetInfo.sheet.source}` }}
+        </p>
+        <div v-for="(s, i) in sheetInfo.sheet.sections" :key="i" class="sheet-section">
+          <div class="sheet-head">
+            <span class="tag">{{ s.name }}</span>
+            <span v-if="s.pattern" class="dim small">{{ s.pattern }}</span>
+          </div>
+          <div class="sheet-chords">{{ s.chords }}</div>
+          <p v-if="s.note" class="muted small">{{ s.note }}</p>
+        </div>
+        <div v-if="sheetChords.length" class="chord-row">
+          <ChordChart v-for="c in sheetChords" :key="c" :name="c" />
+        </div>
+        <div class="btn-row" style="margin-top: 12px">
+          <button v-if="sheetInfo.isUser" class="btn" @click="startSheetEdit">编辑曲谱</button>
+          <button v-else class="btn" @click="startSheetEdit">新建自己的版本</button>
+          <button v-if="sheetInfo.isUser" class="btn btn-danger-sm" @click="removeSheet">删除我的曲谱</button>
+        </div>
+      </template>
+
+      <template v-else-if="!sheetInfo && !editingSheet">
+        <p class="muted small">这首歌还没有曲谱。可以自己录入分段和弦谱，保存在本机浏览器。</p>
+        <button class="btn btn-block" style="margin-top: 10px" @click="startSheetEdit">录入曲谱</button>
+      </template>
+
+      <template v-else>
+        <div v-for="(s, i) in sheetForm" :key="i" class="sheet-edit">
+          <div class="sheet-edit-head">
+            <span class="dim small">第 {{ i + 1 }} 段</span>
+            <button v-if="sheetForm.length > 1" class="btn btn-danger-sm" @click="removeSection(i)">删除此段</button>
+          </div>
+          <label>段名（如：主歌 / 副歌）</label>
+          <input v-model="s.name" type="text" placeholder="主歌" />
+          <label>和弦进行（空格分隔）</label>
+          <input v-model="s.chords" type="text" placeholder="Am C G D" />
+          <label>节奏提示（可选）</label>
+          <input v-model="s.pattern" type="text" placeholder="下 下上 下 下上" />
+          <label>备注（可选）</label>
+          <input v-model="s.note" type="text" placeholder="如：先 80% 速度" />
+        </div>
+        <div class="btn-row" style="margin-top: 12px">
+          <button class="btn" @click="addSection">加一段</button>
+          <button class="btn" @click="editingSheet = false">取消</button>
+          <button class="btn btn-primary" @click="saveSheet">保存曲谱</button>
+        </div>
+      </template>
+    </div>
+
     <div v-if="tpl" class="card">
       <h2>设备设置建议（按当前设备标注）</h2>
       <div class="tpl-head">
@@ -222,4 +319,17 @@ const confLabel = { 高: 'b-high', 中: 'b-mid', 低: 'b-low' }
 
 .tpl-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
 .tpl-name { font-size: 18px; font-weight: 700; }
+
+.sheet-section { margin-bottom: 14px; }
+.sheet-section:last-of-type { margin-bottom: 6px; }
+.sheet-head { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+.sheet-chords {
+  font-size: 19px; font-weight: 700; letter-spacing: 1px;
+  color: var(--accent-dark); font-variant-numeric: tabular-nums;
+}
+.chord-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; justify-content: center; }
+.sheet-edit { border: 1px dashed var(--border); border-radius: 8px; padding: 12px; margin-bottom: 10px; }
+.sheet-edit-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.sheet-edit label { display: block; margin: 8px 0 4px; }
+.sheet-edit input { margin-bottom: 0; }
 </style>

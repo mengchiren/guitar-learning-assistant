@@ -4,6 +4,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 const routes = [
   { path: '/', component: () => import('../views/HomeView.vue'), meta: { tab: true } },
   { path: '/plan', component: () => import('../views/PlanView.vue'), meta: { tab: true } },
+  { path: '/plan-item/basic/:id', component: () => import('../views/PlanItemView.vue'), meta: { title: '练习详情' } },
   { path: '/practice', component: () => import('../views/PracticeView.vue'), meta: { title: '练习计时' } },
   { path: '/tools', component: () => import('../views/ToolsView.vue'), meta: { tab: true } },
   { path: '/metronome', component: () => import('../views/MetronomeView.vue'), meta: { title: '节拍器' } },

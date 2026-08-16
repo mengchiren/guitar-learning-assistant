@@ -90,7 +90,17 @@ const packItems = computed(() => (plan.value.mode === 'reduce' ? plan.value.pack
           <h2>今日练习包（弹性）</h2>
           <div v-for="t in packItems" :key="t.kind + t.ref" class="list-row">
             <span class="tag">{{ t.minutes }} 分钟</span>
-            <span class="small">{{ t.title }}</span>
+            <router-link
+              v-if="t.kind === 'song'"
+              :to="`/songs/${t.ref}`"
+              class="small pack-link"
+            >{{ t.title }}</router-link>
+            <router-link
+              v-else-if="t.kind === 'basic'"
+              :to="`/plan-item/basic/${t.ref}`"
+              class="small pack-link"
+            >{{ t.title }}</router-link>
+            <span v-else class="small">{{ t.title }}</span>
           </div>
           <p v-if="plan.tierNote" class="small" style="margin-top: 8px; color: var(--accent-dark)">
             {{ plan.tierNote }}
@@ -134,6 +144,7 @@ const packItems = computed(() => (plan.value.mode === 'reduce' ? plan.value.pack
 .week-bar.today { background: var(--accent); }
 .week-label { font-size: 11px; }
 .list-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.pack-link { color: var(--text); font-weight: 600; text-decoration: none; border-bottom: 1px dashed var(--border); }
 
 @media (min-width: 768px) {
   .home-grid { grid-template-columns: 2fr 1fr; gap: 16px; align-items: start; }
