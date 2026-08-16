@@ -1,9 +1,22 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useSettingsStore } from '../stores/settings'
 
 const settings = useSettingsStore()
 const notifStatus = ref('')
+
+// 提醒时间用「时/分」两个下拉选择，避免部分浏览器 time 输入框弹不出选择器
+const remHour = computed(() => Number(settings.reminders.time.split(':')[0]))
+const remMinute = computed(() => Number(settings.reminders.time.split(':')[1]))
+
+function setHour(v) {
+  settings.reminders.time = `${String(v).padStart(2, '0')}:${String(remMinute.value).padStart(2, '0')}`
+  settings.saveReminders()
+}
+function setMinute(v) {
+  settings.reminders.time = `${String(remHour.value).padStart(2, '0')}:${String(v).padStart(2, '0')}`
+  settings.saveReminders()
+}
 
 async function requestNotif() {
   if (!('Notification' in window)) {
@@ -32,13 +45,19 @@ async function requestNotif() {
           <span class="knob"></span>
         </button>
       </div>
-      <label v-if="settings.reminders.enabled">提醒时间</label>
-      <input
-        v-if="settings.reminders.enabled"
-        type="time"
-        v-model="settings.reminders.time"
-        @change="settings.saveReminders()"
-      />
+      <div v-if="settings.reminders.enabled" class="time-pick">
+        <label>提醒时间</label>
+        <div class="time-selects">
+          <select :value="remHour" aria-label="提醒小时" @change="setHour(Number($event.target.value))">
+            <option v-for="h in 24" :key="h" :value="String(h - 1).padStart(2, '0')">{{ String(h - 1).padStart(2, '0') }}</option>
+          </select>
+          <span class="dim">时</span>
+          <select :value="remMinute" aria-label="提醒分钟" @change="setMinute(Number($event.target.value))">
+            <option v-for="m in 12" :key="m" :value="String((m - 1) * 5).padStart(2, '0')">{{ String((m - 1) * 5).padStart(2, '0') }}</option>
+          </select>
+          <span class="dim">分</span>
+        </div>
+      </div>
     </div>
 
     <div class="card">
@@ -52,3 +71,9 @@ async function requestNotif() {
     </div>
   </div>
 </template>
+
+<style scoped>
+.time-selects { display: flex; align-items: center; gap: 8px; }
+.time-selects select { width: 84px; }
+.time-selects span { flex: none; }
+</style>

@@ -13,6 +13,7 @@ export const useMetronomeStore = defineStore('metronome', {
     bpm: 100,
     beats: 4,
     running: false,
+    currentBeat: 0, // 当前正在响的第几拍（1 起），供圆点高亮
   }),
   actions: {
     click(time, accented) {
@@ -29,7 +30,13 @@ export const useMetronomeStore = defineStore('metronome', {
     },
     schedule() {
       while (nextTime < ctx.currentTime + 0.12) {
-        this.click(nextTime, beatIndex % this.beats === 0)
+        const beatNo = (beatIndex % this.beats) + 1
+        this.click(nextTime, beatNo === 1)
+        // 声音按 Web Audio 时钟排拍，视觉高亮也用同一时刻，圆点与实际响声对齐
+        const delayMs = Math.max(0, (nextTime - ctx.currentTime) * 1000)
+        setTimeout(() => {
+          this.currentBeat = beatNo
+        }, delayMs)
         nextTime += 60 / this.bpm
         beatIndex++
       }
@@ -48,6 +55,7 @@ export const useMetronomeStore = defineStore('metronome', {
       if (timer) clearInterval(timer)
       timer = null
       this.running = false
+      this.currentBeat = 0
     },
     toggle() {
       if (this.running) this.stop()

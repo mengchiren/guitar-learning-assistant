@@ -19,4 +19,9 @@ const routes = [
 export default createRouter({
   history: createWebHistory(),
   routes,
+  // 前进进新页面回到顶部；后退返回列表时恢复之前滚动到的位置
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) return savedPosition
+    return { top: 0 }
+  },
 })

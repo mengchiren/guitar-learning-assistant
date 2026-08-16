@@ -17,7 +17,7 @@ const presets = [60, 80, 100, 120, 140, 160, 180]
           v-for="i in metro.beats"
           :key="i"
           class="beat-dot"
-          :class="{ first: i === 1 }"
+          :class="{ first: i === 1, active: metro.running && metro.currentBeat === i }"
         ></span>
       </div>
 
@@ -62,6 +62,7 @@ const presets = [60, 80, 100, 120, 140, 160, 180]
 .metro { text-align: center; }
 .metro-bpm { font-size: 64px; font-weight: 700; font-variant-numeric: tabular-nums; }
 .beat-dots { display: flex; justify-content: center; gap: 8px; margin-top: 12px; }
-.beat-dot { width: 14px; height: 14px; border-radius: 50%; background: var(--bg-input); }
+.beat-dot { width: 14px; height: 14px; border-radius: 50%; background: var(--bg-input); transition: background 0.05s linear, transform 0.05s linear; }
 .beat-dot.first { background: var(--accent); }
+.beat-dot.active { background: var(--accent); transform: scale(1.4); }
 </style>
