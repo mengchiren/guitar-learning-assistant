@@ -10,6 +10,7 @@ const timer = useTimerStore()
 
 const tabs = [
   { path: '/', label: '首页', icon: 'home' },
+  { path: '/plan', label: '计划', icon: 'calendar' },
   { path: '/tools', label: '工具', icon: 'grid' },
   { path: '/songs', label: '歌曲', icon: 'music' },
   { path: '/profile', label: '我的', icon: 'user' },

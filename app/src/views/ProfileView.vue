@@ -35,6 +35,20 @@ function toggleDisplayMode() {
           <div class="dim small">5 套常用音色设置</div>
         </div>
       </router-link>
+      <router-link to="/stats" class="card row-card">
+        <span class="row-icon"><Icon name="chart" :size="22" /></span>
+        <div>
+          <div>统计报表</div>
+          <div class="dim small">周报 · 月度热力图 · 清单状态</div>
+        </div>
+      </router-link>
+      <router-link to="/course" class="card row-card">
+        <span class="row-icon"><Icon name="book" :size="22" /></span>
+        <div>
+          <div>课程进度</div>
+          <div class="dim small">成田三套课 · 学到第几课</div>
+        </div>
+      </router-link>
     </div>
     <div class="card">
       <div class="switch-row">

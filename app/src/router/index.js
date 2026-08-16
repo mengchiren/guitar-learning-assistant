@@ -3,6 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 // meta.tab = 主页（显示底部导航）；meta.title = 子页面标题
 const routes = [
   { path: '/', component: () => import('../views/HomeView.vue'), meta: { tab: true } },
+  { path: '/plan', component: () => import('../views/PlanView.vue'), meta: { tab: true } },
   { path: '/practice', component: () => import('../views/PracticeView.vue'), meta: { title: '练习计时' } },
   { path: '/tools', component: () => import('../views/ToolsView.vue'), meta: { tab: true } },
   { path: '/metronome', component: () => import('../views/MetronomeView.vue'), meta: { title: '节拍器' } },
@@ -11,6 +12,8 @@ const routes = [
   { path: '/songs/new', component: () => import('../views/SongAnalyzeView.vue'), meta: { title: '添加歌曲' } },
   { path: '/songs/:id', component: () => import('../views/SongDetailView.vue'), meta: { title: '歌曲详情' } },
   { path: '/profile', component: () => import('../views/ProfileView.vue'), meta: { tab: true } },
+  { path: '/stats', component: () => import('../views/StatsView.vue'), meta: { title: '统计报表' } },
+  { path: '/course', component: () => import('../views/CourseView.vue'), meta: { title: '课程进度' } },
   { path: '/devices', component: () => import('../views/DevicesView.vue'), meta: { title: '我的设备' } },
   { path: '/reminders', component: () => import('../views/RemindersView.vue'), meta: { title: '提醒设置' } },
   { path: '/templates', component: () => import('../views/TemplatesView.vue'), meta: { title: '音色套路库' } },

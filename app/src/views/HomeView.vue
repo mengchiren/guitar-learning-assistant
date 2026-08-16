@@ -2,11 +2,13 @@
 import { ref, computed, onUnmounted } from 'vue'
 import { usePracticeStore } from '../stores/practice'
 import { useSettingsStore } from '../stores/settings'
+import { usePlanStore } from '../stores/plan'
 import { useMediaQuery } from '../composables/useMediaQuery'
 import Icon from '../components/Icon.vue'
 
 const practice = usePracticeStore()
 const settings = useSettingsStore()
+const planStore = usePlanStore()
 
 const isDesktop = useMediaQuery('(min-width: 768px)')
 
@@ -33,11 +35,9 @@ const fmt = (s) => {
 const todayText = computed(() => fmt(practice.todaySeconds))
 const max7 = computed(() => Math.max(...practice.last7Days.map((d) => d.seconds), 60))
 
-const tips = [
-  { dur: 10, text: '爬格子 5 分钟 + 和弦转换 5 分钟' },
-  { dur: 30, text: '基本功 15 分钟 + 歌曲段落 15 分钟' },
-  { dur: 60, text: '基本功 20 分钟 + 歌曲 30 分钟 + 复习 10 分钟' },
-]
+// 今日练习包：读规则引擎输出（上周练得少时显示 10 分钟档，否则 30 分钟档）
+const plan = computed(() => planStore.plan)
+const packItems = computed(() => (plan.value.mode === 'reduce' ? plan.value.packs[10] : plan.value.packs[30]))
 </script>
 
 <template>
@@ -88,13 +88,17 @@ const tips = [
 
         <div class="card">
           <h2>今日练习包（弹性）</h2>
-          <div v-for="t in tips" :key="t.dur" class="list-row">
-            <span class="tag">{{ t.dur }} 分钟</span>
-            <span class="small">{{ t.text }}</span>
+          <div v-for="t in packItems" :key="t.kind + t.ref" class="list-row">
+            <span class="tag">{{ t.minutes }} 分钟</span>
+            <span class="small">{{ t.title }}</span>
           </div>
-          <p class="muted" style="margin-top: 8px">
-            零基础阶段：先坚持每天摸琴 10 分钟，再逐步加量。学习计划完整版见 M3。
+          <p v-if="plan.tierNote" class="small" style="margin-top: 8px; color: var(--accent-dark)">
+            {{ plan.tierNote }}
           </p>
+          <p class="muted" style="margin-top: 8px">
+            时间不固定？从 10 分钟档开始。完整三档与完成打勾见「计划」。
+          </p>
+          <router-link to="/plan" class="small" style="color: var(--accent-dark)">看完整计划 →</router-link>
         </div>
 
         <div class="card">

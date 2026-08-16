@@ -4,12 +4,14 @@ import { useRoute, useRouter } from 'vue-router'
 import { useSongsStore, effectiveSong } from '../stores/songs'
 import { findToneTemplate, TONE_TEMPLATES } from '../data/templates'
 import { useMetronomeStore } from '../stores/metronome'
+import { usePlanStore } from '../stores/plan'
 import ToneAdvice from '../components/ToneAdvice.vue'
 
 const route = useRoute()
 const router = useRouter()
 const songs = useSongsStore()
 const metro = useMetronomeStore()
+const planStore = usePlanStore()
 
 const PITCH = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
 const KEYS = PITCH.flatMap((p) => [`${p} 大调`, `${p} 小调`])
@@ -122,6 +124,28 @@ const confLabel = { 高: 'b-high', 中: 'b-mid', 低: 'b-low' }
       </div>
       <div v-if="song.analysis && song.analysis.notes.length" style="margin-top: 10px">
         <p v-for="n in song.analysis.notes" :key="n" class="muted small" style="margin-bottom: 4px">· {{ n }}</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>练习状态</h2>
+      <p class="muted small">标记后「计划」页会据此推荐下一首；全部掌握可随时改回练习中。</p>
+      <div class="tag-row" style="margin-top: 10px">
+        <span
+          class="tag"
+          :class="{ on: planStore.songStatus[song.id]?.state === 'practicing' }"
+          @click="planStore.setSongStatus(song.id, 'practicing')"
+        >练习中</span>
+        <span
+          class="tag"
+          :class="{ on: planStore.songStatus[song.id]?.state === 'mastered' }"
+          @click="planStore.setSongStatus(song.id, 'mastered')"
+        >已掌握</span>
+        <span
+          v-if="planStore.songStatus[song.id]"
+          class="tag"
+          @click="planStore.setSongStatus(song.id, null)"
+        >清除状态</span>
       </div>
     </div>
 
