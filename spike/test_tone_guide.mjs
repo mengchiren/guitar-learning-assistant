@@ -19,10 +19,14 @@ function check(name, actual, expected) {
   }
 }
 
-// ---- 1. classify 规则边界点（与旧硬编码语义一致） ----
-// 规则顺序：失真节奏 Riff(bpm≥140 且 rmsDb>-14) → 失真主音 Solo(cen>2600 且 rmsDb>-16)
-//          → 轻过载节奏(rmsDb>-16) → 清音+合唱氛围(bpm≥110 且 cen>1500) → 兜底 清音伴奏/中
+// ---- 1. classify 规则边界点（与旧硬编码语义一致 + v0.6.1 金属规则） ----
+// 规则顺序：金属 Riff(bpm≥195 且 rmsDb>-14) → 失真节奏 Riff(bpm≥140 且 rmsDb>-14)
+//          → 失真主音 Solo(cen>2600 且 rmsDb>-16) → 轻过载节奏(rmsDb>-16)
+//          → 清音+合唱氛围(bpm≥110 且 cen>1500) → 兜底 清音伴奏/中
 // 置信度：余量<0.2 低；<1 中；否则高（余量 = min((值-阈值)/分母)，分母 bpm:10 rmsDb:3 cen:500）
+check('classify: 金属 Riff 高置信', classify({ bpm: 205, rmsDb: -10, centroidHz: 2000 }), { template: '金属 Riff', confidence: '高' })
+check('classify: 金属边界（bpm 恰好 195，余量 0）', classify({ bpm: 195, rmsDb: -13.5, centroidHz: 2000 }), { template: '金属 Riff', confidence: '低' })
+check('classify: 195 以下不命中金属（回落失真 Riff）', classify({ bpm: 194, rmsDb: -10, centroidHz: 2000 }), { template: '失真节奏 Riff', confidence: '高' })
 check('classify: 快失真 Riff 高置信', classify({ bpm: 150, rmsDb: -10, centroidHz: 2000 }), { template: '失真节奏 Riff', confidence: '高' })
 check('classify: Riff 边界（bpm 恰好 140，余量 0）', classify({ bpm: 140, rmsDb: -13, centroidHz: 2000 }), { template: '失真节奏 Riff', confidence: '低' })
 check('classify: Riff 余量不足为低', classify({ bpm: 140, rmsDb: -13.5, centroidHz: 2000 }), { template: '失真节奏 Riff', confidence: '低' })
@@ -141,6 +145,29 @@ BASELINE['失真主音 Solo'] = {
     '音箱：MOD 效果保持关',
     '音箱：Delay 开「Analog 轻」',
     '音箱：Reverb 混响开「Hall 中」',
+  ],
+}
+
+// 金属 Riff（v0.6.1 新增）的基准
+BASELINE['金属 Riff'] = {
+  params: [
+    { label: '琴·档位', value: '档位 5（琴桥双线圈）' },
+    { label: '通道', value: 'Rhythm 节奏' },
+    { label: '箱模', value: 'Metal' },
+    { label: 'Gain', value: '7 / 10' },
+  ],
+  steps: [
+    '琴：拾音器拨杆拨到「档位 5（琴桥双线圈）」',
+    '音箱：按下「Rhythm 节奏」通道按钮',
+    '音箱：箱模旋钮转到「Metal」',
+    '音箱：Gain 增益旋钮拧到「7」（满格是 10）',
+  ],
+  fineTune: [
+    '琴：音色旋钮拧到「5~6 偏紧」',
+    '音箱：EQ 三个旋钮 → 低音 6 · 中音 5 · 高音 5',
+    '音箱：MOD 效果保持关',
+    '音箱：Delay 延迟保持关',
+    '音箱：Reverb 混响开「Hall 轻（约 1）」',
   ],
 }
 

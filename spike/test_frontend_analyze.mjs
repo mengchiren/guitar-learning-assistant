@@ -20,7 +20,7 @@ const SONGS_DIR = path.join(__dirname, 'songs')
 const CASES = [
   { file: '放課後ティータイム - NO, Thank You!.mp3', bpm: 181, keys: ['A 小调'], template: '失真节奏 Riff', tol: 0.03 },
   { file: 'トゲナシトゲアリ - 空の箱 (空箱)(井芹仁菜、河原木桃香).mp3', bpm: 148, keys: ['A 大调', 'F# 小调'], template: '失真节奏 Riff', tol: 0.03 },
-  { file: 'Ave Mujica - KiLLKiSS.flac', bpm: 200, keys: ['E 小调'], template: '失真节奏 Riff', tol: 0.03 },
+  { file: 'Ave Mujica - KiLLKiSS.flac', bpm: 200, keys: ['E 小调'], template: '金属 Riff', tol: 0.03 },
   { file: 'トゲナシトゲアリ - 雑踏、僕らの街 (熙熙攘攘、我们的城市).flac', bpm: 171, keys: ['E 小调'], template: '失真节奏 Riff', tol: 0.03 },
   { file: '結束バンド - 星座になれたら (若能化作星座).flac', bpm: 123, keys: ['G# 大调', 'Ab 大调'], template: '失真主音 Solo', tol: 0.03 },
 ]

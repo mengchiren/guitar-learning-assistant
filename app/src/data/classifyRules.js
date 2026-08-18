@@ -11,6 +11,15 @@
 
 export const CLASSIFY_RULES = [
   {
+    // 金属 Riff（v0.6.1 新增）：190+ BPM 重型歌，闷音下拨为主。
+    // 放在最前：与「失真节奏 Riff」的差别主要在速度与重量（小调暗色歌更常见，但不强判调性）。
+    template: '金属 Riff',
+    conditions: [
+      { field: 'bpm', op: '>=', value: 195 },
+      { field: 'rmsDb', op: '>', value: -14 },
+    ],
+  },
+  {
     template: '失真节奏 Riff',
     conditions: [
       { field: 'bpm', op: '>=', value: 140 },

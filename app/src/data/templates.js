@@ -50,6 +50,15 @@ export const TONE_TEMPLATES = [
     说明: '强力和弦、闷音下拨的主战场。Treble +1 更冲；弹单音旋律时改用 Lead 通道。',
   },
   {
+    id: 'heavy',
+    name: '金属 Riff',
+    适用: '重型摇滚 / 金属节奏',
+    示例: '《KiLLKiSS》《Ave Mujica》《ギターと孤独と蒼い惑星》',
+    guitar: { pickup: '档位 5（琴桥双线圈）', tone: '5~6 偏紧' },
+    amp: { channel: 'Rhythm 节奏', model: 'Metal', gain: 7, eq: { b: 6, m: 5, t: 5 }, mod: '关', delay: '关', reverb: 'Hall 轻（约 1）' },
+    说明: '闷音下拨是主力，强力和弦快速移动。Treble 收一点、低音加一点，闷音更紧实；Gain 7 起步，嫌糊就往下收。先 70~80% 速度练闷音，节奏稳了再加速。',
+  },
+  {
     id: 'lead',
     name: '失真主音 Solo',
     适用: '主音旋律 / Solo',

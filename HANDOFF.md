@@ -1,6 +1,6 @@
 # HANDOFF 交接文档
 
-> 给一个完全没有上下文的新对话看。工作目录：`F:\电吉他学习`（Windows 10，Git Bash）。项目名：**练琴搭子 · PickBuddy**。当前版本 **v0.6.0**。
+> 给一个完全没有上下文的新对话看。工作目录：`F:\电吉他学习`（Windows 10，Git Bash）。项目名：**练琴搭子 · PickBuddy**。当前版本 **v0.6.1**。
 
 ## 1. 我们在做什么任务
 
@@ -11,7 +11,7 @@
 - **产品策略（三层）**：种子库人工数据优先 → AI 分析作参考并标置信度 → 人工纠错兜底。**别把 AI 结果当精确数据呈现。**
 - **目标歌曲**：日系动漫乐队歌（轻音、孤独摇滚、MyGO!!!!!、Ave Mujica、哭泣少女乐队）+ Beyond 经典。
 
-**需求的唯一权威来源是 `需求文档.md`（当前 v0.6.0，含完整修订记录）**，任何功能争议以它为准，改需求必须先改它。
+**需求的唯一权威来源是 `需求文档.md`（当前 v0.6.1，含完整修订记录）**，任何功能争议以它为准，改需求必须先改它。
 
 ## 2. 关键文件地图
 
@@ -27,7 +27,7 @@
 | `spike/songs/`、`歌曲文件/`、`视频教程/` | 用户音频/视频，**git 忽略**，勿提交（版权内容）。`歌曲文件/` 已重命名为「歌手 - 歌名」 |
 | `app/` | 应用主体（Vue 3 + Vite + PWA） |
 | `app/functions/api/ask.js` | **AI 答疑代理（CF Pages Functions，POST /api/ask）**：三平台 OpenAI 兼容表（deepseek/ark/qwen），Key 只读 CF 环境变量，Origin 白名单 + **访问令牌（`ASK_TOKEN` 环境变量 + 请求头 `X-Ask-Token`，必配）**，25s 超时 |
-| `app/src/data/` | **`nav.js`（路由/tab/工具页统一清单）**、`devices.js`（**含 params/keyParams 能力描述**）、`templates.js`（5 套套路）、**`classifyRules.js`（套路归类规则表）**、**`seedSongs.json`（29 首种子歌）**、`fundamentals.js`（5 项基本功）、**`chords.js`（82 个和弦指法图 + 分组，`findChord`/`CHORD_GROUPS`）**、**`songSheets.js`（19 首种子曲谱，由 `write_sheets.py` 生成）**、`courseCatalog.js`（194 课，脚本生成勿手改） |
+| `app/src/data/` | **`nav.js`（路由/tab/工具页统一清单）**、`devices.js`（**含 params/keyParams 能力描述**）、`templates.js`（**6 套套路**）、**`classifyRules.js`（套路归类规则表）**、**`seedSongs.json`（29 首种子歌）**、`fundamentals.js`（5 项基本功）、**`chords.js`（82 个和弦指法图 + 分组，`findChord`/`CHORD_GROUPS`）**、**`songSheets.js`（19 首种子曲谱，由 `write_sheets.py` 生成）**、`courseCatalog.js`（194 课，脚本生成勿手改） |
 | `app/src/stores/` | Pinia（**全部用 persist 插件自动落盘，store 里不再有 save 调用**）：`practice.js`（打卡）、`settings.js`（提醒/设备/新手模式）、`timer.js`（计时全局）、`metronome.js`（节拍器全局，含 currentBeat）、`songs.js`（用户歌单，**getter 叫 allSongs、字段叫 title、bpm/key/template 已归一化有效值**）、`plan.js`（达标/歌曲状态）、`course.js`、`sheets.js`（用户自录曲谱）、`recordings.js`（录音元数据，`RECORD_CATEGORIES`）、`chat.js`（AI 聊天，`AI_PROVIDERS`、`token`/`setToken`、`stashAskContext`/`takeAskContext`） |
 | `app/src/composables/` | `useMediaQuery.js`（768px 断点）、`useTuner.js`（麦克风 ACF 调音） |
 | `app/src/utils/` | `analyze.js`（**自研音频分析引擎，改后必须重跑对拍**；套路归类走 data/classifyRules.js）、`analyzeWorker.js`（Worker 封装）、`audio.js`（统一解码管线 `decodeToMono`）、`date.js`（本地时区日期，全工程唯一实现）、`music.js`（音名/调性/徽章常量）、`backup.js`（数据备份/恢复）、`id.js`（UUID 生成）、`toneGuide.js`（**按设备 params 渲染新手建议**）、`storage.js`（**schema 版本 + 迁移注册表 + 变更订阅**，key 前缀 `gla:v1:`）、`planEngine.js`（**规则引擎纯函数，改后必须重跑对拍**）、`recordingsDb.js`（IndexedDB：meta/blob 分 store）、`recordAnalyze.js`（录音→BPM，只分析前 3 分钟，走 Worker） |
@@ -62,7 +62,8 @@
 - **工程评审修复第一批（v0.5.0，用户发起四维评审后确认方案，详见需求文档修订记录）**：①**AI 代理防刷**——新增访问令牌 `ASK_TOKEN`（CF 环境变量 + 请求头 `X-Ask-Token` 校验；Origin 白名单挡不住脚本直连，令牌层补上；**未配令牌时接口拒绝服务**，应用内 AI 答疑页顶部有令牌输入卡）；②**数据备份/恢复**——`utils/backup.js` + 「我的」页导出/恢复（结构化数据 JSON，录音不含，遍历 `gla:v1:` 前缀自动覆盖未来新 store）；③**CI**——`.github/workflows/ci.yml`（合成音频引擎测试 + 规则 25 项 + 数据 767 项 + build）；④**重复代码收敛**——`utils/date.js`（消灭 5 份 `localDateStr` 重复）、`utils/music.js`（PITCH/KEYS/CONF_LABELS）、`utils/audio.js`（`decodeToMono` 统一歌曲分析与录音解码管线）；⑤**分析引擎进 Web Worker**——`workers/analyze.worker.js` + `utils/analyzeWorker.js`（Float32Array 转移所有权零拷贝，Worker 不可用回退主线程）；⑥package.json 版本统一 0.5.0。**本地验证全过**：真实歌曲对拍 5/5、合成 3/3、规则 25/25、数据 767/767、生产构建通过。**待用户操作**：CF 后台配 `ASK_TOKEN` 环境变量 + 重新部署，手机验收（验收指南 M 第一步半 / N 节新增）。
 - **首页空白 bug 修复（v0.5.1，用户电脑端验收发现）**：根因是 v0.5.0 重构 `stores/practice.js` 删了本地 `todayStr` 但 getter 调用点没改（`ReferenceError`，首页三处 getter 全炸；**Vite 构建不查未定义引用，测试也没覆盖 store**）。修复 + **新增 `spike/test_stores_smoke.mjs`（16 项，实例化全部 store 访问全部 getter/action，纯 Node + localStorage 内存 shim，已入 CI）**；顺手把全工程 63 处不带 `.js` 的相对导入统一补齐（`./router`→`./router/index.js`、`seedSongs.json` 加 `with { type: 'json' }`，Node 可直接测 store）。本地回归全过：对拍 5/5、合成 3/3、规则 25/25、数据 767/767、冒烟 16/16、构建通过。
 - **工程评审修复第二批（v0.6.0，用户验收第 1 步后确认开工，方案已确认，详见需求文档修订记录）**：①**数据层重构**——`storage.js` v2（schema 版本 + 按 key 迁移注册表 + save 变更订阅，云同步接入点）、Pinia 自动持久化插件 `plugins/persist.js`（store 声明 persist 配置自动落盘，防抖 150ms，与旧版同 key 同格式零迁移，7 个 store 接入，**store 里不再有 save 调用**）、ID 改 UUID（`utils/id.js`）；②**歌曲模型统一**——`allSongs` 归一化单一实体（bpm/key/template 直接有效值），`effectiveSong` 收进 store，4 个消费方改造；③**导航配置化**——`data/nav.js` 驱动路由/tab/工具页（加页面只加一条）；④**套路规则数据化**——`data/classifyRules.js`（条件 DSL + 置信度分母表，`classify` 已导出），新增套路不改引擎；⑤**设备能力声明式化**——devices.js 的 params/keyParams（含 on/off 文案），toneGuide 按设备渲染、缺参数自动跳过；⑥**JSDoc 契约**——AnalysisResult/Confidence/Song/PlanItem/PlanOutput/StorageMeta。新增 `spike/test_tone_guide.mjs`（14 项：classify 边界点 + 设备建议输出与 v0.5.x 基准逐字符一致 + 缺参数降级），冒烟升级 20 项（含自动落盘断言），均入 CI。**用户可见变化：无**（纯工程改进）。本地回归全过：对拍 5/5、合成 3/3、规则 25/25、数据 767/767、冒烟 20/20、toneGuide 14/14、构建通过。
-- 全程约 43 个提交，git 历史即详细变更记录；需求文档修订记录完整到 v0.6.0；README/验收指南/交接文档全同步。
+- **音色套路库扩充（v0.6.1，用户要求：按现有歌曲扩充）**：种子库 29 首盘点——「失真节奏 Riff」占 86%（25 首），混着重型金属与常规日摇两类音色；**新增第 6 套「金属 Riff」**（Rhythm 通道 + Metal 箱模 + Gain 7 + 低音 6/高音 5 + 混响最轻；针对 GRX40 + Jam Buddy 2），4 首重型歌改标（KiLLKiSS/Ave Mujica/黒のバースデイ/ギターと孤独と蒼い惑星）；classifyRules 置顶新增金属规则（bpm≥195 且 rmsDb>-14），对拍期望同步（KiLLKiSS→金属 Riff），toneGuide 回归 14→18 项。全量回归通过：对拍 5/5、合成 3/3、规则 25/25、数据 767/767、冒烟 20/20、toneGuide 18/18、构建通过。
+- 全程约 45 个提交，git 历史即详细变更记录；需求文档修订记录完整到 v0.6.1；README/验收指南/交接文档全同步。
 
 ## 4. 当前卡在哪
 
