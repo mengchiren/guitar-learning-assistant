@@ -18,11 +18,15 @@ const amp = AMPS.find((d) => d.id === settings.activeDevices.ampId)
 // computed 而非一次性计算：同组件实例复用时（路由参数切换）tpl 会变，内容要跟着变
 const beginner = computed(() => beginnerGuide(props.tpl, { guitar, amp }))
 
-// 面板图数据：套路值 → 面板字段；高亮 = 设备 keyParams（新手必须动的）
+// 面板图数据：套路值 → 面板字段；高亮 = 设备 keyParams（新手必须动的）。
+// 通道特殊：JAM BUDDY 2 是双脚钉（CHANNEL=CLEAN/DRIVE，DRIVE MODE=RHYTHM/LEAD），
+// 按 channelMap 拆成脚钉状态，DRIVE 时 DRIVE MODE 脚钉一起高亮。
 const ampValues = computed(() => {
   const a = props.tpl.amp
+  const step = amp?.channelMap?.[a.channel] || null
   return {
-    channel: a.channel,
+    channel: step ? step.channel : a.channel,
+    driveMode: step?.driveMode || undefined,
     model: a.model,
     gain: a.gain,
     'eq.b': a.eq.b,
@@ -34,7 +38,10 @@ const ampValues = computed(() => {
   }
 })
 const guitarValues = computed(() => ({ pickup: props.tpl.guitar.pickup, tone: props.tpl.guitar.tone }))
-const ampHighlight = amp?.keyParams || []
+const ampHighlight = computed(() => {
+  const base = amp?.keyParams || []
+  return ampValues.value.driveMode ? [...base, 'driveMode'] : base
+})
 const guitarHighlight = guitar?.keyParams || []
 </script>
 

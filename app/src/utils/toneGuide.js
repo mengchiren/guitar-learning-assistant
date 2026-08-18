@@ -27,19 +27,36 @@ export function beginnerGuide(tpl, { guitar, amp } = {}) {
 
   const paramValue = (side, p) => {
     const v = valueOf(side, p.field)
+    // 通道：显示脚钉语义（如「DRIVE → RHYTHM」），一眼知道该按哪个脚钉
+    if (side === 'amp' && p.field === 'channel' && amp?.channelMap?.[v]) {
+      const step = amp.channelMap[v]
+      return step.driveMode ? `${step.channel} → ${step.driveMode}` : step.channel
+    }
     if (p.kind === 'gain') return `${v} / ${p.max}`
     return String(v ?? '')
   }
 
-  // 步骤文案（按设备参数顺序；eq/effect 不进步骤，进 fineTune）
+  // 步骤文案（按设备参数顺序；eq/effect 不进步骤，进 fineTune）。
+  // 通道可能返回多行（JAM BUDDY 2 双脚钉：CHANNEL 选 CLEAN/DRIVE，DRIVE MODE 选 RHYTHM/LEAD）
   const stepFor = (side, p) => {
     const v = valueOf(side, p.field)
     if (side === 'guitar') {
       return p.kind === 'pickup' ? `琴：拾音器拨杆拨到「${v}」` : `琴：音色旋钮拧到「${v}」`
     }
     switch (p.kind) {
-      case 'button':
+      case 'button': {
+        const step = amp?.channelMap?.[v]
+        if (step) {
+          const lines = [
+            `音箱：CHANNEL 脚钉按到「${step.channel}」${step.channel === 'CLEAN' ? '（清音）' : '（失真）'}`,
+          ]
+          if (step.driveMode) {
+            lines.push(`音箱：DRIVE MODE 脚钉按到「${step.driveMode}」${step.driveMode === 'RHYTHM' ? '（节奏）' : '（主音）'}`)
+          }
+          return lines
+        }
         return `音箱：按下「${v}」通道按钮`
+      }
       case 'gain':
         return `音箱：Gain 增益旋钮拧到「${v}」（满格是 ${p.max}）`
       case 'knob':
@@ -74,12 +91,12 @@ export function beginnerGuide(tpl, { guitar, amp } = {}) {
   for (const f of gKey) {
     const p = gParams.find((x) => x.field === f)
     const s = p && stepFor('guitar', p)
-    if (s) steps.push(s)
+    if (s) steps.push(...(Array.isArray(s) ? s : [s]))
   }
   for (const f of aKey) {
     const p = aParams.find((x) => x.field === f)
     const s = p && stepFor('amp', p)
-    if (s) steps.push(s)
+    if (s) steps.push(...(Array.isArray(s) ? s : [s]))
   }
 
   // 可先不动：keyParams 之外的全部参数（on/off 完整文案在设备数据里）

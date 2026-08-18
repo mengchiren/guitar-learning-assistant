@@ -50,17 +50,19 @@ function check(name, cond) {
 const amp = AMPS[0]
 const guitar = GUITARS[0]
 
-// 用「失真节奏 Riff」套路的值渲染
-const tpl = { guitar: { pickup: '档位 5（琴桥双线圈）', tone: '6~7' }, amp: { channel: 'Rhythm 节奏', model: 'Rock', gain: 6, eq: { b: 5, m: 5, t: 6 }, mod: '关', delay: '关', reverb: 'Hall 轻' } }
-const ampValues = { channel: tpl.amp.channel, model: tpl.amp.model, gain: tpl.amp.gain, 'eq.b': tpl.amp.eq.b, 'eq.m': tpl.amp.eq.m, 'eq.t': tpl.amp.eq.t, mod: tpl.amp.mod, delay: tpl.amp.delay, reverb: tpl.amp.reverb }
+// 用「失真节奏 Riff」套路的值渲染（v0.6.3：双脚钉通道 + 实物箱模名）
+const tpl = { guitar: { pickup: '档位 5（琴桥双线圈）', tone: '6~7' }, amp: { channel: 'Rhythm 节奏', model: 'j800 lo', gain: 6, eq: { b: 5, m: 5, t: 6 }, mod: '关', delay: '关', reverb: 'Hall 轻' } }
+const step = amp.channelMap[tpl.amp.channel]
+const ampValues = { channel: step.channel, driveMode: step.driveMode, model: tpl.amp.model, gain: tpl.amp.gain, 'eq.b': tpl.amp.eq.b, 'eq.m': tpl.amp.eq.m, 'eq.t': tpl.amp.eq.t, mod: tpl.amp.mod, delay: tpl.amp.delay, reverb: tpl.amp.reverb }
 
-const ampHtml = await renderToString(createSSRApp({ components: { AmpPanel }, template: '<AmpPanel :panel="p" :values="v" :highlight="[\'channel\',\'model\',\'gain\']" />', data: () => ({ p: amp.panel, v: ampValues }) }))
+const ampHtml = await renderToString(createSSRApp({ components: { AmpPanel }, template: '<AmpPanel :panel="p" :values="v" :highlight="[\'channel\',\'model\',\'gain\',\'driveMode\']" />', data: () => ({ p: amp.panel, v: ampValues }) }))
 check('AmpPanel 渲染出面板底', ampHtml.includes('panel-body'))
 check('AmpPanel 渲染 10 个旋钮', (ampHtml.match(/knob-ring/g) || []).length === 10)
 check('AmpPanel 渲染 3 个脚钉', (ampHtml.match(/foot-body/g) || []).length === 3)
 check('AmpPanel gain 高亮（红圈 + 值标签）', ampHtml.includes('val-chip') && ampHtml.includes('>6<'))
-check('AmpPanel model 值标签 Rock', ampHtml.includes('>Rock<'))
-check('AmpPanel channel 脚钉值标签', ampHtml.includes('>Rhythm 节奏<'))
+check('AmpPanel model 值标签 j800 lo', ampHtml.includes('>j800 lo<'))
+check('AmpPanel CHANNEL 脚钉值标签 DRIVE', ampHtml.includes('>DRIVE<'))
+check('AmpPanel DRIVE MODE 脚钉值标签 RHYTHM', ampHtml.includes('>RHYTHM<'))
 check('AmpPanel 指针端点存在', (ampHtml.match(/knob-pointer/g) || []).length === 4) // eq.b/m/t + gain
 
 const guitarHtml = await renderToString(createSSRApp({ components: { GuitarPanel }, template: '<GuitarPanel :panel="p" :values="v" :highlight="[\'pickup\']" />', data: () => ({ p: guitar.panel, v: { pickup: '档位 5（琴桥双线圈）' } }) }))

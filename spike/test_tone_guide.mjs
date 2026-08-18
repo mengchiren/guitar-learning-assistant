@@ -36,20 +36,20 @@ check('classify: 清音+合唱', classify({ bpm: 120, rmsDb: -20, centroidHz: 16
 check('classify: 兜底清音伴奏', classify({ bpm: 80, rmsDb: -20, centroidHz: 1000 }), { template: '清音伴奏', confidence: '中' })
 check('classify: Solo 优先于轻过载（规则顺序）', classify({ bpm: 100, rmsDb: -15, centroidHz: 2700 }), { template: '失真主音 Solo', confidence: '中' })
 
-// ---- 2. beginnerGuide 输出与 v0.5.x 基准逐字符一致 ----
+// ---- 2. beginnerGuide 输出基准逐字符一致（v0.6.3：通道两步脚钉 + 实物箱模名） ----
 const devices = { guitar: GUITARS[0], amp: AMPS[0] }
 const BASELINE = {
   清音伴奏: {
     params: [
       { label: '琴·档位', value: '档位 1~3（琴颈/中间）' },
-      { label: '通道', value: 'Clean 清音' },
-      { label: '箱模', value: 'Clean' },
+      { label: '通道', value: 'CLEAN' },
+      { label: '箱模', value: '65 black nor' },
       { label: 'Gain', value: '3 / 10' },
     ],
     steps: [
       '琴：拾音器拨杆拨到「档位 1~3（琴颈/中间）」',
-      '音箱：按下「Clean 清音」通道按钮',
-      '音箱：箱模旋钮转到「Clean」',
+      '音箱：CHANNEL 脚钉按到「CLEAN」（清音）',
+      '音箱：箱模旋钮转到「65 black nor」',
       '音箱：Gain 增益旋钮拧到「3」（满格是 10）',
     ],
     fineTune: [
@@ -63,14 +63,14 @@ const BASELINE = {
   '清音 + 合唱氛围': {
     params: [
       { label: '琴·档位', value: '档位 1 或 2' },
-      { label: '通道', value: 'Clean 清音' },
-      { label: '箱模', value: 'Clean' },
+      { label: '通道', value: 'CLEAN' },
+      { label: '箱模', value: '65 black nor' },
       { label: 'Gain', value: '3 / 10' },
     ],
     steps: [
       '琴：拾音器拨杆拨到「档位 1 或 2」',
-      '音箱：按下「Clean 清音」通道按钮',
-      '音箱：箱模旋钮转到「Clean」',
+      '音箱：CHANNEL 脚钉按到「CLEAN」（清音）',
+      '音箱：箱模旋钮转到「65 black nor」',
       '音箱：Gain 增益旋钮拧到「3」（满格是 10）',
     ],
     fineTune: [
@@ -84,14 +84,15 @@ const BASELINE = {
   轻过载节奏: {
     params: [
       { label: '琴·档位', value: '档位 4~5' },
-      { label: '通道', value: 'Rhythm 节奏' },
-      { label: '箱模', value: 'Blues' },
+      { label: '通道', value: 'DRIVE → RHYTHM' },
+      { label: '箱模', value: '65 black nor od' },
       { label: 'Gain', value: '5 / 10' },
     ],
     steps: [
       '琴：拾音器拨杆拨到「档位 4~5」',
-      '音箱：按下「Rhythm 节奏」通道按钮',
-      '音箱：箱模旋钮转到「Blues」',
+      '音箱：CHANNEL 脚钉按到「DRIVE」（失真）',
+      '音箱：DRIVE MODE 脚钉按到「RHYTHM」（节奏）',
+      '音箱：箱模旋钮转到「65 black nor od」',
       '音箱：Gain 增益旋钮拧到「5」（满格是 10）',
     ],
     fineTune: [
@@ -105,14 +106,15 @@ const BASELINE = {
   '失真节奏 Riff': {
     params: [
       { label: '琴·档位', value: '档位 5（琴桥双线圈）' },
-      { label: '通道', value: 'Rhythm 节奏' },
-      { label: '箱模', value: 'Rock' },
+      { label: '通道', value: 'DRIVE → RHYTHM' },
+      { label: '箱模', value: 'j800 lo' },
       { label: 'Gain', value: '6 / 10' },
     ],
     steps: [
       '琴：拾音器拨杆拨到「档位 5（琴桥双线圈）」',
-      '音箱：按下「Rhythm 节奏」通道按钮',
-      '音箱：箱模旋钮转到「Rock」',
+      '音箱：CHANNEL 脚钉按到「DRIVE」（失真）',
+      '音箱：DRIVE MODE 脚钉按到「RHYTHM」（节奏）',
+      '音箱：箱模旋钮转到「j800 lo」',
       '音箱：Gain 增益旋钮拧到「6」（满格是 10）',
     ],
     fineTune: [
@@ -123,54 +125,51 @@ const BASELINE = {
       '音箱：Reverb 混响开「Hall 轻」',
     ],
   },
+  '失真主音 Solo': {
+    params: [
+      { label: '琴·档位', value: '档位 5' },
+      { label: '通道', value: 'DRIVE → LEAD' },
+      { label: '箱模', value: 'j800 hi od' },
+      { label: 'Gain', value: '7 / 10' },
+    ],
+    steps: [
+      '琴：拾音器拨杆拨到「档位 5」',
+      '音箱：CHANNEL 脚钉按到「DRIVE」（失真）',
+      '音箱：DRIVE MODE 脚钉按到「LEAD」（主音）',
+      '音箱：箱模旋钮转到「j800 hi od」',
+      '音箱：Gain 增益旋钮拧到「7」（满格是 10）',
+    ],
+    fineTune: [
+      '琴：音色旋钮拧到「7~8」',
+      '音箱：EQ 三个旋钮 → 低音 5 · 中音 6 · 高音 6',
+      '音箱：MOD 效果保持关',
+      '音箱：Delay 开「Analog 轻」',
+      '音箱：Reverb 混响开「Hall 中」',
+    ],
+  },
+  '金属 Riff': {
+    params: [
+      { label: '琴·档位', value: '档位 5（琴桥双线圈）' },
+      { label: '通道', value: 'DRIVE → RHYTHM' },
+      { label: '箱模', value: 'dualrect red' },
+      { label: 'Gain', value: '7 / 10' },
+    ],
+    steps: [
+      '琴：拾音器拨杆拨到「档位 5（琴桥双线圈）」',
+      '音箱：CHANNEL 脚钉按到「DRIVE」（失真）',
+      '音箱：DRIVE MODE 脚钉按到「RHYTHM」（节奏）',
+      '音箱：箱模旋钮转到「dualrect red」',
+      '音箱：Gain 增益旋钮拧到「7」（满格是 10）',
+    ],
+    fineTune: [
+      '琴：音色旋钮拧到「5~6 偏紧」',
+      '音箱：EQ 三个旋钮 → 低音 6 · 中音 5 · 高音 5',
+      '音箱：MOD 效果保持关',
+      '音箱：Delay 延迟保持关',
+      '音箱：Reverb 混响开「Hall 轻（约 1）」',
+    ],
+  },
 }
-
-// 失真主音 Solo 的基准（模板 name 是「失真主音 Solo」）
-BASELINE['失真主音 Solo'] = {
-  params: [
-    { label: '琴·档位', value: '档位 5' },
-    { label: '通道', value: 'Lead 主音' },
-    { label: '箱模', value: 'Rock' },
-    { label: 'Gain', value: '7 / 10' },
-  ],
-  steps: [
-    '琴：拾音器拨杆拨到「档位 5」',
-    '音箱：按下「Lead 主音」通道按钮',
-    '音箱：箱模旋钮转到「Rock」',
-    '音箱：Gain 增益旋钮拧到「7」（满格是 10）',
-  ],
-  fineTune: [
-    '琴：音色旋钮拧到「7~8」',
-    '音箱：EQ 三个旋钮 → 低音 5 · 中音 6 · 高音 6',
-    '音箱：MOD 效果保持关',
-    '音箱：Delay 开「Analog 轻」',
-    '音箱：Reverb 混响开「Hall 中」',
-  ],
-}
-
-// 金属 Riff（v0.6.1 新增）的基准
-BASELINE['金属 Riff'] = {
-  params: [
-    { label: '琴·档位', value: '档位 5（琴桥双线圈）' },
-    { label: '通道', value: 'Rhythm 节奏' },
-    { label: '箱模', value: 'Metal' },
-    { label: 'Gain', value: '7 / 10' },
-  ],
-  steps: [
-    '琴：拾音器拨杆拨到「档位 5（琴桥双线圈）」',
-    '音箱：按下「Rhythm 节奏」通道按钮',
-    '音箱：箱模旋钮转到「Metal」',
-    '音箱：Gain 增益旋钮拧到「7」（满格是 10）',
-  ],
-  fineTune: [
-    '琴：音色旋钮拧到「5~6 偏紧」',
-    '音箱：EQ 三个旋钮 → 低音 6 · 中音 5 · 高音 5',
-    '音箱：MOD 效果保持关',
-    '音箱：Delay 延迟保持关',
-    '音箱：Reverb 混响开「Hall 轻（约 1）」',
-  ],
-}
-
 for (const t of TONE_TEMPLATES) {
   const out = beginnerGuide(t, devices)
   check(`beginnerGuide: ${t.name}`, out, BASELINE[t.name])
@@ -194,6 +193,13 @@ for (const t of TONE_TEMPLATES) {
 }
 check('吉他面板档位 5 个', devices.guitar.panel.switch.positions, 5)
 check('吉他面板旋钮字段无重复', new Set(devices.guitar.panel.knobs.map((k) => k.field)).size, devices.guitar.panel.knobs.length)
+
+// ---- 5. 通道双脚钉映射与实物箱模名一致性（v0.6.3） ----
+check('channelMap 覆盖全部套路的通道值', TONE_TEMPLATES.every((t) => devices.amp.channelMap[t.amp.channel]), true)
+check('channelMap 只含 CLEAN/DRIVE 与 RHYTHM/LEAD', Object.values(devices.amp.channelMap).every((s) => ['CLEAN', 'DRIVE'].includes(s.channel) && (s.driveMode === null || ['RHYTHM', 'LEAD'].includes(s.driveMode))), true)
+check('14 种箱模名齐全无重复', new Set(devices.amp.ampModels).size === 14 && devices.amp.ampModels.length === 14, true)
+check('模板箱模名都在 14 种实物名单里', TONE_TEMPLATES.every((t) => devices.amp.ampModels.includes(t.amp.model)), true)
+check('模板不再出现虚构箱模名', ['Rock', 'Metal', 'Blues', 'Funk', 'Clean'].every((n) => !devices.amp.ampModels.includes(n)), true)
 
 console.log(`\n结果：${pass}/${pass + fail} 项通过（${fail} 项失败）`)
 process.exit(fail > 0 ? 1 : 0)

@@ -72,7 +72,39 @@ export const AMPS = [
     id: 'joyo-jam-buddy-2',
     name: 'JOYO Jam Buddy 2',
     channels: ['Clean 清音', 'Rhythm 节奏', 'Lead 主音'],
-    ampModels: ['Clean', 'Blues', 'Funk', 'Rock', 'Metal'], // 共 14 种，以说明书为准
+    // 14 种箱头模拟：以用户实物转轮顺序为准（od = 过载推子版）
+    ampModels: [
+      '65 black nor', '65 black nor od', '65 black vib', '65 black vib od',
+      'j800 lo', 'j800 lo od', 'j800 hi', 'j800 hi od',
+      'dualrect red', 'dualrect red od',
+      '5153 el34', '5153 el34 od', '5153 6l6', '5153 6l6 od',
+    ],
+    // 箱模中文对照（入门页/面板提示用）
+    modelNotes: {
+      '65 black nor': '芬达 65 黑脸清音（Fender 65 Blackface 类，干净明亮）',
+      '65 black nor od': '芬达 65 黑脸 + 过载推子（轻过载/蓝调）',
+      '65 black vib': '芬达 65 黑脸颤音通道',
+      '65 black vib od': '芬达 65 黑脸颤音 + 过载推子',
+      'j800 lo': '马歇尔 JCM800 低输入（经典摇滚失真，crunch 标准）',
+      'j800 lo od': '马歇尔 JCM800 低输入 + 过载推子',
+      'j800 hi': '马歇尔 JCM800 高输入（增益更大更冲）',
+      'j800 hi od': '马歇尔 JCM800 高输入 + 过载推子（主音利器）',
+      'dualrect red': '梅萨 双整流 红通道（Mesa Dual Rectifier，金属标配）',
+      'dualrect red od': '梅萨 双整流 红通道 + 过载推子（更凶）',
+      '5153 el34': 'EVH 5150III（EL34 管，现代金属）',
+      '5153 el34 od': 'EVH 5150III（EL34）+ 过载推子',
+      '5153 6l6': 'EVH 5150III（6L6 管，低频更厚）',
+      '5153 6l6 od': 'EVH 5150III（6L6）+ 过载推子',
+    },
+    // 双脚钉通道分工（v0.6.3 修正）：
+    //   CHANNEL 脚钉 = CLEAN（清音）/ DRIVE（失真）二选一
+    //   DRIVE MODE 脚钉 = DRIVE 状态下再选 RHYTHM（节奏）/ LEAD（主音）
+    // 模板的 channel 语义值（Clean 清音/Rhythm 节奏/Lead 主音）→ 脚钉操作
+    channelMap: {
+      'Clean 清音': { channel: 'CLEAN', driveMode: null },
+      'Rhythm 节奏': { channel: 'DRIVE', driveMode: 'RHYTHM' },
+      'Lead 主音': { channel: 'DRIVE', driveMode: 'LEAD' },
+    },
     eq: ['Bass', 'Mid', 'Treble'],
     mods: ['关', 'Chorus', 'Flanger', 'Phaser', 'Tremolo', 'Vibrato'],
     delays: ['关', 'Digital', 'Analog'],
@@ -92,12 +124,12 @@ export const AMPS = [
       { field: 'delay', label: 'Delay', kind: 'effect', off: '音箱：Delay 延迟保持关', on: '音箱：Delay 开「%s」' },
       { field: 'reverb', label: 'Reverb', kind: 'knob', off: '音箱：Reverb 混响保持关', on: '音箱：Reverb 混响开「%s」' },
     ],
-    // 顶部面板示意（v0.6.2）：10 个旋钮一排（左→右按实物），右侧 3 个脚钉。
+    // 顶部面板示意：10 个旋钮一排（左→右按实物），右侧 3 个脚钉。
     // 多功能旋钮（Bass/Save 等）的按压功能写在 note 里——新手最常踩的坑。
     panel: {
       width: 760,
       height: 300,
-      note: '示意：旋钮从左到右按实物排列，多功能旋钮按住可触发第二功能（如 Save 保存预设）；以实物面板为准',
+      note: '示意：旋钮从左到右按实物排列；CHANNEL 脚钉选 CLEAN/DRIVE，DRIVE MODE 脚钉在 DRIVE 下选 RHYTHM/LEAD；多功能旋钮按住触发第二功能（如 Save 保存预设）',
       knobs: [
         { field: 'guitarVol', label: 'Guitar Vol', x: 45, y: 150, kind: 'text', note: '吉他输入音量（接吉他的音量）。' },
         { field: 'musicVol', label: 'Music Vol', x: 115, y: 150, kind: 'text', note: '伴奏/音乐音量（蓝牙放伴奏时用它）。' },
@@ -108,11 +140,11 @@ export const AMPS = [
         { field: 'reverb', label: 'Reverb / D.Vol', x: 465, y: 150, kind: 'text', note: '转动：混响类型（关/Hall 厅堂/Church 教堂）。按住：混响音量。' },
         { field: 'delay', label: 'Delay / D.Type', x: 535, y: 150, kind: 'text', note: '转动：延迟类型（关/Digital 数字/Analog 模拟）。按住：延迟音量。' },
         { field: 'mod', label: 'Mod / D.Speed', x: 605, y: 150, kind: 'text', note: '转动：MOD 效果类型（关/Chorus 合唱/Flanger/Phaser/Tremolo/Vibrato）。按住：效果速度。' },
-        { field: 'model', label: 'Amp / Ch.Volume', x: 675, y: 150, kind: 'text', note: '转动：选择箱头模拟（14 种：Clean/Blues/Funk/Rock/Metal 等，循环）。按住：通道音量。套路建议里的「箱模」就是转它。' },
+        { field: 'model', label: 'Amp / Ch.Volume', x: 675, y: 150, kind: 'text', note: '转动：循环选择 14 种箱头模拟（65 black=芬达黑脸清音、j800=马歇尔 JCM800、dualrect=梅萨双整流、5153=EVH 5150III，od=过载推子版）。按住：通道音量。套路建议里的「箱模」就是转它。' },
       ],
       foots: [
-        { id: 'channel', label: 'CHANNEL', x: 190, y: 238, w: 92, h: 36, note: '脚钉：切换 清音(Clean) / 失真(Drive) 通道。套路建议里的「通道」就是按它。' },
-        { id: 'driveMode', label: 'DRIVE MODE', x: 310, y: 238, w: 92, h: 36, note: '脚钉：失真通道下切换 节奏(Rhythm) / 主音(Lead)。' },
+        { id: 'channel', label: 'CHANNEL', x: 190, y: 238, w: 92, h: 36, note: '脚钉：第一步选通道——CLEAN（清音）/ DRIVE（失真）。套路建议会明确告诉你按哪边。' },
+        { id: 'driveMode', label: 'DRIVE MODE', x: 310, y: 238, w: 92, h: 36, note: '脚钉：第二步（只在 DRIVE 状态下有效）——RHYTHM（节奏）/ LEAD（主音）。' },
         { id: 'looper', label: 'LOOPER', x: 430, y: 238, w: 92, h: 36, note: '脚钉：30 秒循环录音（Looper），练伴奏/录即兴用。' },
       ],
     },

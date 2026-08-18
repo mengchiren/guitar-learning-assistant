@@ -11,6 +11,13 @@ import GuitarPanel from '../components/GuitarPanel.vue'
 const amp = AMPS[0]
 const guitar = GUITARS[0]
 
+// 套路通道 → 脚钉操作文案（与 toneGuide 的 channelMap 一致）
+function channelLabel(v) {
+  const step = amp.channelMap?.[v]
+  if (!step) return v
+  return step.driveMode ? `${step.channel} → ${step.driveMode}` : step.channel
+}
+
 // 点按选中的旋钮/脚钉说明
 const selected = ref(null)
 function onSelect(field) {
@@ -70,18 +77,30 @@ const items = computed(() => [
       <p class="muted small" style="margin-bottom: 8px">练歌时先在歌曲详情页看套路名，再照这一行调。</p>
       <div class="tpl-table">
         <div class="tpl-row tpl-head">
-          <span>套路</span><span>通道</span><span>箱模</span><span>Gain</span>
+          <span>套路</span><span>通道（脚钉）</span><span>箱模</span><span>Gain</span>
         </div>
         <div v-for="t in TONE_TEMPLATES" :key="t.id" class="tpl-row">
           <span class="tpl-name">{{ t.name }}</span>
-          <span>{{ t.amp.channel }}</span>
+          <span>{{ channelLabel(t.amp.channel) }}</span>
           <span>{{ t.amp.model }}</span>
           <span>{{ t.amp.gain }} / 10</span>
         </div>
       </div>
       <p class="muted small" style="margin-top: 8px">
-        <b>Gain 旋钮是哪个？</b>上面面板里标着 <b>Gain / Quit</b> 的旋钮；箱模是标着 <b>Amp / Ch.Volume</b> 的旋钮（转动循环选 14 种箱头模拟）。
+        <b>通道怎么按？</b>CHANNEL 脚钉先选 CLEAN（清音）或 DRIVE（失真）；选了 DRIVE 的话，再用 DRIVE MODE 脚钉选 RHYTHM（节奏）或 LEAD（主音）。
+        <b>Gain 旋钮是哪个？</b>标着 <b>Gain / Quit</b> 的旋钮；箱模是标着 <b>Amp / Ch.Volume</b> 的旋钮（转动循环选 14 种）。
       </p>
+    </div>
+
+    <div class="card">
+      <h2>14 种箱体模拟对照表</h2>
+      <p class="muted small" style="margin-bottom: 8px">
+        转动「Amp / Ch.Volume」旋钮循环选择；名字带 <b>od</b> 的是过载推子版（更冲）。
+      </p>
+      <div v-for="m in amp.ampModels" :key="m" class="list-row">
+        <span class="tag">{{ m }}</span>
+        <div class="dim small">{{ amp.modelNotes[m] }}</div>
+      </div>
     </div>
 
     <div class="card">
