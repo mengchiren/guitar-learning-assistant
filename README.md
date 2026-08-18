@@ -20,24 +20,26 @@
 - 📅 **学习计划（M3）**：规则引擎生成弹性练习包（10/30/60 分钟三档，每项带「为什么」解释）；基本功清单与达标标记；歌曲「练习中/已掌握」与同套路推荐；统计报表（周报/热力图）；成田课程进度跟踪（194 课）。
 - ⏱ **练琴打卡**：计时切页不断、补卡、连续天数、最近 7 天统计；练琴时切去别的页面有「练习中」胶囊一键回来。
 - 🎙 **录音回听**：练习页/工具页录音（存本机 IndexedDB，不出设备），录完自动测 BPM 对拍（置信度 + 手动改），回听播放/删除，分类与打卡一致。
-- 🤖 **AI 答疑**：练琴问题随时问（DeepSeek/豆包/通义千问可切换），歌曲/练习详情页「问 AI」自动带上当前上下文；经 Cloudflare Pages Functions 代理，API Key 只存环境变量、不进前端。
+- 🤖 **AI 答疑**：练琴问题随时问（DeepSeek/豆包/通义千问可切换），歌曲/练习详情页「问 AI」自动带上当前上下文；经 Cloudflare Pages Functions 代理，API Key 只存环境变量、不进前端；**访问令牌防刷**（ASK_TOKEN 环境变量，应用内配置一次）。
 - 🥁 **节拍器**：前瞻调度的 Web Audio 节拍器（切页声音不断）、打拍定速；歌曲详情一键「用此 BPM 开节拍器」。
 - 🎚 **调音器**：麦克风收音 + 参考音（EADGBE）。
 - ⏰ **练琴提醒**：应用内定时提醒。
+- 💾 **数据备份**：「我的」页一键导出/恢复全部数据（JSON 文件，录音除外）。
 - 🎨 **视觉**：简约瑞士军刀风——米白底、细线卡片、瑞士红点缀、线性图标；桌面端为 B 站式顶栏 + 仪表盘多栏，手机端为底部导航单栏。
 
 ## 技术栈
 
 - Vue 3 + Vite + Pinia + Vue Router + vite-plugin-pwa
-- **自研纯前端音频分析引擎**（`app/src/utils/analyze.js`）：手写 FFT/onset 包络/自相关/K-S 调性模板，无任何 ML/音频库依赖，Node 与浏览器通用
+- **自研纯前端音频分析引擎**（`app/src/utils/analyze.js`）：手写 FFT/onset 包络/自相关/K-S 调性模板，无任何 ML/音频库依赖，Node 与浏览器通用；**分析在 Web Worker 后台线程跑**（`app/src/workers/analyze.worker.js`），大文件不卡界面
 - 本地存储：localStorage 抽象层（云同步预留）+ IndexedDB（录音）
-- Cloudflare Pages Functions：AI 答疑代理（`app/functions/api/ask.js`，Key 存环境变量）
+- Cloudflare Pages Functions：AI 答疑代理（`app/functions/api/ask.js`，Key 存环境变量，访问令牌防刷）
+- CI：GitHub Actions（规则引擎对拍 + 数据校验 + 合成音频引擎测试 + 构建）
 
 ## 目录结构
 
 ```
 ├── app/                  # 应用主体（Vue 3 + Vite + PWA）
-│   ├── functions/        # CF Pages Functions：api/ask.js（AI 答疑代理）
+│   ├── functions/        # CF Pages Functions：api/ask.js（AI 答疑代理，访问令牌防刷）
 │   └── src/
 │       ├── components/   # Icon、ToneAdvice、ChordChart、FretboardMap、RecordPanel 等
 │       ├── composables/  # useMediaQuery、useTuner
@@ -45,8 +47,11 @@
 │       │                 # songSheets（19 首曲谱）、fundamentals、courseCatalog
 │       ├── stores/       # Pinia：practice/timer/metronome/songs/settings/plan/course/sheets/recordings/chat
 │       ├── utils/        # analyze.js（分析引擎）、planEngine.js（规则引擎）、
-│       │                 # recordingsDb.js（IndexedDB）、recordAnalyze.js、toneGuide.js、storage.js
+│       │                 # recordingsDb.js（IndexedDB）、recordAnalyze.js、toneGuide.js、storage.js、
+│       │                 # analyzeWorker.js（Worker 封装）、audio.js（解码）、date.js、music.js、backup.js
+│       ├── workers/      # analyze.worker.js（分析引擎后台线程）
 │       └── views/        # 页面
+├── .github/workflows/    # CI：规则引擎 25 项 + 数据 767 项 + 合成音频引擎测试 + 构建
 ├── spike/                # M0 可行性验证（Python librosa 版）+ 各引擎对拍单测
 ├── 需求文档.md           # 需求规格（唯一权威来源，含修订记录）
 ├── 验收指南.md           # 手机验收清单 + 常见问题
@@ -79,12 +84,15 @@ npm run dev        # 默认端口 4173，可用 -- --port 4174
 测试（改引擎/规则/数据后必须重跑）：
 
 ```bash
-# ffmpeg 路径（来自 spike 虚拟环境）
+# ffmpeg 路径（来自 spike 虚拟环境；PowerShell 里先设 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8 防中文路径乱码）
 FFMPEG=$(spike/.venv/Scripts/python.exe -c "import imageio_ffmpeg; print(imageio_ffmpeg.get_ffmpeg_exe())")
-node spike/test_frontend_analyze.mjs "$FFMPEG"   # 分析引擎 5 首对拍
+node spike/test_frontend_analyze.mjs "$FFMPEG"   # 分析引擎 5 首对拍（需本地版权音频，CI 不跑）
+node spike/test_frontend_synthetic.mjs           # 分析引擎合成音频测试（CI 跑：快/中/慢三档 + 慢歌不加倍）
 node spike/test_plan_engine.mjs                  # 规则引擎 25 项
 node spike/test_sheets.mjs                       # 曲谱/和弦数据 767 项
 ```
+
+**CI**（`.github/workflows/ci.yml`）：push/PR 自动跑合成音频引擎测试 + 规则引擎对拍 + 数据校验 + 生产构建，全过才允许合并；真实歌曲对拍因版权音频不入库，只在本地跑。
 
 ## 部署
 
@@ -93,12 +101,13 @@ Cloudflare Pages + GitHub 自动部署（push 即发）：
 - 站点：<https://guitar-learning-assistant.pages.dev>
 - 构建配置：根目录 `app`、构建命令 `npm run build`、输出目录 `dist`、环境变量 `NODE_VERSION=22`
 - SPA 深链接回退：`app/public/_redirects`
-- AI 答疑环境变量：`AI_KEY_DEEPSEEK`（必配）、`AI_KEY_ARK`+`AI_MODEL_ARK`、`AI_KEY_QWEN`（按需）；改动后需 Retry deployment
+- AI 答疑环境变量：`AI_KEY_DEEPSEEK`（必配）、`AI_KEY_ARK`+`AI_MODEL_ARK`、`AI_KEY_QWEN`（按需）、**`ASK_TOKEN`（必配，防盗刷令牌，应用内 AI 答疑页首次使用时填入）**；改动后需 Retry deployment
 
 ## 隐私
 
 - 打卡记录、歌单、录音、设置、聊天记录**只存在本机浏览器**；上传的音频**不会离开设备**，仅在浏览器本地解码分析。
 - 唯一的上行数据：AI 答疑时，提问文字经 Cloudflare Pages Functions 代理转发给大模型（无账号、无追踪；API Key 只存在 Cloudflare 环境变量）。
+- **数据备份**：「我的」页可一键导出/恢复全部数据（JSON 文件，录音除外），建议定期备份。
 
 ## 路线图
 

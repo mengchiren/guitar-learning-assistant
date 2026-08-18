@@ -3,6 +3,14 @@
 // Key 只存在 Cloudflare 控制台的环境变量里（AI_KEY_DEEPSEEK / AI_KEY_ARK / AI_KEY_QWEN），
 // 本文件永远不出现真实 Key，环境变量也不进 git。
 //
+// 防盗刷（v0.5.0 评审修复）：
+//   Origin 白名单只能防「浏览器」跨站调用，挡不住 curl/脚本直连（可伪造或不带 Origin），
+//   所以再加一层访问令牌：环境变量 ASK_TOKEN 存一个随机密钥（只配一次），
+//   应用内「AI 答疑」页首次使用时填入（存本机 localStorage），每次请求带 X-Ask-Token 头，
+//   代理校验一致才放行。令牌不在代码包里，攻击者无法从网页源码拿到。
+//   更严格的按 IP 限流需要自定义域名 + Cloudflare 限流规则（当前 pages.dev 免费域名配不了），
+//   令牌层已能挡住绝大多数盗刷，后续换域名时可补。
+//
 // 三平台都是 OpenAI 兼容的 chat/completions 格式，一张表切换：
 //   deepseek  → https://api.deepseek.com/chat/completions
 //   ark（火山方舟）→ https://ark.cn-beijing.volces.com/api/v3/chat/completions（model 填 endpoint id，环境变量 AI_MODEL_ARK）
@@ -44,7 +52,7 @@ const ALLOWED_ORIGINS = [
 const CORS = (origin) => ({
   'Access-Control-Allow-Origin': origin,
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Headers': 'Content-Type, X-Ask-Token',
 })
 
 function json(data, status = 200, origin = '') {
@@ -64,6 +72,17 @@ export async function onRequestPost({ request, env }) {
   const origin = request.headers.get('Origin') || ''
   if (!ALLOWED_ORIGINS.includes(origin)) {
     return json({ ok: false, error: '请求来源不被允许' }, 403)
+  }
+
+  // 访问令牌校验（v0.5.0）：防脚本直连盗刷 Key 额度。未配置 ASK_TOKEN 时拒绝服务，
+  // 配置了但令牌不匹配也拒绝——宁可暂时用不了，也不敞开额度。
+  const askToken = env.ASK_TOKEN
+  if (!askToken) {
+    return json({ ok: false, code: 'NO_TOKEN_CONFIG', error: '服务端还没配置访问令牌（Cloudflare 环境变量 ASK_TOKEN）' }, 503, origin)
+  }
+  const gotToken = request.headers.get('X-Ask-Token') || ''
+  if (gotToken !== askToken) {
+    return json({ ok: false, code: 'BAD_TOKEN', error: '访问令牌不对，请在应用里重新填写' }, 401, origin)
   }
 
   let body

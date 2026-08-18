@@ -1,16 +1,9 @@
 import { defineStore } from 'pinia'
 import { load, save } from '../utils/storage'
+import { localDateStr } from '../utils/date'
 import { usePracticeStore } from './practice'
 import { useSongsStore, effectiveSong } from './songs'
 import { generatePlan } from '../utils/planEngine.js'
-
-// 本地时区日期（与 PracticeView 的 localDateStr 同一模式）
-function localDateStr(d = new Date()) {
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${y}-${m}-${day}`
-}
 
 // 学习计划：基本功达标标记 + 歌曲练习状态；练习包由 planEngine 纯函数生成
 export const usePlanStore = defineStore('plan', {

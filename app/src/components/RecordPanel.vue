@@ -2,18 +2,11 @@
 import { ref, onUnmounted, computed } from 'vue'
 import { useRecordingsStore, RECORD_CATEGORIES } from '../stores/recordings'
 import { analyzeRecordingBlob } from '../utils/recordAnalyze'
+import { localDateStr } from '../utils/date'
 import { useSongsStore } from '../stores/songs'
 
 const recordings = useRecordingsStore()
 const songs = useSongsStore()
-
-// 用本地时区日期（toISOString 是 UTC，凌晨会差一天）
-function localDateStr(d = new Date()) {
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${y}-${m}-${day}`
-}
 
 const MAX_SEC = 600 // 单次最长 10 分钟
 

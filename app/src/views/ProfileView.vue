@@ -1,12 +1,53 @@
 <script setup>
+import { ref } from 'vue'
 import Icon from '../components/Icon.vue'
 import { useSettingsStore } from '../stores/settings'
+import { downloadBackup, parseBackup, restoreBackup } from '../utils/backup'
 
 const settings = useSettingsStore()
 
 function toggleDisplayMode() {
   settings.displayMode = settings.displayMode === 'beginner' ? 'full' : 'beginner'
   settings.saveDisplayMode()
+}
+
+// ---- 数据备份/恢复（v0.5.0）：结构化数据导出 JSON 文件，可恢复 ----
+const restoreInput = ref(null)
+const backupMsg = ref('')
+const restoring = ref(false)
+
+function onExport() {
+  try {
+    downloadBackup()
+    backupMsg.value = '备份文件已下载（练琴搭子备份-日期.json），请收好它。'
+  } catch (e) {
+    backupMsg.value = '导出失败：' + (e?.message || '未知错误')
+  }
+  setTimeout(() => (backupMsg.value = ''), 6000)
+}
+
+function onPickRestoreFile(e) {
+  const f = e.target.files?.[0]
+  e.target.value = ''
+  if (!f) return
+  const reader = new FileReader()
+  reader.onload = async () => {
+    try {
+      const backup = parseBackup(String(reader.result))
+      if (!window.confirm(`将用备份文件覆盖当前全部数据（${Object.keys(backup.data).length} 项），确定恢复？`)) return
+      restoring.value = true
+      const n = restoreBackup(backup)
+      backupMsg.value = `已恢复 ${n} 项数据，页面即将刷新…`
+      setTimeout(() => window.location.reload(), 1200)
+    } catch (err) {
+      backupMsg.value = '恢复失败：' + (err?.message || '文件格式不对')
+      restoring.value = false
+    }
+  }
+  reader.onerror = () => {
+    backupMsg.value = '读取文件失败'
+  }
+  reader.readAsText(f)
 }
 </script>
 
@@ -65,6 +106,19 @@ function toggleDisplayMode() {
         </button>
       </div>
       <p class="muted small" style="margin-top: 8px">影响歌曲详情页与音色套路库的参数展示。</p>
+    </div>
+    <div class="card">
+      <h2>数据备份</h2>
+      <p class="muted small" style="margin-bottom: 10px">
+        打卡记录、歌单、曲谱、课程进度、聊天记录都存在本机浏览器，清理缓存会全部丢失。建议定期导出备份文件。
+        （录音体积大，不在备份范围。）
+      </p>
+      <div class="btn-row">
+        <button class="btn btn-primary" @click="onExport">导出备份文件</button>
+        <button class="btn" :disabled="restoring" @click="restoreInput?.click()">{{ restoring ? '恢复中…' : '从备份恢复' }}</button>
+        <input ref="restoreInput" type="file" accept=".json,application/json" style="display: none" @change="onPickRestoreFile" />
+      </div>
+      <p v-if="backupMsg" class="small" style="color: var(--accent-dark); margin-top: 8px">{{ backupMsg }}</p>
     </div>
     <div class="card">
       <h2>关于</h2>

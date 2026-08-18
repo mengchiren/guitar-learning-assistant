@@ -10,7 +10,16 @@ const listEl = ref(null)
 const pendingContext = ref('')
 const contextShown = ref(false)
 
+// AI 访问令牌（防刷）：没配置时提示填写；配置后可修改
+const tokenInput = ref(chat.token)
+const editingToken = ref(false)
+
 const canSend = computed(() => input.value.trim().length > 0 && !chat.busy)
+
+function saveToken() {
+  chat.setToken(tokenInput.value)
+  editingToken.value = false
+}
 
 onMounted(() => {
   pendingContext.value = takeAskContext()
@@ -59,6 +68,26 @@ function onKeydown(e) {
         >
           {{ p.label }}
         </span>
+      </div>
+    </div>
+
+    <!-- AI 访问令牌（防刷，v0.5.0）：值在 Cloudflare 后台环境变量 ASK_TOKEN，配一次即可 -->
+    <div v-if="!chat.token || editingToken" class="card" style="padding: 12px 14px">
+      <label>AI 访问令牌（防刷用，只配一次）</label>
+      <input v-model="tokenInput" type="password" placeholder="粘贴 ASK_TOKEN 环境变量的值" />
+      <div class="btn-row" style="margin-top: 8px">
+        <button class="btn btn-primary" :disabled="!tokenInput.trim()" @click="saveToken">保存令牌</button>
+        <button v-if="chat.token" class="btn" @click="editingToken = false; tokenInput = chat.token">取消</button>
+      </div>
+      <p class="muted small" style="margin-top: 6px">
+        令牌怎么来的：Cloudflare 控制台 → Pages → 环境变量 → 添加 <b>ASK_TOKEN</b>（一长串随机字符）→ 重新部署，然后填到这里。
+      </p>
+    </div>
+    <div v-else class="card" style="padding: 10px 14px">
+      <div class="provider-row">
+        <span class="dim small">AI 访问令牌：</span>
+        <span class="dim small">已配置（防刷保护中）</span>
+        <button class="btn small-btn" style="margin-left: auto" @click="editingToken = true; tokenInput = chat.token">修改</button>
       </div>
     </div>
 
@@ -119,4 +148,5 @@ function onKeydown(e) {
 .msg-text { white-space: pre-wrap; word-break: break-word; font-size: 15px; line-height: 1.6; }
 .input-row { margin-top: 10px; }
 .input-row textarea { width: 100%; }
+.small-btn { padding: 4px 10px; font-size: 13px; }
 </style>

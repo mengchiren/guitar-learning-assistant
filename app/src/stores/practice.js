@@ -1,18 +1,6 @@
 import { defineStore } from 'pinia'
 import { load, save } from '../utils/storage'
-
-function todayStr(d = new Date()) {
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${y}-${m}-${day}`
-}
-
-function shiftDate(base, delta) {
-  const d = new Date(base)
-  d.setDate(d.getDate() + delta)
-  return todayStr(d)
-}
+import { localDateStr, shiftDate } from '../utils/date'
 
 export const usePracticeStore = defineStore('practice', {
   state: () => ({

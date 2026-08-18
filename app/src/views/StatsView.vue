@@ -10,10 +10,7 @@ const practice = usePracticeStore()
 const planStore = usePlanStore()
 const songsStore = useSongsStore()
 
-function localDateStr(d = new Date()) {
-  return fmt(d)
-}
-const today = computed(() => localDateStr())
+const today = computed(() => fmt(new Date()))
 
 // 每日分钟聚合
 const minutesByDay = computed(() => {

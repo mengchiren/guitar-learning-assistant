@@ -2,26 +2,17 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSongsStore } from '../stores/songs'
-import { analyzeAudio } from '../utils/analyze'
+import { decodeToMono, MemoryLimitError } from '../utils/audio'
+import { analyzeInWorker } from '../utils/analyzeWorker'
+import { KEYS, CONF_LABELS } from '../utils/music'
 import { TONE_TEMPLATES } from '../data/templates'
 
 const router = useRouter()
 const songs = useSongsStore()
 const isDev = import.meta.env.DEV
 
-const PITCH = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
-const KEYS = PITCH.flatMap((p) => [`${p} 大调`, `${p} 小调`])
 const ENCRYPTED_EXTS = ['kgg', 'mflac', 'kgm', 'qmcflac', 'qmc0', 'qmc3']
 const MAX_SIZE = 100 * 1024 * 1024
-const TARGET_SR = 22050
-const MAX_PCM_BYTES = 300 * 1024 * 1024 // 解码后原始 PCM 数据量护栏（手机内存安全线）
-
-class MemoryLimitError extends Error {
-  constructor() {
-    super('memory limit')
-    this.name = 'MemoryLimitError'
-  }
-}
 
 const mode = ref('analyze') // analyze | manual
 const file = ref(null)
@@ -49,30 +40,9 @@ function onFileChange(e) {
   if (f && !title.value) title.value = f.name.replace(/\.[^.]+$/, '')
 }
 
-// 解码并直接渲染成 22050Hz 单声道：不再持有全采样率双声道的工作副本，峰值内存省约 4 倍
-async function decodeArrayBuffer(arrayBuf) {
-  const AC = window.AudioContext || window.webkitAudioContext
-  const ctx = new AC()
-  let audio
-  try {
-    audio = await ctx.decodeAudioData(arrayBuf)
-  } finally {
-    ctx.close()
-  }
-  const pcmBytes = audio.length * audio.numberOfChannels * 4
-  if (pcmBytes > MAX_PCM_BYTES) throw new MemoryLimitError()
-  const len = Math.max(1, Math.ceil((audio.length * TARGET_SR) / audio.sampleRate))
-  const off = new OfflineAudioContext(1, len, TARGET_SR)
-  const src = off.createBufferSource()
-  src.buffer = audio
-  src.connect(off.destination)
-  src.start()
-  const rendered = await off.startRendering()
-  return { samples: rendered.getChannelData(0), sampleRate: TARGET_SR }
-}
-
+// 解码 + 分析：解码统一走 utils/audio.js，分析在 Web Worker 里跑（不卡 UI）
 async function decodeFile(f) {
-  return decodeArrayBuffer(await f.arrayBuffer())
+  return decodeToMono(await f.arrayBuffer())
 }
 
 async function runAnalyze() {
@@ -94,7 +64,7 @@ async function runAnalyze() {
   analyzing.value = true
   try {
     const { samples, sampleRate } = await decodeFile(f)
-    result.value = analyzeAudio({ samples, sampleRate })
+    result.value = await analyzeInWorker({ samples, sampleRate })
   } catch (err) {
     console.error(err)
     if (err && err.name === 'MemoryLimitError') {
@@ -150,9 +120,9 @@ async function loadDevTest() {
       error.value = `文件超过 100MB（实际 ${(arrayBuf.byteLength / 1024 / 1024).toFixed(1)}MB）。`
       return
     }
-    const { samples, sampleRate } = await decodeArrayBuffer(arrayBuf)
+    const { samples, sampleRate } = await decodeToMono(arrayBuf)
     title.value = title.value || '开发测试音频'
-    result.value = analyzeAudio({ samples, sampleRate })
+    result.value = await analyzeInWorker({ samples, sampleRate })
   } catch (err) {
     console.error(err)
     if (err && err.name === 'MemoryLimitError') {
@@ -164,8 +134,6 @@ async function loadDevTest() {
     analyzing.value = false
   }
 }
-
-const confLabel = { 高: 'b-high', 中: 'b-mid', 低: 'b-low' }
 </script>
 
 <template>
@@ -203,12 +171,12 @@ const confLabel = { 高: 'b-high', 中: 'b-mid', 低: 'b-low' }
         <div class="info-row">
           <span class="dim small">BPM</span>
           <span class="info-val">{{ result.tempoUseBpm }}</span>
-          <span class="badge" :class="confLabel[result.confidence.bpm]">{{ result.confidence.bpm }}</span>
+          <span class="badge" :class="CONF_LABELS[result.confidence.bpm]">{{ result.confidence.bpm }}</span>
         </div>
         <div class="info-row">
           <span class="dim small">调性</span>
           <span class="info-val">{{ result.keyTop3[0].key }}</span>
-          <span class="badge" :class="confLabel[result.confidence.key]">{{ result.confidence.key }}</span>
+          <span class="badge" :class="CONF_LABELS[result.confidence.key]">{{ result.confidence.key }}</span>
         </div>
         <div class="muted small" style="margin-top: 2px">
           其他候选：{{ result.keyTop3.slice(1).map((k) => `${k.key}（${k.corr}）`).join('、') }}
@@ -216,7 +184,7 @@ const confLabel = { 高: 'b-high', 中: 'b-mid', 低: 'b-low' }
         <div class="info-row" style="margin-top: 6px">
           <span class="dim small">套路</span>
           <span class="info-val">{{ result.template }}</span>
-          <span class="badge" :class="confLabel[result.confidence.template]">{{ result.confidence.template }}</span>
+          <span class="badge" :class="CONF_LABELS[result.confidence.template]">{{ result.confidence.template }}</span>
         </div>
         <div v-if="result.chordsRough.length" class="info-row">
           <span class="dim small">和弦</span>

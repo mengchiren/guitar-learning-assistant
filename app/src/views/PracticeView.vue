@@ -2,18 +2,11 @@
 import { ref, computed } from 'vue'
 import { usePracticeStore } from '../stores/practice'
 import { useTimerStore } from '../stores/timer'
+import { localDateStr } from '../utils/date'
 import RecordPanel from '../components/RecordPanel.vue'
 
 const practice = usePracticeStore()
 const timer = useTimerStore()
-
-// 用本地时区日期（toISOString 是 UTC，凌晨会差一天）
-function localDateStr(d = new Date()) {
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${y}-${m}-${day}`
-}
 
 const TAG_OPTIONS = ['歌曲', '基本功', '课程', '自由练习']
 const tags = ref([])

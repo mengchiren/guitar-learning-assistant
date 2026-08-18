@@ -1,0 +1,38 @@
+# 持续集成（v0.5.0 新增）：push 自动跑规则引擎对拍 + 数据校验 + 合成音频引擎测试 + 构建。
+# 注意：真实歌曲对拍（test_frontend_analyze.mjs）需要本地版权音频与 ffmpeg，只在本地跑，
+# 不在 CI 跑；CI 用纯 JS 合成的节拍音覆盖引擎的半速加倍/慢歌不加倍逻辑。
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - name: 安装依赖
+        run: npm ci
+        working-directory: app
+
+      - name: 规则引擎对拍（25 项）
+        run: node spike/test_plan_engine.mjs
+
+      - name: 数据完整性校验（767 项）
+        run: node spike/test_sheets.mjs
+
+      - name: 分析引擎合成音频测试（半速加倍 / 慢歌不加倍）
+        run: node spike/test_frontend_synthetic.mjs
+
+      - name: 生产构建
+        run: npm run build
+        working-directory: app

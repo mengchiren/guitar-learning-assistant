@@ -7,6 +7,7 @@ import { useMetronomeStore } from '../stores/metronome'
 import { usePlanStore } from '../stores/plan'
 import { useSheetsStore } from '../stores/sheets'
 import { stashAskContext } from '../stores/chat'
+import { KEYS, CONF_LABELS } from '../utils/music'
 import ToneAdvice from '../components/ToneAdvice.vue'
 import ChordChart from '../components/ChordChart.vue'
 
@@ -16,9 +17,6 @@ const songs = useSongsStore()
 const metro = useMetronomeStore()
 const planStore = usePlanStore()
 const sheetsStore = useSheetsStore()
-
-const PITCH = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
-const KEYS = PITCH.flatMap((p) => [`${p} 大调`, `${p} 小调`])
 
 const song = computed(() => songs.byId(route.params.id))
 const eff = computed(() => (song.value ? effectiveSong(song.value) : null))
@@ -125,8 +123,6 @@ const sheetChords = computed(() => {
   }
   return set
 })
-
-const confLabel = { 高: 'b-high', 中: 'b-mid', 低: 'b-low' }
 </script>
 
 <template>
@@ -153,12 +149,12 @@ const confLabel = { 高: 'b-high', 中: 'b-mid', 低: 'b-low' }
       <div class="info-row">
         <span class="dim small">BPM</span>
         <span class="info-val">{{ eff.bpm ?? '—' }}</span>
-        <span v-if="song.analysis" class="badge" :class="confLabel[song.analysis.confidence.bpm]">{{ song.analysis.confidence.bpm }}</span>
+        <span v-if="song.analysis" class="badge" :class="CONF_LABELS[song.analysis.confidence.bpm]">{{ song.analysis.confidence.bpm }}</span>
       </div>
       <div class="info-row">
         <span class="dim small">调性</span>
         <span class="info-val">{{ eff.key ?? '—' }}</span>
-        <span v-if="song.analysis" class="badge" :class="confLabel[song.analysis.confidence.key]">{{ song.analysis.confidence.key }}</span>
+        <span v-if="song.analysis" class="badge" :class="CONF_LABELS[song.analysis.confidence.key]">{{ song.analysis.confidence.key }}</span>
       </div>
       <div v-if="song.analysis && song.analysis.keyTop3.length > 1" class="muted small" style="margin-top: 2px">
         其他候选：{{ song.analysis.keyTop3.slice(1).map((k) => `${k.key}（${k.corr}）`).join('、') }}
@@ -166,7 +162,7 @@ const confLabel = { 高: 'b-high', 中: 'b-mid', 低: 'b-low' }
       <div class="info-row">
         <span class="dim small">套路</span>
         <span class="info-val">{{ eff.template ?? '—' }}</span>
-        <span v-if="song.analysis" class="badge" :class="confLabel[song.analysis.confidence.template]">{{ song.analysis.confidence.template }}</span>
+        <span v-if="song.analysis" class="badge" :class="CONF_LABELS[song.analysis.confidence.template]">{{ song.analysis.confidence.template }}</span>
       </div>
       <div v-if="song.difficulty" class="info-row">
         <span class="dim small">难度</span>
