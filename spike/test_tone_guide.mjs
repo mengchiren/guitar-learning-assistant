@@ -43,13 +43,13 @@ const BASELINE = {
     params: [
       { label: '琴·档位', value: '档位 1~3（琴颈/中间）' },
       { label: '通道', value: 'CLEAN' },
-      { label: '箱模', value: '65 black nor' },
+      { label: '箱模', value: '65 Black Nor' },
       { label: 'Gain', value: '3 / 10' },
     ],
     steps: [
       '琴：拾音器拨杆拨到「档位 1~3（琴颈/中间）」',
       '音箱：CHANNEL 脚钉按到「CLEAN」（清音）',
-      '音箱：箱模旋钮转到「65 black nor」',
+      '音箱：箱模旋钮转到「65 Black Nor」',
       '音箱：Gain 增益旋钮拧到「3」（满格是 10）',
     ],
     fineTune: [
@@ -64,13 +64,13 @@ const BASELINE = {
     params: [
       { label: '琴·档位', value: '档位 1 或 2' },
       { label: '通道', value: 'CLEAN' },
-      { label: '箱模', value: '65 black nor' },
+      { label: '箱模', value: '65 Black Nor' },
       { label: 'Gain', value: '3 / 10' },
     ],
     steps: [
       '琴：拾音器拨杆拨到「档位 1 或 2」',
       '音箱：CHANNEL 脚钉按到「CLEAN」（清音）',
-      '音箱：箱模旋钮转到「65 black nor」',
+      '音箱：箱模旋钮转到「65 Black Nor」',
       '音箱：Gain 增益旋钮拧到「3」（满格是 10）',
     ],
     fineTune: [
@@ -85,14 +85,14 @@ const BASELINE = {
     params: [
       { label: '琴·档位', value: '档位 4~5' },
       { label: '通道', value: 'DRIVE → RHYTHM' },
-      { label: '箱模', value: '65 black nor od' },
+      { label: '箱模', value: '65 Black Nor OD' },
       { label: 'Gain', value: '5 / 10' },
     ],
     steps: [
       '琴：拾音器拨杆拨到「档位 4~5」',
       '音箱：CHANNEL 脚钉按到「DRIVE」（失真）',
       '音箱：DRIVE MODE 脚钉按到「RHYTHM」（节奏）',
-      '音箱：箱模旋钮转到「65 black nor od」',
+      '音箱：箱模旋钮转到「65 Black Nor OD」',
       '音箱：Gain 增益旋钮拧到「5」（满格是 10）',
     ],
     fineTune: [
@@ -107,14 +107,14 @@ const BASELINE = {
     params: [
       { label: '琴·档位', value: '档位 5（琴桥双线圈）' },
       { label: '通道', value: 'DRIVE → RHYTHM' },
-      { label: '箱模', value: 'j800 lo' },
+      { label: '箱模', value: 'J800 Lo' },
       { label: 'Gain', value: '6 / 10' },
     ],
     steps: [
       '琴：拾音器拨杆拨到「档位 5（琴桥双线圈）」',
       '音箱：CHANNEL 脚钉按到「DRIVE」（失真）',
       '音箱：DRIVE MODE 脚钉按到「RHYTHM」（节奏）',
-      '音箱：箱模旋钮转到「j800 lo」',
+      '音箱：箱模旋钮转到「J800 Lo」',
       '音箱：Gain 增益旋钮拧到「6」（满格是 10）',
     ],
     fineTune: [
@@ -129,14 +129,14 @@ const BASELINE = {
     params: [
       { label: '琴·档位', value: '档位 5' },
       { label: '通道', value: 'DRIVE → LEAD' },
-      { label: '箱模', value: 'j800 hi od' },
+      { label: '箱模', value: 'J800 Hi OD' },
       { label: 'Gain', value: '7 / 10' },
     ],
     steps: [
       '琴：拾音器拨杆拨到「档位 5」',
       '音箱：CHANNEL 脚钉按到「DRIVE」（失真）',
       '音箱：DRIVE MODE 脚钉按到「LEAD」（主音）',
-      '音箱：箱模旋钮转到「j800 hi od」',
+      '音箱：箱模旋钮转到「J800 Hi OD」',
       '音箱：Gain 增益旋钮拧到「7」（满格是 10）',
     ],
     fineTune: [
@@ -151,14 +151,14 @@ const BASELINE = {
     params: [
       { label: '琴·档位', value: '档位 5（琴桥双线圈）' },
       { label: '通道', value: 'DRIVE → RHYTHM' },
-      { label: '箱模', value: 'dualrect red' },
+      { label: '箱模', value: 'DualRect Red' },
       { label: 'Gain', value: '7 / 10' },
     ],
     steps: [
       '琴：拾音器拨杆拨到「档位 5（琴桥双线圈）」',
       '音箱：CHANNEL 脚钉按到「DRIVE」（失真）',
       '音箱：DRIVE MODE 脚钉按到「RHYTHM」（节奏）',
-      '音箱：箱模旋钮转到「dualrect red」',
+      '音箱：箱模旋钮转到「DualRect Red」',
       '音箱：Gain 增益旋钮拧到「7」（满格是 10）',
     ],
     fineTune: [
