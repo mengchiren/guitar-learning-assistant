@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { load, save } from '../utils/storage'
+import { load, save } from '../utils/storage.js'
 import { SEED_SHEETS } from '../data/songSheets.js'
 
 // 曲谱：种子曲谱（只读，人工整理）+ 用户自录曲谱（localStorage，优先显示）。

@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Icon from './components/Icon.vue'
-import { useTimerStore } from './stores/timer'
+import { useTimerStore } from './stores/timer.js'
 
 const route = useRoute()
 const router = useRouter()

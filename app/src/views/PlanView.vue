@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { usePlanStore } from '../stores/plan'
-import { useSongsStore, effectiveSong } from '../stores/songs'
+import { usePlanStore } from '../stores/plan.js'
+import { useSongsStore, effectiveSong } from '../stores/songs.js'
 import Icon from '../components/Icon.vue'
 
 const planStore = usePlanStore()

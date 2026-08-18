@@ -2,9 +2,9 @@
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { FUNDAMENTALS } from '../data/fundamentals.js'
-import { usePlanStore } from '../stores/plan'
-import { useMetronomeStore } from '../stores/metronome'
-import { stashAskContext } from '../stores/chat'
+import { usePlanStore } from '../stores/plan.js'
+import { useMetronomeStore } from '../stores/metronome.js'
+import { stashAskContext } from '../stores/chat.js'
 import ChordChart from '../components/ChordChart.vue'
 import FretboardMap from '../components/FretboardMap.vue'
 

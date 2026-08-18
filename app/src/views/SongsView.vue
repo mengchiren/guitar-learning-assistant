@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { useSongsStore, effectiveSong } from '../stores/songs'
+import { useSongsStore, effectiveSong } from '../stores/songs.js'
 
 const songs = useSongsStore()
 const q = ref('')

@@ -1,8 +1,8 @@
 // 录音 → BPM 分析：复用歌曲分析引擎（Web Worker 后台跑，不卡 UI）。
 // 录音是用户自己弹的（清音电吉他为主），节拍检测有效性不如完整歌曲，
 // 结果只作参考并标置信度，用户可手动改。
-import { decodeToMono } from './audio'
-import { analyzeInWorker } from './analyzeWorker'
+import { decodeToMono } from './audio.js'
+import { analyzeInWorker } from './analyzeWorker.js'
 
 const MAX_ANALYZE_SEC = 180 // 只分析前 3 分钟，保证手机上秒级出结果
 

@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { useSettingsStore } from '../stores/settings'
+import { useSettingsStore } from '../stores/settings.js'
 
 const settings = useSettingsStore()
 const notifStatus = ref('')

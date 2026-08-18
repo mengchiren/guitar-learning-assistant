@@ -1,9 +1,9 @@
 <script setup>
 import { ref, onUnmounted, computed } from 'vue'
-import { useRecordingsStore, RECORD_CATEGORIES } from '../stores/recordings'
-import { analyzeRecordingBlob } from '../utils/recordAnalyze'
-import { localDateStr } from '../utils/date'
-import { useSongsStore } from '../stores/songs'
+import { useRecordingsStore, RECORD_CATEGORIES } from '../stores/recordings.js'
+import { analyzeRecordingBlob } from '../utils/recordAnalyze.js'
+import { localDateStr } from '../utils/date.js'
+import { useSongsStore } from '../stores/songs.js'
 
 const recordings = useRecordingsStore()
 const songs = useSongsStore()

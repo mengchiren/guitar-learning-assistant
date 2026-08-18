@@ -1,5 +1,5 @@
 <script setup>
-import { TONE_TEMPLATES } from '../data/templates'
+import { TONE_TEMPLATES } from '../data/templates.js'
 import ToneAdvice from '../components/ToneAdvice.vue'
 </script>
 

@@ -1,9 +1,9 @@
 <script setup>
 import { ref, computed, onUnmounted } from 'vue'
-import { usePracticeStore } from '../stores/practice'
-import { useSettingsStore } from '../stores/settings'
-import { usePlanStore } from '../stores/plan'
-import { useMediaQuery } from '../composables/useMediaQuery'
+import { usePracticeStore } from '../stores/practice.js'
+import { useSettingsStore } from '../stores/settings.js'
+import { usePlanStore } from '../stores/plan.js'
+import { useMediaQuery } from '../composables/useMediaQuery.js'
 import Icon from '../components/Icon.vue'
 
 const practice = usePracticeStore()

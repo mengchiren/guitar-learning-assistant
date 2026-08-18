@@ -1,8 +1,8 @@
 <script setup>
 import { computed } from 'vue'
-import { usePracticeStore } from '../stores/practice'
-import { usePlanStore } from '../stores/plan'
-import { useSongsStore } from '../stores/songs'
+import { usePracticeStore } from '../stores/practice.js'
+import { usePlanStore } from '../stores/plan.js'
+import { useSongsStore } from '../stores/songs.js'
 import { FUNDAMENTALS } from '../data/fundamentals.js'
 import { weekStartOf, shiftDays, fmt } from '../utils/planEngine.js'
 

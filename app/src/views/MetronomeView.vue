@@ -1,5 +1,5 @@
 <script setup>
-import { useMetronomeStore } from '../stores/metronome'
+import { useMetronomeStore } from '../stores/metronome.js'
 
 const metro = useMetronomeStore()
 const presets = [60, 80, 100, 120, 140, 160, 180]

@@ -90,9 +90,10 @@ node spike/test_frontend_analyze.mjs "$FFMPEG"   # 分析引擎 5 首对拍（�
 node spike/test_frontend_synthetic.mjs           # 分析引擎合成音频测试（CI 跑：快/中/慢三档 + 慢歌不加倍）
 node spike/test_plan_engine.mjs                  # 规则引擎 25 项
 node spike/test_sheets.mjs                       # 曲谱/和弦数据 767 项
+node spike/test_stores_smoke.mjs                 # Store 冒烟测试 16 项（CI 跑，防运行时引用错误）
 ```
 
-**CI**（`.github/workflows/ci.yml`）：push/PR 自动跑合成音频引擎测试 + 规则引擎对拍 + 数据校验 + 生产构建，全过才允许合并；真实歌曲对拍因版权音频不入库，只在本地跑。
+**CI**（`.github/workflows/ci.yml`）：push/PR 自动跑合成音频引擎测试 + 规则引擎对拍 + 数据校验 + store 冒烟测试 + 生产构建，全过才允许合并；真实歌曲对拍因版权音频不入库，只在本地跑。
 
 ## 部署
 

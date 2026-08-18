@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, onUnmounted, nextTick } from 'vue'
-import { useRecordingsStore } from '../stores/recordings'
+import { useRecordingsStore } from '../stores/recordings.js'
 import RecordPanel from '../components/RecordPanel.vue'
 
 const recordings = useRecordingsStore()

@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { getAllMeta, getBlob, putMeta, putBlob, deleteRecording } from '../utils/recordingsDb'
+import { getAllMeta, getBlob, putMeta, putBlob, deleteRecording } from '../utils/recordingsDb.js'
 
 // 录音分类与打卡一致（歌曲/基本功/课程/自由练习），统计页以后可串起来
 export const RECORD_CATEGORIES = ['歌曲', '基本功', '课程', '自由练习']

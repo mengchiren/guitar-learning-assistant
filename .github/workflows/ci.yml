@@ -27,6 +27,9 @@ jobs:
       - name: 规则引擎对拍（25 项）
         run: node spike/test_plan_engine.mjs
 
+      - name: Store 冒烟测试（16 项，v0.5.1）
+        run: node spike/test_stores_smoke.mjs
+
       - name: 数据完整性校验（767 项）
         run: node spike/test_sheets.mjs
 

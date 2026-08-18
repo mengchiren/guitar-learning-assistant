@@ -1,8 +1,8 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { usePracticeStore } from '../stores/practice'
-import { useTimerStore } from '../stores/timer'
-import { localDateStr } from '../utils/date'
+import { usePracticeStore } from '../stores/practice.js'
+import { useTimerStore } from '../stores/timer.js'
+import { localDateStr } from '../utils/date.js'
 import RecordPanel from '../components/RecordPanel.vue'
 
 const practice = usePracticeStore()

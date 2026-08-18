@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { load, save } from '../utils/storage'
+import { load, save } from '../utils/storage.js'
 import { COURSE_CATALOG } from '../data/courseCatalog.js'
 
 // 成田课程进度：按套（basic/intermediate/core）记录已学课与当前学到第几课。

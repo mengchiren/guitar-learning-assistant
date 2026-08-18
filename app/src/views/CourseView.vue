@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { useCourseStore } from '../stores/course'
+import { useCourseStore } from '../stores/course.js'
 import Icon from '../components/Icon.vue'
 
 const course = useCourseStore()

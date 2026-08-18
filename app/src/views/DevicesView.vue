@@ -1,6 +1,6 @@
 <script setup>
-import { GUITARS, AMPS } from '../data/devices'
-import { useSettingsStore } from '../stores/settings'
+import { GUITARS, AMPS } from '../data/devices.js'
+import { useSettingsStore } from '../stores/settings.js'
 
 const settings = useSettingsStore()
 

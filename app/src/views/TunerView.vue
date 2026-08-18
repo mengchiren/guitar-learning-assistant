@@ -1,6 +1,6 @@
 <script setup>
 import { onUnmounted } from 'vue'
-import { useTuner } from '../composables/useTuner'
+import { useTuner } from '../composables/useTuner.js'
 
 const tuner = useTuner()
 

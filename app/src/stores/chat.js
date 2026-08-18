@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { load, save } from '../utils/storage'
+import { load, save } from '../utils/storage.js'
 
 // 可切换的模型平台（先接 DeepSeek，其余按需配 Key 即用）
 export const AI_PROVIDERS = [

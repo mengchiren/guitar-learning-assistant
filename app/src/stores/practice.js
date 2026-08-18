@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
-import { load, save } from '../utils/storage'
-import { localDateStr, shiftDate } from '../utils/date'
+import { load, save } from '../utils/storage.js'
+import { localDateStr, shiftDate } from '../utils/date.js'
 
 export const usePracticeStore = defineStore('practice', {
   state: () => ({
@@ -9,11 +9,11 @@ export const usePracticeStore = defineStore('practice', {
   }),
   getters: {
     todaySeconds: (s) =>
-      s.records.filter((r) => r.date === todayStr()).reduce((sum, r) => sum + r.seconds, 0),
+      s.records.filter((r) => r.date === localDateStr()).reduce((sum, r) => sum + r.seconds, 0),
     streakDays(s) {
       const dates = new Set(s.records.map((r) => r.date))
       let streak = 0
-      let cursor = dates.has(todayStr()) ? 0 : 1 // 今天没练则从昨天开始数
+      let cursor = dates.has(localDateStr()) ? 0 : 1 // 今天没练则从昨天开始数
       while (dates.has(shiftDate(new Date(), -cursor))) {
         streak++
         cursor++

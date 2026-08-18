@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, onMounted, nextTick } from 'vue'
-import { useChatStore, AI_PROVIDERS, takeAskContext } from '../stores/chat'
+import { useChatStore, AI_PROVIDERS, takeAskContext } from '../stores/chat.js'
 
 const chat = useChatStore()
 const input = ref('')

@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue'
-import { useSettingsStore } from '../stores/settings'
-import { beginnerGuide } from '../utils/toneGuide'
+import { useSettingsStore } from '../stores/settings.js'
+import { beginnerGuide } from '../utils/toneGuide.js'
 
 // 设备设置建议卡：按「我的 → 显示偏好」切换两种模式。
 // beginner：参数速览 + 大白话操作流程；full：全部参数表（9 项网格）。

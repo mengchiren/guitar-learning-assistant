@@ -1,11 +1,11 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { useSongsStore } from '../stores/songs'
-import { decodeToMono, MemoryLimitError } from '../utils/audio'
-import { analyzeInWorker } from '../utils/analyzeWorker'
-import { KEYS, CONF_LABELS } from '../utils/music'
-import { TONE_TEMPLATES } from '../data/templates'
+import { useSongsStore } from '../stores/songs.js'
+import { decodeToMono, MemoryLimitError } from '../utils/audio.js'
+import { analyzeInWorker } from '../utils/analyzeWorker.js'
+import { KEYS, CONF_LABELS } from '../utils/music.js'
+import { TONE_TEMPLATES } from '../data/templates.js'
 
 const router = useRouter()
 const songs = useSongsStore()

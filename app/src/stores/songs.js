@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
-import { load, save } from '../utils/storage'
-import seedSongs from '../data/seedSongs.json'
+import { load, save } from '../utils/storage.js'
+import seedSongs from '../data/seedSongs.json' with { type: 'json' }
 
 let uidSeq = 0
 function genId() {

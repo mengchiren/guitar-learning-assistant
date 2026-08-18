@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia'
-import { load, save } from '../utils/storage'
-import { localDateStr } from '../utils/date'
-import { usePracticeStore } from './practice'
-import { useSongsStore, effectiveSong } from './songs'
+import { load, save } from '../utils/storage.js'
+import { localDateStr } from '../utils/date.js'
+import { usePracticeStore } from './practice.js'
+import { useSongsStore, effectiveSong } from './songs.js'
 import { generatePlan } from '../utils/planEngine.js'
 
 // 学习计划：基本功达标标记 + 歌曲练习状态；练习包由 planEngine 纯函数生成

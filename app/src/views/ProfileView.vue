@@ -1,8 +1,8 @@
 <script setup>
 import { ref } from 'vue'
 import Icon from '../components/Icon.vue'
-import { useSettingsStore } from '../stores/settings'
-import { downloadBackup, parseBackup, restoreBackup } from '../utils/backup'
+import { useSettingsStore } from '../stores/settings.js'
+import { downloadBackup, parseBackup, restoreBackup } from '../utils/backup.js'
 
 const settings = useSettingsStore()
 

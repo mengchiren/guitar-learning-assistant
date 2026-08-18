@@ -3,8 +3,8 @@
 // 录音（IndexedDB blob）体量大，不在备份范围——丢录音可重录，丢打卡/歌单/曲谱才是真损失。
 // 备份文件带版本号，后续存储 schema 升级时可据此做迁移。
 
-import { save } from './storage'
-import { localDateStr } from './date'
+import { save } from './storage.js'
+import { localDateStr } from './date.js'
 
 const PREFIX = 'gla:v1:'
 const BACKUP_VERSION = 1

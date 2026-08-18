@@ -1,6 +1,6 @@
 # HANDOFF 交接文档
 
-> 给一个完全没有上下文的新对话看。工作目录：`F:\电吉他学习`（Windows 10，Git Bash）。项目名：**练琴搭子 · PickBuddy**。当前版本 **v0.5.0**。
+> 给一个完全没有上下文的新对话看。工作目录：`F:\电吉他学习`（Windows 10，Git Bash）。项目名：**练琴搭子 · PickBuddy**。当前版本 **v0.5.1**。
 
 ## 1. 我们在做什么任务
 
@@ -11,7 +11,7 @@
 - **产品策略（三层）**：种子库人工数据优先 → AI 分析作参考并标置信度 → 人工纠错兜底。**别把 AI 结果当精确数据呈现。**
 - **目标歌曲**：日系动漫乐队歌（轻音、孤独摇滚、MyGO!!!!!、Ave Mujica、哭泣少女乐队）+ Beyond 经典。
 
-**需求的唯一权威来源是 `需求文档.md`（当前 v0.5.0，含完整修订记录）**，任何功能争议以它为准，改需求必须先改它。
+**需求的唯一权威来源是 `需求文档.md`（当前 v0.5.1，含完整修订记录）**，任何功能争议以它为准，改需求必须先改它。
 
 ## 2. 关键文件地图
 
@@ -22,7 +22,7 @@
 | `验收指南.md` | 手把手手机验收清单（L 录音 / M AI 答疑含 Key 与 **ASK_TOKEN 令牌**配置步骤 / N 数据备份）+ 反馈模板 + 常见问题 |
 | `README.md` | GitHub 项目主页（功能/目录/测试/CI/部署/隐私/路线图，已同步到 v0.5.0） |
 | `.github/workflows/ci.yml` | **CI（v0.5.0 新增）**：push/PR 自动跑合成音频引擎测试 + 规则引擎 25 项 + 数据 767 项 + 生产构建；真实歌曲对拍因版权音频不入库，只在本地跑 |
-| `spike/` | 验证与测试：Python librosa 版 `analyze.py`、`make_synthetic.py`、**前端引擎对拍 `test_frontend_analyze.mjs`**（本地跑）、**合成音频引擎测试 `test_frontend_synthetic.mjs`（v0.5.0 新增，CI 跑）**、**规则引擎对拍 `test_plan_engine.mjs`（25 项）**、**数据校验 `test_sheets.mjs`（767 项）**、`gen_course_catalog.py`、单文件分析 `analyze_one.mjs`、**批量分析 `batch_analyze_songs.mjs`（结果 `batch_analyze_result.json`）**、**曲谱生成 `write_sheets.py`** |
+| `spike/` | 验证与测试：Python librosa 版 `analyze.py`、`make_synthetic.py`、**前端引擎对拍 `test_frontend_analyze.mjs`**（本地跑）、**合成音频引擎测试 `test_frontend_synthetic.mjs`（v0.5.0 新增，CI 跑）**、**Store 冒烟测试 `test_stores_smoke.mjs`（v0.5.1 新增，16 项，CI 跑）**、**规则引擎对拍 `test_plan_engine.mjs`（25 项）**、**数据校验 `test_sheets.mjs`（767 项）**、`gen_course_catalog.py`、单文件分析 `analyze_one.mjs`、**批量分析 `batch_analyze_songs.mjs`（结果 `batch_analyze_result.json`）**、**曲谱生成 `write_sheets.py`** |
 | `spike/.venv/` | Python 3.13 虚拟环境（librosa + imageio-ffmpeg），git 忽略 |
 | `spike/songs/`、`歌曲文件/`、`视频教程/` | 用户音频/视频，**git 忽略**，勿提交（版权内容）。`歌曲文件/` 已重命名为「歌手 - 歌名」 |
 | `app/` | 应用主体（Vue 3 + Vite + PWA） |
@@ -59,14 +59,16 @@
 - **删除 bug 修复（用户反馈「确认删除没反应」）**：根因是 **v-for 里的模板 ref 被 Vue 收集成数组**，`audioEl.value.pause()` 抛 TypeError 中断删除/停止流程（且 `play()` 一直静默失败，自动播放从未生效）——改**函数式 ref** + 删除确认改**独立弹层** + 错误信息展示。实测：自动播放/停止/播放中删除/取消全部正常。
 - **曲谱大扩充 + 新歌入库（v0.4.2）**：用户提供 23 首歌曲文件——按 ID3 元数据重命名「歌手 - 歌名」+ 批量分析 BPM/调性/套路；**种子库 7→29 首**（分析值入库标「待人工校准」）；**曲谱 2→19 首**（5 个搜索代理并行检索交叉验证，来源与校准状态全标注；10 首无可靠谱不录，宁缺毋滥）；**和弦图库 49→82 个**（升/降号调标准按法）；校验升级 **767 项断言**全过。
 - **工程评审修复第一批（v0.5.0，用户发起四维评审后确认方案，详见需求文档修订记录）**：①**AI 代理防刷**——新增访问令牌 `ASK_TOKEN`（CF 环境变量 + 请求头 `X-Ask-Token` 校验；Origin 白名单挡不住脚本直连，令牌层补上；**未配令牌时接口拒绝服务**，应用内 AI 答疑页顶部有令牌输入卡）；②**数据备份/恢复**——`utils/backup.js` + 「我的」页导出/恢复（结构化数据 JSON，录音不含，遍历 `gla:v1:` 前缀自动覆盖未来新 store）；③**CI**——`.github/workflows/ci.yml`（合成音频引擎测试 + 规则 25 项 + 数据 767 项 + build）；④**重复代码收敛**——`utils/date.js`（消灭 5 份 `localDateStr` 重复）、`utils/music.js`（PITCH/KEYS/CONF_LABELS）、`utils/audio.js`（`decodeToMono` 统一歌曲分析与录音解码管线）；⑤**分析引擎进 Web Worker**——`workers/analyze.worker.js` + `utils/analyzeWorker.js`（Float32Array 转移所有权零拷贝，Worker 不可用回退主线程）；⑥package.json 版本统一 0.5.0。**本地验证全过**：真实歌曲对拍 5/5、合成 3/3、规则 25/25、数据 767/767、生产构建通过。**待用户操作**：CF 后台配 `ASK_TOKEN` 环境变量 + 重新部署，手机验收（验收指南 M 第一步半 / N 节新增）。
-- 全程约 40 个提交，git 历史即详细变更记录；需求文档修订记录完整到 v0.5.0；README/验收指南/交接文档全同步。
+- **首页空白 bug 修复（v0.5.1，用户电脑端验收发现）**：根因是 v0.5.0 重构 `stores/practice.js` 删了本地 `todayStr` 但 getter 调用点没改（`ReferenceError`，首页三处 getter 全炸；**Vite 构建不查未定义引用，测试也没覆盖 store**）。修复 + **新增 `spike/test_stores_smoke.mjs`（16 项，实例化全部 store 访问全部 getter/action，纯 Node + localStorage 内存 shim，已入 CI）**；顺手把全工程 63 处不带 `.js` 的相对导入统一补齐（`./router`→`./router/index.js`、`seedSongs.json` 加 `with { type: 'json' }`，Node 可直接测 store）。本地回归全过：对拍 5/5、合成 3/3、规则 25/25、数据 767/767、冒烟 16/16、构建通过。
+- 全程约 41 个提交，git 历史即详细变更记录；需求文档修订记录完整到 v0.5.1；README/验收指南/交接文档全同步。
 
 ## 4. 当前卡在哪
 
-**等待用户做两件事（v0.5.0 发布后）：**
+**v0.5.1 已修复用户验收发现的首页空白 bug 并推送**，等用户再验收（首页应恢复正常；AI 答疑若还没配 ASK_TOKEN 令牌会提示配置）：
 
-1. **配 ASK_TOKEN 访问令牌（必须，否则 AI 答疑不可用）**：CF 后台环境变量加 `ASK_TOKEN`（值 = 我生成的一长串随机字符，会话里发给他；他自己换任意随机字符串也行）→ Retry deployment → 应用内 AI 答疑页顶部输入框填入保存。步骤在验收指南 M 第一步半。
-2. **手机/电脑验收 v0.5.0**（验收指南 N 节新增数据备份；M 节新增令牌验收项；顺带确认之前 v0.4.2 的遗留问题）：
+1. **首页空白修复确认**（v0.5.1）：刷新两三次（避开 SW 旧缓存）后首页应正常显示仪表盘/练习包/7 天图。
+2. **配 ASK_TOKEN 访问令牌（必须，否则 AI 答疑不可用）**：CF 后台环境变量加 `ASK_TOKEN`（值 = 我生成的一长串随机字符，会话里发给他；他自己换任意随机字符串也行）→ Retry deployment → 应用内 AI 答疑页顶部输入框填入保存。步骤在验收指南 M 第一步半。
+3. **手机验收 v0.5.0/v0.5.1**（验收指南 N 节数据备份；M 节令牌验收项；顺带确认之前 v0.4.2 的遗留问题）：
 
 **v0.4.2 遗留的待用户反馈**：
 1. **曲谱准确性（重点）**：19 首曲谱中多数标注了来源与置信度；单源/自动检测的（影色舞等）标注「请对照原曲校准」。用户弹到不对的，按他听出来的改数据（人工纠错永远优先）。
@@ -123,6 +125,7 @@
 32. **Web Worker 与 Vite**：`new Worker(new URL('../workers/x.worker.js', import.meta.url), { type: 'module' })` 是 Vite 原生支持的写法（dev 与 build 都自动打包，build 产物里能看到独立 worker chunk）；**postMessage 传 Float32Array 时用转移列表 `[samples.buffer]`**（零拷贝，但转移后主线程的 samples 不能再读）；Worker 里 import 的模块必须是纯函数（analyze.js 无 DOM 依赖才敢放 Worker）；`analyzeWorker.js` 已有 Worker 崩溃/不可用回退主线程逻辑，别删。
 33. **PowerShell 跑 ffmpeg 对拍的中文路径坑**：工作目录含中文（`F:\电吉他学习`），PowerShell 下 Python 输出的 ffmpeg 路径会乱码（GBK 控制台）导致 spawn 失败——先 `[Console]::OutputEncoding = [System.Text.Encoding]::UTF8` 再取路径；Git Bash 无此问题（HANDOFF 里的 `FFMPEG=$(...)` 用法在 Git Bash 下照旧）。
 34. **合成音频测试的校准陷阱**（`test_frontend_synthetic.mjs`）：完全均匀的冲击串在引擎的自相关上所有周期整数倍 lag 打平，会随机测出 1/2 速甚至 1/3 速——**每拍振幅必须加「缓慢起伏的正弦调制 + 小扰动」**（模拟真实演奏的渐强渐弱，让真周期独占鳌头）；固定种子（42）保证 CI 可复现；「半速加倍」分支在合成音上无法稳定触发（阈值按真实音乐校准），由本地真实歌曲对拍覆盖，别硬凑。
+35. **重构删函数定义必须同步所有调用点**（v0.5.1 血泪教训）：`stores/practice.js` 删了本地 `todayStr` 改用 `utils/date.js` 的 `localDateStr`，但 getter 里的 `todayStr()` 调用点没改 → 首页三处 getter 运行时 `ReferenceError` → **首页空白**。Vite 构建只查语法不查未定义引用，普通测试也不覆盖 store。对策：①改动 store 后必跑 `node spike/test_stores_smoke.mjs`；②**全工程相对导入已统一带 `.js` 扩展名**（`./router` 目录导入是例外，要写 `./router/index.js`；JSON 导入带 `with { type: 'json' }`）——Node 现在可以直接 import store 模块，别回退到不带扩展名的写法。
 
 ## 7. 与用户协作的注意事项
 
