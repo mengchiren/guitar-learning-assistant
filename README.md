@@ -13,7 +13,8 @@
 ## 功能
 
 - 🎵 **歌曲分析**（纯前端，音频不出设备）：上传 mp3/flac/wav/m4a，本地分析出 BPM、调性 Top3、粗略和弦、音色套路归类，每项带置信度徽章；酷狗 kgg 等加密格式会引导换源或手动录入。
-- 🎸 **设备设置建议**：把套路模板（**6 套**：清音伴奏/清音+合唱氛围/轻过载节奏/失真节奏 Riff/**金属 Riff**/失真主音 Solo）映射到具体设备参数；两种显示模式——「新手模式」是大白话分步操作流程（参数速览 + 照做步骤 + 可先不动的旋钮），「完整模式」是全部参数表。
+- 🎸 **设备设置建议**：把套路模板（**6 套**：清音伴奏/清音+合唱氛围/轻过载节奏/失真节奏 Riff/**金属 Riff**/失真主音 Solo）映射到具体设备参数；两种显示模式——「新手模式」是大白话分步操作流程（**面板示意图：要动的旋钮红圈高亮 + 指针指向目标值** + 参数速览 + 照做步骤 + 可先不动的旋钮），「完整模式」是全部参数表。
+- 📖 **音箱入门**（v0.6.2）：工具页入口，JAM BUDDY 2 面板全景点按图解——每个旋钮/脚钉点一下看说明（含 Bass/Save 这类多功能按压提示）+ 6 套音色套路对照表。
 - 📚 **歌曲库**：种子曲库 **29 首**（人工校准数据 + 引擎分析标注「待人工校准」）+ 你自己的歌单；搜索、详情、人工纠错（纠错值优先展示）。
 - 📖 **曲谱（和弦谱）**：**19 首种子曲谱**（分段和弦进行 + 节奏提示 + 来源与校准状态标注，宁缺毋滥）+ 用户自录曲谱（存本机）；谱中和弦自动配指法图。
 - 🎼 **和弦图库**：**82 个常用和弦**指法图（6 组展示，点开放大，横按/转位标注）。
@@ -43,9 +44,10 @@
 ├── app/                  # 应用主体（Vue 3 + Vite + PWA）
 │   ├── functions/        # CF Pages Functions：api/ask.js（AI 答疑代理，访问令牌防刷）
 │   └── src/
-│       ├── components/   # Icon、ToneAdvice、ChordChart、FretboardMap、RecordPanel 等
+│       ├── components/   # Icon、ToneAdvice、ChordChart、FretboardMap、RecordPanel、
+│       │                 # AmpPanel（音箱面板 SVG）、GuitarPanel（吉他示意 SVG）
 │       ├── composables/  # useMediaQuery、useTuner
-│       ├── data/         # nav（路由/tab/工具入口清单）、devices（含能力描述）、templates、
+│       ├── data/         # nav（路由/tab/工具入口清单）、devices（含能力描述与面板布局）、templates、
 │       │                 # classifyRules（套路归类规则）、seedSongs（29 首）、chords（82 个）、
 │       │                 # songSheets（19 首曲谱）、fundamentals、courseCatalog
 │       ├── plugins/      # persist.js（Pinia 自动持久化插件）

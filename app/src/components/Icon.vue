@@ -101,5 +101,11 @@ defineProps({
       <path d="M12 4l1.9 5.1L19 11l-5.1 1.9L12 18l-1.9-5.1L5 11l5.1-1.9Z" />
       <path d="M19 16.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8Z" />
     </template>
+    <template v-else-if="name === 'amp'">
+      <rect x="3.5" y="5.5" width="17" height="12.5" rx="2" />
+      <circle cx="8.5" cy="11.7" r="2.8" />
+      <path d="M13.8 9.2h3.2M13.8 12h3.2M13.8 14.8h3.2" />
+      <path d="M9 21h6" />
+    </template>
   </svg>
 </template>

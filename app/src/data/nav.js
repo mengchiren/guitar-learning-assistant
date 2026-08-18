@@ -33,6 +33,7 @@ export const ROUTES = [
   { path: '/devices', component: () => import('../views/DevicesView.vue'), meta: { title: '我的设备' } },
   { path: '/reminders', component: () => import('../views/RemindersView.vue'), meta: { title: '提醒设置' } },
   { path: '/templates', component: () => import('../views/TemplatesView.vue'), meta: { title: '音色套路库' } },
+  { path: '/amp-guide', component: () => import('../views/AmpGuideView.vue'), meta: { title: '音箱入门' } },
 ]
 
 /** 底部导航 / 顶栏 tab（ROUTES 里 meta.tab 的子集） */
@@ -56,5 +57,6 @@ export const TOOLS = [
   { path: '/chords', name: '和弦图库', desc: '82 个常用和弦指法图 · 点开可放大', icon: 'chord' },
   { path: '/recordings', name: '录音回听', desc: '录练习 · 自动对拍 · 回听', icon: 'mic' },
   { path: '/ask', name: 'AI 答疑', desc: '练琴问题随时问 · 多模型切换', icon: 'sparkle' },
-  { path: '/templates', name: '音色套路库', desc: '5 套常用音色 · 对应你的设备', icon: 'sliders' },
+  { path: '/templates', name: '音色套路库', desc: '6 套常用音色 · 对应你的设备', icon: 'sliders' },
+  { path: '/amp-guide', name: '音箱入门', desc: '面板旋钮图解 · 学会调音色', icon: 'amp' },
 ]

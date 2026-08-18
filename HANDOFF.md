@@ -1,6 +1,6 @@
 # HANDOFF 交接文档
 
-> 给一个完全没有上下文的新对话看。工作目录：`F:\电吉他学习`（Windows 10，Git Bash）。项目名：**练琴搭子 · PickBuddy**。当前版本 **v0.6.1**。
+> 给一个完全没有上下文的新对话看。工作目录：`F:\电吉他学习`（Windows 10，Git Bash）。项目名：**练琴搭子 · PickBuddy**。当前版本 **v0.6.2**。
 
 ## 1. 我们在做什么任务
 
@@ -11,7 +11,7 @@
 - **产品策略（三层）**：种子库人工数据优先 → AI 分析作参考并标置信度 → 人工纠错兜底。**别把 AI 结果当精确数据呈现。**
 - **目标歌曲**：日系动漫乐队歌（轻音、孤独摇滚、MyGO!!!!!、Ave Mujica、哭泣少女乐队）+ Beyond 经典。
 
-**需求的唯一权威来源是 `需求文档.md`（当前 v0.6.1，含完整修订记录）**，任何功能争议以它为准，改需求必须先改它。
+**需求的唯一权威来源是 `需求文档.md`（当前 v0.6.2，含完整修订记录）**，任何功能争议以它为准，改需求必须先改它。
 
 ## 2. 关键文件地图
 
@@ -27,14 +27,14 @@
 | `spike/songs/`、`歌曲文件/`、`视频教程/` | 用户音频/视频，**git 忽略**，勿提交（版权内容）。`歌曲文件/` 已重命名为「歌手 - 歌名」 |
 | `app/` | 应用主体（Vue 3 + Vite + PWA） |
 | `app/functions/api/ask.js` | **AI 答疑代理（CF Pages Functions，POST /api/ask）**：三平台 OpenAI 兼容表（deepseek/ark/qwen），Key 只读 CF 环境变量，Origin 白名单 + **访问令牌（`ASK_TOKEN` 环境变量 + 请求头 `X-Ask-Token`，必配）**，25s 超时 |
-| `app/src/data/` | **`nav.js`（路由/tab/工具页统一清单）**、`devices.js`（**含 params/keyParams 能力描述**）、`templates.js`（**6 套套路**）、**`classifyRules.js`（套路归类规则表）**、**`seedSongs.json`（29 首种子歌）**、`fundamentals.js`（5 项基本功）、**`chords.js`（82 个和弦指法图 + 分组，`findChord`/`CHORD_GROUPS`）**、**`songSheets.js`（19 首种子曲谱，由 `write_sheets.py` 生成）**、`courseCatalog.js`（194 课，脚本生成勿手改） |
+| `app/src/data/` | **`nav.js`（路由/tab/工具页统一清单）**、`devices.js`（**含 params 能力描述 + panel 面板布局坐标/量程/说明**）、`templates.js`（**6 套套路**）、**`classifyRules.js`（套路归类规则表）**、**`seedSongs.json`（29 首种子歌）**、`fundamentals.js`（5 项基本功）、**`chords.js`（82 个和弦指法图 + 分组，`findChord`/`CHORD_GROUPS`）**、**`songSheets.js`（19 首种子曲谱，由 `write_sheets.py` 生成）**、`courseCatalog.js`（194 课，脚本生成勿手改） |
 | `app/src/stores/` | Pinia（**全部用 persist 插件自动落盘，store 里不再有 save 调用**）：`practice.js`（打卡）、`settings.js`（提醒/设备/新手模式）、`timer.js`（计时全局）、`metronome.js`（节拍器全局，含 currentBeat）、`songs.js`（用户歌单，**getter 叫 allSongs、字段叫 title、bpm/key/template 已归一化有效值**）、`plan.js`（达标/歌曲状态）、`course.js`、`sheets.js`（用户自录曲谱）、`recordings.js`（录音元数据，`RECORD_CATEGORIES`）、`chat.js`（AI 聊天，`AI_PROVIDERS`、`token`/`setToken`、`stashAskContext`/`takeAskContext`） |
 | `app/src/composables/` | `useMediaQuery.js`（768px 断点）、`useTuner.js`（麦克风 ACF 调音） |
 | `app/src/utils/` | `analyze.js`（**自研音频分析引擎，改后必须重跑对拍**；套路归类走 data/classifyRules.js）、`analyzeWorker.js`（Worker 封装）、`audio.js`（统一解码管线 `decodeToMono`）、`date.js`（本地时区日期，全工程唯一实现）、`music.js`（音名/调性/徽章常量）、`backup.js`（数据备份/恢复）、`id.js`（UUID 生成）、`toneGuide.js`（**按设备 params 渲染新手建议**）、`storage.js`（**schema 版本 + 迁移注册表 + 变更订阅**，key 前缀 `gla:v1:`）、`planEngine.js`（**规则引擎纯函数，改后必须重跑对拍**）、`recordingsDb.js`（IndexedDB：meta/blob 分 store）、`recordAnalyze.js`（录音→BPM，只分析前 3 分钟，走 Worker） |
 | `app/src/plugins/` | `persist.js`（**Pinia 自动持久化插件，防抖 150ms**） |
 | `app/src/workers/` | `analyze.worker.js`（分析引擎后台线程，纯函数无 DOM 依赖） |
-| `app/src/components/` | `Icon.vue`（线性 SVG 图标集）、`ToneAdvice.vue`（**按当前设备渲染**）、`ChordChart.vue`（自绘 SVG 指法图）、`FretboardMap.vue`（竖版指板图）、`RecordPanel.vue`（录音面板，双入口复用） |
-| `app/src/views/` | Home/Tools（**卡片由 nav.js 驱动**）/Songs/SongDetail/SongAnalyze/Practice/Metronome/Tuner/Templates/Devices/Reminders/Profile/Plan/Stats/Course/PlanItem/ChordLibrary/Recordings/Chat（**ChatView 顶部有 ASK_TOKEN 令牌输入卡**；**ProfileView 有数据备份卡**） |
+| `app/src/components/` | `Icon.vue`（线性 SVG 图标集，含 amp）、`ToneAdvice.vue`（**新手模式集成面板图**）、`AmpPanel.vue`（**音箱面板 SVG：数值旋钮指针角度/循环旋钮高亮+值标签/脚钉 LED，interactive 点按**）、`GuitarPanel.vue`（**吉他示意 SVG：档位单点/区间高亮**）、`ChordChart.vue`（自绘 SVG 指法图）、`FretboardMap.vue`（竖版指板图）、`RecordPanel.vue`（录音面板，双入口复用） |
+| `app/src/views/` | Home/Tools（**卡片由 nav.js 驱动**）/Songs/SongDetail/SongAnalyze/Practice/Metronome/Tuner/Templates/Devices/Reminders/Profile/Plan/Stats/Course/PlanItem/ChordLibrary/Recordings/Chat（**ChatView 顶部有 ASK_TOKEN 令牌输入卡**；**ProfileView 有数据备份卡**；**AmpGuideView「音箱入门」v0.6.2：面板点按图解 + 套路对照表**） |
 | `app/public/_redirects` | SPA 深链接回退（CF Pages 需要，别删） |
 
 **路由全景**：`/`(tab) `/plan`(tab) `/practice` `/tools`(tab) `/metronome` `/tuner` `/chords` `/recordings` `/ask` `/songs`(tab) `/songs/new` `/songs/:id` `/profile`(tab) `/stats` `/course` `/devices` `/reminders` `/templates` `/plan-item/basic/:id`。`meta.tab` = 显示底部导航（手机 5 标签：首页/计划/工具/歌曲/我的）。
@@ -63,15 +63,17 @@
 - **首页空白 bug 修复（v0.5.1，用户电脑端验收发现）**：根因是 v0.5.0 重构 `stores/practice.js` 删了本地 `todayStr` 但 getter 调用点没改（`ReferenceError`，首页三处 getter 全炸；**Vite 构建不查未定义引用，测试也没覆盖 store**）。修复 + **新增 `spike/test_stores_smoke.mjs`（16 项，实例化全部 store 访问全部 getter/action，纯 Node + localStorage 内存 shim，已入 CI）**；顺手把全工程 63 处不带 `.js` 的相对导入统一补齐（`./router`→`./router/index.js`、`seedSongs.json` 加 `with { type: 'json' }`，Node 可直接测 store）。本地回归全过：对拍 5/5、合成 3/3、规则 25/25、数据 767/767、冒烟 16/16、构建通过。
 - **工程评审修复第二批（v0.6.0，用户验收第 1 步后确认开工，方案已确认，详见需求文档修订记录）**：①**数据层重构**——`storage.js` v2（schema 版本 + 按 key 迁移注册表 + save 变更订阅，云同步接入点）、Pinia 自动持久化插件 `plugins/persist.js`（store 声明 persist 配置自动落盘，防抖 150ms，与旧版同 key 同格式零迁移，7 个 store 接入，**store 里不再有 save 调用**）、ID 改 UUID（`utils/id.js`）；②**歌曲模型统一**——`allSongs` 归一化单一实体（bpm/key/template 直接有效值），`effectiveSong` 收进 store，4 个消费方改造；③**导航配置化**——`data/nav.js` 驱动路由/tab/工具页（加页面只加一条）；④**套路规则数据化**——`data/classifyRules.js`（条件 DSL + 置信度分母表，`classify` 已导出），新增套路不改引擎；⑤**设备能力声明式化**——devices.js 的 params/keyParams（含 on/off 文案），toneGuide 按设备渲染、缺参数自动跳过；⑥**JSDoc 契约**——AnalysisResult/Confidence/Song/PlanItem/PlanOutput/StorageMeta。新增 `spike/test_tone_guide.mjs`（14 项：classify 边界点 + 设备建议输出与 v0.5.x 基准逐字符一致 + 缺参数降级），冒烟升级 20 项（含自动落盘断言），均入 CI。**用户可见变化：无**（纯工程改进）。本地回归全过：对拍 5/5、合成 3/3、规则 25/25、数据 767/767、冒烟 20/20、toneGuide 14/14、构建通过。
 - **音色套路库扩充（v0.6.1，用户要求：按现有歌曲扩充）**：种子库 29 首盘点——「失真节奏 Riff」占 86%（25 首），混着重型金属与常规日摇两类音色；**新增第 6 套「金属 Riff」**（Rhythm 通道 + Metal 箱模 + Gain 7 + 低音 6/高音 5 + 混响最轻；针对 GRX40 + Jam Buddy 2），4 首重型歌改标（KiLLKiSS/Ave Mujica/黒のバースデイ/ギターと孤独と蒼い惑星）；classifyRules 置顶新增金属规则（bpm≥195 且 rmsDb>-14），对拍期望同步（KiLLKiSS→金属 Riff），toneGuide 回归 14→18 项。全量回归通过：对拍 5/5、合成 3/3、规则 25/25、数据 767/767、冒烟 20/20、toneGuide 18/18、构建通过。
-- 全程约 45 个提交，git 历史即详细变更记录；需求文档修订记录完整到 v0.6.1；README/验收指南/交接文档全同步。
+- **图形化设备配置说明（v0.6.2，用户反馈文字版仍难用 + 讨论确认方案 A/双模块/音箱+吉他）**：①devices.js 加 panel 面板布局数据（JAM BUDDY 2 十旋钮三脚钉含多功能按压说明、GRX40 琴身+档位+旋钮）；②`AmpPanel.vue`/`GuitarPanel.vue` SVG 组件（数值旋钮指针 7:30→4:30、高亮红圈+值标签、interactive 点按）；③ToneAdvice 新手模式集成面板图（歌曲详情/套路库共用）；④**「音箱入门」页 `/amp-guide`**（工具页入口，点旋钮看说明 + 6 套套路对照表 + 教学视频提示）；⑤`amp` 图标 + nav 卡片；⑥回归：toneGuide 41 项（+面板数据↔套路模板一致性校验）、新增 `test_panels_render.mjs`（11 项，**Vue SSR 编译 SFC 渲染 SVG 断言高亮/指针/值标签**——inlineTemplate 编译 + import→require 转换的沙箱技巧），均入 CI。全量回归通过：对拍 5/5、合成 3/3、规则 25/25、数据 767/767、冒烟 20/20、toneGuide 41/41、面板渲染 11/11、构建通过。
+- 全程约 48 个提交，git 历史即详细变更记录；需求文档修订记录完整到 v0.6.2；README/验收指南/交接文档全同步。
 
 ## 4. 当前卡在哪
 
-**v0.6.0（工程改进第 2 步）已完成并推送，等用户验收**。用户可见变化为零（纯重构），验收重点是「功能没变坏」：
+**v0.6.2（图形化设备配置说明）已推送，等用户验收**。这次有大量可见变化，验收重点：
 
-1. **回归确认**：电脑/手机各点一遍（首页、歌曲库、添加歌曲分析、计划页、录音、AI 答疑、数据备份）——所有行为应与 v0.5.1 完全一致；数据（打卡/歌单/曲谱/聊天）在重构后应原样保留（persist 插件与旧版共用同一批 localStorage key，零迁移）。
-2. **ASK_TOKEN 已确认配置**（用户反馈 AI 答疑正常）。
-3. **v0.4.2 遗留的待用户反馈**（功能层面，与本次重构无关）：
+1. **歌曲详情页/套路库页（新手模式）**：设备建议卡顶部出现音箱面板图 + 吉他图，要动的旋钮红圈高亮并显示目标值（如 Gain 旋钮旁红色 "6" 标签、CHANNEL 脚钉上方 "Rhythm 节奏"）；Gain/EQ 指针指向对应刻度；手机端面板可横向滑动。
+2. **工具 →「音箱入门」**：点面板任意旋钮/脚钉看说明（重点验证：Bass/Save 等多功能旋钮的"按住=保存预设"提示、CHANNEL 脚钉说明）；下方 6 套套路对照表。
+3. **数据无损**：打卡/歌单/曲谱/聊天原样（v0.6.0 起自动持久化）。
+4. **v0.4.2 遗留的待用户反馈**（功能层面，与本次无关）：
 1. **曲谱准确性（重点）**：19 首曲谱中多数标注了来源与置信度；单源/自动检测的（影色舞等）标注「请对照原曲校准」。用户弹到不对的，按他听出来的改数据（人工纠错永远优先）。
 2. **新歌 BPM/调性待校准**：22 首新歌的 BPM/调性多为引擎分析值（`dataFrom` 标「待人工校准」）；用户弹到速度不对的报过来改。已知悬案：天使にふれたよ!（社区谱 100~117 疑似半速）、青春コンプレックス（社区谱 155 vs 分析 185）、ソラノムジカ（分析 129 vs 半速记谱 98）。
 3. 计划页练习包建议、达标标准难度是否合适；和弦图库 82 个指法是否有标错的。

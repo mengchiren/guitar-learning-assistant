@@ -181,5 +181,19 @@ const ampNoDelay = { ...devices.amp, params: devices.amp.params.filter((p) => p.
 const outNoDelay = beginnerGuide(TONE_TEMPLATES.find((t) => t.id === 'lead'), { ...devices, amp: ampNoDelay })
 check('设备无 Delay 时 fineTune 自动跳过', outNoDelay.fineTune.includes('音箱：Delay 延迟保持关'), false)
 
+// ---- 4. 面板数据与套路模板一致性（v0.6.2 图形化配置） ----
+const ampPanel = devices.amp.panel
+const panelFields = ampPanel.knobs.map((k) => k.field)
+check('音箱面板旋钮字段无重复', new Set(panelFields).size, panelFields.length)
+check('音箱面板坐标都在画布内', ampPanel.knobs.every((k) => k.x > 30 && k.x < ampPanel.width - 30 && k.y > 110 && k.y < ampPanel.height - 40), true)
+check('音箱面板脚钉含 channel', ampPanel.foots.some((f) => f.id === 'channel'), true)
+for (const t of TONE_TEMPLATES) {
+  check(`套路 ${t.name}：gain/mod/delay/reverb/model 在面板有旋钮`, ['gain', 'mod', 'delay', 'reverb', 'model'].every((f) => panelFields.includes(f)), true)
+  check(`套路 ${t.name}：eq 三旋钮齐全`, ['eq.b', 'eq.m', 'eq.t'].every((f) => panelFields.includes(f)), true)
+  check(`套路 ${t.name}：channel 在脚钉`, ampPanel.foots.some((f) => f.id === 'channel'), true)
+}
+check('吉他面板档位 5 个', devices.guitar.panel.switch.positions, 5)
+check('吉他面板旋钮字段无重复', new Set(devices.guitar.panel.knobs.map((k) => k.field)).size, devices.guitar.panel.knobs.length)
+
 console.log(`\n结果：${pass}/${pass + fail} 项通过（${fail} 项失败）`)
 process.exit(fail > 0 ? 1 : 0)

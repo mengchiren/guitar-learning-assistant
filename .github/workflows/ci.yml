@@ -30,8 +30,11 @@ jobs:
       - name: Store 冒烟测试（20 项，v0.5.1）
         run: node spike/test_stores_smoke.mjs
 
-      - name: 套路归类规则 + 设备建议回归（14 项，v0.6.0）
+      - name: 套路归类规则 + 设备建议回归（41 项，v0.6.0）
         run: node spike/test_tone_guide.mjs
+
+      - name: 面板组件渲染冒烟（11 项，v0.6.2）
+        run: node spike/test_panels_render.mjs
 
       - name: 数据完整性校验（767 项）
         run: node spike/test_sheets.mjs

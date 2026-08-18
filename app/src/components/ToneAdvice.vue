@@ -3,10 +3,12 @@ import { computed } from 'vue'
 import { useSettingsStore } from '../stores/settings.js'
 import { beginnerGuide } from '../utils/toneGuide.js'
 import { GUITARS, AMPS } from '../data/devices.js'
+import AmpPanel from './AmpPanel.vue'
+import GuitarPanel from './GuitarPanel.vue'
 
 // 设备设置建议卡：按「我的 → 显示偏好」切换两种模式。
-// beginner：参数速览 + 大白话操作流程；full：全部参数表（9 项网格）。
-// v0.6.0：按当前选中的设备渲染（新设备只改 devices.js 数据，渲染逻辑不动）。
+// beginner：面板示意图（v0.6.2，要动的旋钮红圈高亮）+ 参数速览 + 大白话操作流程；full：全部参数表。
+// 按当前选中的设备渲染（新设备只改 devices.js 数据，渲染逻辑不动）。
 const props = defineProps({
   tpl: { type: Object, required: true },
 })
@@ -15,10 +17,42 @@ const guitar = GUITARS.find((d) => d.id === settings.activeDevices.guitarId)
 const amp = AMPS.find((d) => d.id === settings.activeDevices.ampId)
 // computed 而非一次性计算：同组件实例复用时（路由参数切换）tpl 会变，内容要跟着变
 const beginner = computed(() => beginnerGuide(props.tpl, { guitar, amp }))
+
+// 面板图数据：套路值 → 面板字段；高亮 = 设备 keyParams（新手必须动的）
+const ampValues = computed(() => {
+  const a = props.tpl.amp
+  return {
+    channel: a.channel,
+    model: a.model,
+    gain: a.gain,
+    'eq.b': a.eq.b,
+    'eq.m': a.eq.m,
+    'eq.t': a.eq.t,
+    mod: a.mod,
+    delay: a.delay,
+    reverb: a.reverb,
+  }
+})
+const guitarValues = computed(() => ({ pickup: props.tpl.guitar.pickup, tone: props.tpl.guitar.tone }))
+const ampHighlight = amp?.keyParams || []
+const guitarHighlight = guitar?.keyParams || []
 </script>
 
 <template>
   <div v-if="settings.displayMode === 'beginner'">
+    <!-- 面板示意图：要动的旋钮红圈高亮（v0.6.2） -->
+    <div class="panel-scroll">
+      <div class="panel-wrap">
+        <div v-if="guitar" class="guitar-wrap">
+          <GuitarPanel :panel="guitar.panel" :values="guitarValues" :highlight="guitarHighlight" />
+        </div>
+        <div v-if="amp" class="amp-wrap">
+          <AmpPanel :panel="amp.panel" :values="ampValues" :highlight="ampHighlight" />
+        </div>
+      </div>
+    </div>
+    <p class="muted small" style="margin-top: 6px">上图红色圈出的就是要动的：照着数值拧/按，其余先别碰。</p>
+
     <div class="quick-params">
       <span v-for="p in beginner.params" :key="p.label" class="quick-chip">
         <b>{{ p.label }}</b>{{ p.value }}
@@ -52,6 +86,12 @@ const beginner = computed(() => beginnerGuide(props.tpl, { guitar, amp }))
 </template>
 
 <style scoped>
+/* 面板区：手机横向滚动（音箱图保持可读宽度），桌面并排 */
+.panel-scroll { overflow-x: auto; padding-bottom: 4px; }
+.panel-wrap { display: flex; gap: 10px; align-items: flex-start; }
+.guitar-wrap { flex: none; width: 92px; }
+.amp-wrap { flex: none; width: 520px; }
+
 .quick-params { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
 .quick-chip {
   background: var(--bg-input);

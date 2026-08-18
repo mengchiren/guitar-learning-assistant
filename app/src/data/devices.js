@@ -1,23 +1,31 @@
-// 设备参数模板库（v0.6.0 起含「能力描述」）。音色建议会按「当前选中的设备」把套路模板
-// 映射为具体旋钮位置。新增设备时在此扩展即可，toneGuide.js 按 params 自动渲染，不改代码。
-// 参数以实物面板/说明书核对为准。
+// 设备参数模板库（v0.6.2 起含「面板布局」数据）。
+// 音色建议会按「当前选中的设备」把套路模板映射为具体旋钮位置；面板示意图（AmpPanel/GuitarPanel）
+// 也由这里的 panel 数据驱动——新设备只需补数据：params（套路字段→旋钮）+ panel（坐标/量程/说明）。
+// 参数以实物面板/说明书核对为准；面板图为示意，旋钮相对位置按实物标注。
 
 /**
- * @typedef {object} DeviceParam 设备可调参数（套路模板字段 → 设备旋钮的映射描述）
- * @property {string} field 模板字段名：guitar 侧取 tpl.guitar[field]；amp 侧取 tpl.amp[field]
- *                            （'eq' 取整个 tpl.amp.eq 对象；eq.b/m/t 取 tpl.amp.eq.b 等）
- * @property {string} label 展示名
- * @property {'pickup'|'button'|'knob'|'gain'|'eq'|'effect'} kind 渲染方式：
- *                           pickup=拾音器拨杆 / button=通道按钮 / knob=旋钮 / gain=带满格 / eq=三段合一 / effect=开关型
- * @property {number} [max] kind 为 gain 时的满格值
+ * @typedef {object} PanelKnob 面板旋钮
+ * @property {string} field 对应套路模板字段（guitar 侧 tpl.guitar[field]；amp 侧 tpl.amp[field]；
+ *                           'eq.b/m/t' 取 tpl.amp.eq.*；非套路字段如 guitarVol 只作图解不入套路）
+ * @property {string} label 面板印刷标签（如 'Gain / Quit'）
+ * @property {number} x
+ * @property {number} y 旋钮圆心坐标（面板画布坐标系）
+ * @property {'num'|'text'} kind num=数值旋钮（按 min/max 画指针角度）；text=循环选择旋钮（只高亮+显示值）
+ * @property {number} [min] kind=num 的最小值
+ * @property {number} [max] kind=num 的最大值
+ * @property {string} note 这是什么、怎么用（入门页点按显示）
+ * @property {string} [tip] 与套路的关系提示（可选）
  */
 
 /**
- * @typedef {object} Device 设备
- * @property {string} id
- * @property {string} name
- * @property {string[]} keyParams 新手速览优先展示的参数（顺序即展示顺序）
- * @property {DeviceParam[]} params 全部可调参数（顺序即步骤顺序）
+ * @typedef {object} PanelFoot 面板脚钉
+ * @property {string} id 唯一 id（channel 等，套路字段 channel 映射到此）
+ * @property {string} label 印刷标签
+ * @property {number} x
+ * @property {number} y 左上角坐标
+ * @property {number} w
+ * @property {number} h
+ * @property {string} note 说明
  */
 
 /** @type {Device[]} */
@@ -44,6 +52,17 @@ export const GUITARS = [
       { field: 'pickup', label: '琴·档位', kind: 'pickup' },
       { field: 'tone', label: '音色旋钮', kind: 'knob' },
     ],
+    // 吉他示意图（v0.6.2）：琴身轮廓 + 5 档拨杆 + 音量/音色旋钮
+    panel: {
+      width: 300,
+      height: 420,
+      note: '示意图：5 档拾音器拨杆 + 音量/音色旋钮，位置以实物为准',
+      switch: { field: 'pickup', x: 118, y: 292, positions: 5 },
+      knobs: [
+        { field: 'volume', label: '音量', x: 178, y: 332, kind: 'text', note: '吉他总音量。关小可以把失真变「清音化」。' },
+        { field: 'tone', label: '音色', x: 146, y: 352, kind: 'text', note: '音色旋钮：开大偏亮、关小偏闷。套路建议里标了大致范围。' },
+      ],
+    },
   },
 ]
 
@@ -73,5 +92,29 @@ export const AMPS = [
       { field: 'delay', label: 'Delay', kind: 'effect', off: '音箱：Delay 延迟保持关', on: '音箱：Delay 开「%s」' },
       { field: 'reverb', label: 'Reverb', kind: 'knob', off: '音箱：Reverb 混响保持关', on: '音箱：Reverb 混响开「%s」' },
     ],
+    // 顶部面板示意（v0.6.2）：10 个旋钮一排（左→右按实物），右侧 3 个脚钉。
+    // 多功能旋钮（Bass/Save 等）的按压功能写在 note 里——新手最常踩的坑。
+    panel: {
+      width: 760,
+      height: 300,
+      note: '示意：旋钮从左到右按实物排列，多功能旋钮按住可触发第二功能（如 Save 保存预设）；以实物面板为准',
+      knobs: [
+        { field: 'guitarVol', label: 'Guitar Vol', x: 45, y: 150, kind: 'text', note: '吉他输入音量（接吉他的音量）。' },
+        { field: 'musicVol', label: 'Music Vol', x: 115, y: 150, kind: 'text', note: '伴奏/音乐音量（蓝牙放伴奏时用它）。' },
+        { field: 'eq.b', label: 'Bass / Save', x: 185, y: 150, kind: 'num', min: 0, max: 10, note: '转动：低音多少（0~10）。按住：保存当前音色为预设。' },
+        { field: 'eq.m', label: 'Mid / Tune', x: 255, y: 150, kind: 'num', min: 0, max: 10, note: '转动：中音多少（0~10）。按住：进入内置调音器。' },
+        { field: 'eq.t', label: 'Treble / D.Control', x: 325, y: 150, kind: 'num', min: 0, max: 10, note: '转动：高音多少（0~10）。按住：鼓机速度控制。' },
+        { field: 'gain', label: 'Gain / Quit', x: 395, y: 150, kind: 'num', min: 0, max: 10, note: '转动：失真增益（0~10），越大越「糊/冲」。按住：退出当前模式。' },
+        { field: 'reverb', label: 'Reverb / D.Vol', x: 465, y: 150, kind: 'text', note: '转动：混响类型（关/Hall 厅堂/Church 教堂）。按住：混响音量。' },
+        { field: 'delay', label: 'Delay / D.Type', x: 535, y: 150, kind: 'text', note: '转动：延迟类型（关/Digital 数字/Analog 模拟）。按住：延迟音量。' },
+        { field: 'mod', label: 'Mod / D.Speed', x: 605, y: 150, kind: 'text', note: '转动：MOD 效果类型（关/Chorus 合唱/Flanger/Phaser/Tremolo/Vibrato）。按住：效果速度。' },
+        { field: 'model', label: 'Amp / Ch.Volume', x: 675, y: 150, kind: 'text', note: '转动：选择箱头模拟（14 种：Clean/Blues/Funk/Rock/Metal 等，循环）。按住：通道音量。套路建议里的「箱模」就是转它。' },
+      ],
+      foots: [
+        { id: 'channel', label: 'CHANNEL', x: 190, y: 238, w: 92, h: 36, note: '脚钉：切换 清音(Clean) / 失真(Drive) 通道。套路建议里的「通道」就是按它。' },
+        { id: 'driveMode', label: 'DRIVE MODE', x: 310, y: 238, w: 92, h: 36, note: '脚钉：失真通道下切换 节奏(Rhythm) / 主音(Lead)。' },
+        { id: 'looper', label: 'LOOPER', x: 430, y: 238, w: 92, h: 36, note: '脚钉：30 秒循环录音（Looper），练伴奏/录即兴用。' },
+      ],
+    },
   },
 ]
