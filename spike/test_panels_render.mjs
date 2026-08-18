@@ -73,6 +73,10 @@ check('GuitarPanel 档位高亮点 1 个（档位 5）', (guitarHtml.match(/swit
 const guitarHtml2 = await renderToString(createSSRApp({ components: { GuitarPanel }, template: '<GuitarPanel :panel="p" :values="v" :highlight="[\'pickup\']" />', data: () => ({ p: guitar.panel, v: { pickup: '档位 1~3（琴颈/中间）' } }) }))
 check('GuitarPanel 范围档位高亮 3 个（1~3）', (guitarHtml2.match(/switch-dot/g) || []).length === 3)
 
+// 音量旋钮也高亮（v0.6.4：琴两个旋钮 VOLUME/TONE，音量进 keyParams）
+const guitarHtml4 = await renderToString(createSSRApp({ components: { GuitarPanel }, template: '<GuitarPanel :panel="p" :values="v" :highlight="[\'pickup\',\'volume\']" />', data: () => ({ p: guitar.panel, v: { pickup: '档位 5（琴桥双线圈）', volume: '8~9', tone: '6~7' } }) }))
+check('GuitarPanel 音量旋钮红圈 1 个（volume 高亮）', (guitarHtml4.match(/hl-ring/g) || []).length === 2) // 档位红圈 + 音量红圈
+
 // 不高亮时不应有红圈
 const guitarHtml3 = await renderToString(createSSRApp({ components: { GuitarPanel }, template: '<GuitarPanel :panel="p" :values="v" />', data: () => ({ p: guitar.panel, v: { pickup: '档位 5（琴桥双线圈）' } }) }))
 check('GuitarPanel 无高亮时无红圈', !guitarHtml3.includes('hl-ring'))

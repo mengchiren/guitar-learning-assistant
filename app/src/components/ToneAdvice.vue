@@ -37,7 +37,7 @@ const ampValues = computed(() => {
     reverb: a.reverb,
   }
 })
-const guitarValues = computed(() => ({ pickup: props.tpl.guitar.pickup, tone: props.tpl.guitar.tone }))
+const guitarValues = computed(() => ({ pickup: props.tpl.guitar.pickup, volume: props.tpl.guitar.volume, tone: props.tpl.guitar.tone }))
 const ampHighlight = computed(() => {
   const base = amp?.keyParams || []
   return ampValues.value.driveMode ? [...base, 'driveMode'] : base

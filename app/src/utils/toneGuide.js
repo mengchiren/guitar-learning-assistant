@@ -41,7 +41,9 @@ export function beginnerGuide(tpl, { guitar, amp } = {}) {
   const stepFor = (side, p) => {
     const v = valueOf(side, p.field)
     if (side === 'guitar') {
-      return p.kind === 'pickup' ? `琴：拾音器拨杆拨到「${v}」` : `琴：音色旋钮拧到「${v}」`
+      if (p.kind === 'pickup') return `琴：拾音器拨杆拨到「${v}」`
+      if (p.field === 'volume') return `琴：音量旋钮拧到「${v}」`
+      return `琴：音色旋钮拧到「${v}」`
     }
     switch (p.kind) {
       case 'button': {
@@ -69,7 +71,7 @@ export function beginnerGuide(tpl, { guitar, amp } = {}) {
   // 可先不动（非速览参数）：eq 三合一、开关型效果（on/off 完整文案在设备数据里）、其余旋钮
   const fineFor = (side, p) => {
     const v = valueOf(side, p.field)
-    if (side === 'guitar') return `琴：音色旋钮拧到「${v}」`
+    if (side === 'guitar') return p.field === 'volume' ? `琴：音量旋钮拧到「${v}」` : `琴：音色旋钮拧到「${v}」`
     if (p.on || p.off) return isOff(v) ? (p.off || '').replace('%s', v) : (p.on || '').replace('%s', v)
     if (p.kind === 'eq') return `音箱：EQ 三个旋钮 → 低音 ${v.b} · 中音 ${v.m} · 高音 ${v.t}`
     return `音箱：${p.label}调到「${v}」`

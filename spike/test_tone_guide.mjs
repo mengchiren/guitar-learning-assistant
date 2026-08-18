@@ -36,18 +36,20 @@ check('classify: 清音+合唱', classify({ bpm: 120, rmsDb: -20, centroidHz: 16
 check('classify: 兜底清音伴奏', classify({ bpm: 80, rmsDb: -20, centroidHz: 1000 }), { template: '清音伴奏', confidence: '中' })
 check('classify: Solo 优先于轻过载（规则顺序）', classify({ bpm: 100, rmsDb: -15, centroidHz: 2700 }), { template: '失真主音 Solo', confidence: '中' })
 
-// ---- 2. beginnerGuide 输出基准逐字符一致（v0.6.3：通道两步脚钉 + 实物箱模名） ----
+// ---- 2. beginnerGuide 输出基准逐字符一致（v0.6.4：琴音量旋钮 + 通道两步脚钉 + 实物箱模名） ----
 const devices = { guitar: GUITARS[0], amp: AMPS[0] }
 const BASELINE = {
   清音伴奏: {
     params: [
       { label: '琴·档位', value: '档位 1~3（琴颈/中间）' },
+      { label: '音量旋钮', value: '7~8' },
       { label: '通道', value: 'CLEAN' },
       { label: '箱模', value: '65 Black Nor' },
       { label: 'Gain', value: '3 / 10' },
     ],
     steps: [
       '琴：拾音器拨杆拨到「档位 1~3（琴颈/中间）」',
+      '琴：音量旋钮拧到「7~8」',
       '音箱：CHANNEL 脚钉按到「CLEAN」（清音）',
       '音箱：箱模旋钮转到「65 Black Nor」',
       '音箱：Gain 增益旋钮拧到「3」（满格是 10）',
@@ -63,12 +65,14 @@ const BASELINE = {
   '清音 + 合唱氛围': {
     params: [
       { label: '琴·档位', value: '档位 1 或 2' },
+      { label: '音量旋钮', value: '7~8' },
       { label: '通道', value: 'CLEAN' },
       { label: '箱模', value: '65 Black Nor' },
       { label: 'Gain', value: '3 / 10' },
     ],
     steps: [
       '琴：拾音器拨杆拨到「档位 1 或 2」',
+      '琴：音量旋钮拧到「7~8」',
       '音箱：CHANNEL 脚钉按到「CLEAN」（清音）',
       '音箱：箱模旋钮转到「65 Black Nor」',
       '音箱：Gain 增益旋钮拧到「3」（满格是 10）',
@@ -84,12 +88,14 @@ const BASELINE = {
   轻过载节奏: {
     params: [
       { label: '琴·档位', value: '档位 4~5' },
+      { label: '音量旋钮', value: '8~9' },
       { label: '通道', value: 'DRIVE → RHYTHM' },
       { label: '箱模', value: '65 Black Nor OD' },
       { label: 'Gain', value: '5 / 10' },
     ],
     steps: [
       '琴：拾音器拨杆拨到「档位 4~5」',
+      '琴：音量旋钮拧到「8~9」',
       '音箱：CHANNEL 脚钉按到「DRIVE」（失真）',
       '音箱：DRIVE MODE 脚钉按到「RHYTHM」（节奏）',
       '音箱：箱模旋钮转到「65 Black Nor OD」',
@@ -106,12 +112,14 @@ const BASELINE = {
   '失真节奏 Riff': {
     params: [
       { label: '琴·档位', value: '档位 5（琴桥双线圈）' },
+      { label: '音量旋钮', value: '8~9' },
       { label: '通道', value: 'DRIVE → RHYTHM' },
       { label: '箱模', value: 'J800 Lo' },
       { label: 'Gain', value: '6 / 10' },
     ],
     steps: [
       '琴：拾音器拨杆拨到「档位 5（琴桥双线圈）」',
+      '琴：音量旋钮拧到「8~9」',
       '音箱：CHANNEL 脚钉按到「DRIVE」（失真）',
       '音箱：DRIVE MODE 脚钉按到「RHYTHM」（节奏）',
       '音箱：箱模旋钮转到「J800 Lo」',
@@ -128,12 +136,14 @@ const BASELINE = {
   '失真主音 Solo': {
     params: [
       { label: '琴·档位', value: '档位 5' },
+      { label: '音量旋钮', value: '8~9' },
       { label: '通道', value: 'DRIVE → LEAD' },
       { label: '箱模', value: 'J800 Hi OD' },
       { label: 'Gain', value: '7 / 10' },
     ],
     steps: [
       '琴：拾音器拨杆拨到「档位 5」',
+      '琴：音量旋钮拧到「8~9」',
       '音箱：CHANNEL 脚钉按到「DRIVE」（失真）',
       '音箱：DRIVE MODE 脚钉按到「LEAD」（主音）',
       '音箱：箱模旋钮转到「J800 Hi OD」',
@@ -150,12 +160,14 @@ const BASELINE = {
   '金属 Riff': {
     params: [
       { label: '琴·档位', value: '档位 5（琴桥双线圈）' },
+      { label: '音量旋钮', value: '9~10' },
       { label: '通道', value: 'DRIVE → RHYTHM' },
       { label: '箱模', value: 'DualRect Red' },
       { label: 'Gain', value: '7 / 10' },
     ],
     steps: [
       '琴：拾音器拨杆拨到「档位 5（琴桥双线圈）」',
+      '琴：音量旋钮拧到「9~10」',
       '音箱：CHANNEL 脚钉按到「DRIVE」（失真）',
       '音箱：DRIVE MODE 脚钉按到「RHYTHM」（节奏）',
       '音箱：箱模旋钮转到「DualRect Red」',

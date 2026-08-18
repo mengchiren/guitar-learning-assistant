@@ -47,9 +47,10 @@ export const GUITARS = [
       '音量旋钮关小可把失真「清音化」',
       '零基础阶段先熟悉 1、2、5 档就够用',
     ],
-    keyParams: ['pickup'],
+    keyParams: ['pickup', 'volume'],
     params: [
       { field: 'pickup', label: '琴·档位', kind: 'pickup' },
+      { field: 'volume', label: '音量旋钮', kind: 'knob' },
       { field: 'tone', label: '音色旋钮', kind: 'knob' },
     ],
     // 吉他示意图（v0.6.2）：琴身轮廓 + 5 档拨杆 + 音量/音色旋钮

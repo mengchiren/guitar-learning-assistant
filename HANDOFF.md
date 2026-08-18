@@ -1,6 +1,6 @@
 # HANDOFF 交接文档
 
-> 给一个完全没有上下文的新对话看。工作目录：`F:\电吉他学习`（Windows 10，Git Bash）。项目名：**练琴搭子 · PickBuddy**。当前版本 **v0.6.3**。
+> 给一个完全没有上下文的新对话看。工作目录：`F:\电吉他学习`（Windows 10，Git Bash）。项目名：**练琴搭子 · PickBuddy**。当前版本 **v0.6.4**。
 
 ## 1. 我们在做什么任务
 
@@ -11,7 +11,7 @@
 - **产品策略（三层）**：种子库人工数据优先 → AI 分析作参考并标置信度 → 人工纠错兜底。**别把 AI 结果当精确数据呈现。**
 - **目标歌曲**：日系动漫乐队歌（轻音、孤独摇滚、MyGO!!!!!、Ave Mujica、哭泣少女乐队）+ Beyond 经典。
 
-**需求的唯一权威来源是 `需求文档.md`（当前 v0.6.3，含完整修订记录）**，任何功能争议以它为准，改需求必须先改它。
+**需求的唯一权威来源是 `需求文档.md`（当前 v0.6.4，含完整修订记录）**，任何功能争议以它为准，改需求必须先改它。
 
 ## 2. 关键文件地图
 
@@ -65,7 +65,8 @@
 - **音色套路库扩充（v0.6.1，用户要求：按现有歌曲扩充）**：种子库 29 首盘点——「失真节奏 Riff」占 86%（25 首），混着重型金属与常规日摇两类音色；**新增第 6 套「金属 Riff」**（Rhythm 通道 + Metal 箱模 + Gain 7 + 低音 6/高音 5 + 混响最轻；针对 GRX40 + Jam Buddy 2），4 首重型歌改标（KiLLKiSS/Ave Mujica/黒のバースデイ/ギターと孤独と蒼い惑星）；classifyRules 置顶新增金属规则（bpm≥195 且 rmsDb>-14），对拍期望同步（KiLLKiSS→金属 Riff），toneGuide 回归 14→18 项。全量回归通过：对拍 5/5、合成 3/3、规则 25/25、数据 767/767、冒烟 20/20、toneGuide 18/18、构建通过。
 - **图形化设备配置说明（v0.6.2，用户反馈文字版仍难用 + 讨论确认方案 A/双模块/音箱+吉他）**：①devices.js 加 panel 面板布局数据（JAM BUDDY 2 十旋钮三脚钉含多功能按压说明、GRX40 琴身+档位+旋钮）；②`AmpPanel.vue`/`GuitarPanel.vue` SVG 组件（数值旋钮指针 7:30→4:30、高亮红圈+值标签、interactive 点按）；③ToneAdvice 新手模式集成面板图（歌曲详情/套路库共用）；④**「音箱入门」页 `/amp-guide`**（工具页入口，点旋钮看说明 + 6 套套路对照表 + 教学视频提示）；⑤`amp` 图标 + nav 卡片；⑥回归：toneGuide 41 项（+面板数据↔套路模板一致性校验）、新增 `test_panels_render.mjs`（11 项，**Vue SSR 编译 SFC 渲染 SVG 断言高亮/指针/值标签**——inlineTemplate 编译 + import→require 转换的沙箱技巧），均入 CI。全量回归通过：对拍 5/5、合成 3/3、规则 25/25、数据 767/767、冒烟 20/20、toneGuide 41/41、面板渲染 11/11、构建通过。
 - **设备建议修正（v0.6.3，用户实物反馈两个真错误）**：①**通道双脚钉**——CHANNEL（CLEAN/DRIVE）+ DRIVE MODE（RHYTHM/LEAD）两步讲全，`channelMap` 数据驱动：步骤拆两步、速览芯片显示「DRIVE → RHYTHM」/「CLEAN」、面板两个脚钉联动高亮；②**箱模名按实物 14 种更正**（65 Black/J800/DualRect/5153 系列，OD=过载推子版）+ `modelNotes` 中文对照 + 入门页 14 种对照表；模板映射：清音→65 Black Nor、轻过载→65 Black Nor OD、失真节奏→J800 Lo、金属→DualRect Red、主音→J800 Hi OD。回归：toneGuide 41→46 项（+channelMap/14 种名单/虚构名禁止校验）、面板渲染 11→12 项，均过；构建通过。
-- 全程约 50 个提交，git 历史即详细变更记录；需求文档修订记录完整到 v0.6.3；README/验收指南/交接文档全同步。
+- **设备建议补全（v0.6.4，用户反馈）**：①**琴音量旋钮（VOLUME）补全**——之前只建议了音色旋钮（TONE）；GRX40 两个旋钮现在都给建议：音量进 keyParams（速览第 2 芯片、步骤第 2 步「琴：音量旋钮拧到…」、面板图上音量旋钮红圈高亮），音色留在「可先不动」；6 套套路音量参考：清音 7~8 / 轻过载 8~9 / 失真节奏 8~9 / 金属 9~10 / 主音 8~9；②**箱模名大小写规范化**——用户输入用小写是打字方便，实物为标准大小写（65 Black Nor、J800 Lo、DualRect Red、5153 EL34/6L6、OD 大写），全部按标准写法。回归：toneGuide 46 项（基准重写含音量）、面板渲染 12→13 项（+音量旋钮高亮断言），全过；构建通过。**用户确认本轮结束，等验收。**
+- 全程约 52 个提交，git 历史即详细变更记录；需求文档修订记录完整到 v0.6.4；README/验收指南/交接文档全同步。
 
 ## 4. 当前卡在哪
 
@@ -106,7 +107,7 @@
 10. **音频/视频不进 git**：`.gitignore` 已排除 `歌曲文件/`、`视频教程/`、`spike/songs/`、`node_modules`、`spike/.venv`、`app/public/test-audio.mp3`、`gui-test-screenshots/`。用户歌曲是版权内容。
 11. **Windows 端口残留**：任务被 kill 后 node 可能占端口：`netstat -ano | grep :端口 | grep -i listen` 拿 PID → `taskkill //F //PID <PID>`。
 12. **手机调音器/录音需要 HTTPS**：getUserMedia 要求安全上下文。线上已 HTTPS；局域网 IP 的 http 不行。
-13. **设备参数来自实物核对（v0.6.3 起）**：GRX40/Jam Buddy 2 参数在 `devices.js`；**14 种箱头模拟名单已按用户实物确认**（65 Black Nor/od、65 Black Vib/od、J800 Lo/od、J800 Hi/od、DualRect Red/od、5153 EL34/od、5153 6L6/od，OD=过载推子版），模板不再用虚构名（Rock/Metal/Blues 之类，校验测试禁止）；**通道是双脚钉**：CHANNEL（CLEAN/DRIVE）+ DRIVE MODE（RHYTHM/LEAD），映射在 `channelMap`。
+13. **设备参数来自实物核对（v0.6.3/v0.6.4 起）**：GRX40/Jam Buddy 2 参数在 `devices.js`；**14 种箱头模拟名单已按用户实物确认**（65 Black Nor/OD、65 Black Vib/OD、J800 Lo/OD、J800 Hi/OD、DualRect Red/OD、5153 EL34/OD、5153 6L6/OD，OD=过载推子版；**名字用标准大小写——用户打小写是偷懒，实物为准，别照抄小写**），模板不再用虚构名（Rock/Metal/Blues 之类，校验测试禁止）；**通道是双脚钉**：CHANNEL（CLEAN/DRIVE）+ DRIVE MODE（RHYTHM/LEAD），映射在 `channelMap`；**吉他两个旋钮 VOLUME/TONE 都要给建议**（音量旋钮在 keyParams/步骤/速览/面板高亮里，音色旋钮在「可先不动」里）。
 14. **浏览器测试方法**（browser-use 技能，`mcp__node_repl__js` 工具）：开 IAB 浏览器，`setViewportSize` 模拟手机（390×844）与桌面（1280×800）；**本会话模型看不了图片**——截图证据用 Python PIL 做像素校验（尺寸/颜色分布/区域 diff），截图存 `gui-test-screenshots/`（不进 git）；`playwright.evaluate` 会被安全策略拒绝（简单只读如 `window.scrollY` 可行，读 localStorage 被拒）；**读非有限数值（NaN/Infinity）用 `String(el.duration)` 包装**（安全层把非有限值序列化成 undefined）；aria-hidden 的 SVG 内容不在快照里（验证 SVG 用 locator 计数）；`fill('')` 对 search 输入框不生效（用 click + Control+A + Backspace）；HMR 会重置组件局部状态；**IAB 不支持文件选择器**——上传联调用添加歌曲页 dev-only 的「加载开发测试音频」按钮；**IAB 点击通道会间歇性失效**（一个 tab 用久了 playwright 点击超时、cua 坐标/dom_cua 都无效）——**换新 tab 通常恢复**；**页面持续更新（计时 tick、录音中、节拍器跑）会让 playwright 点击永远等不到元素稳定**——用 `dom_cua.get_visible_dom()` 拿 node ref 再 `dom_cua.click({node_id})`，或读按钮 boundingBox 用 `cua.click({x,y})` 坐标点；截图偶发「activity capture failed」重试一次即可；IAB 里 getUserMedia 可能直接放行（能真录环境噪音，测出低置信度 BPM 是正常现象不是 bug）。
 15. **AGENTS.md 规矩**：编辑任何已有文本文件前用 chardet 检测编码（本工程都是 UTF-8）；新文件直接 UTF-8。
 16. **计时器/节拍器是全局 store**：切页不停表/不停声靠 `stores/timer.js`、`stores/metronome.js` 共享实例。不要写回页面级 composable。**练习页不要放节拍器控件**（用户明确拒绝过）。
