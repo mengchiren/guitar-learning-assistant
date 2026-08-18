@@ -1,10 +1,12 @@
 import { defineStore } from 'pinia'
-import { load, save } from '../utils/storage.js'
+import { load } from '../utils/storage.js'
 import { SEED_SHEETS } from '../data/songSheets.js'
 
 // 曲谱：种子曲谱（只读，人工整理）+ 用户自录曲谱（localStorage，优先显示）。
 // 谱子为个人学习笔记，仅存本地浏览器，无分享/公开功能。
 export const useSheetsStore = defineStore('sheets', {
+  // v0.6.0：状态变更自动持久化（persist 插件），不再手动 save
+  persist: { key: 'user-sheets', paths: ['userSheets'] },
   state: () => ({
     // { songId: { sections: [{ name, chords, pattern, note }] } }
     userSheets: load('user-sheets', {}),
@@ -22,11 +24,9 @@ export const useSheetsStore = defineStore('sheets', {
   actions: {
     saveSheet(songId, sections) {
       this.userSheets[songId] = { sections }
-      save('user-sheets', this.userSheets)
     },
     removeSheet(songId) {
       delete this.userSheets[songId]
-      save('user-sheets', this.userSheets)
     },
   },
 })

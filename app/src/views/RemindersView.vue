@@ -11,11 +11,9 @@ const remMinute = computed(() => Number(settings.reminders.time.split(':')[1]))
 
 function setHour(v) {
   settings.reminders.time = `${String(v).padStart(2, '0')}:${String(remMinute.value).padStart(2, '0')}`
-  settings.saveReminders()
 }
 function setMinute(v) {
   settings.reminders.time = `${String(remHour.value).padStart(2, '0')}:${String(v).padStart(2, '0')}`
-  settings.saveReminders()
 }
 
 async function requestNotif() {
@@ -40,7 +38,7 @@ async function requestNotif() {
         <button
           class="switch"
           :class="{ on: settings.reminders.enabled }"
-          @click="settings.reminders.enabled = !settings.reminders.enabled; settings.saveReminders()"
+          @click="settings.reminders.enabled = !settings.reminders.enabled"
         >
           <span class="knob"></span>
         </button>

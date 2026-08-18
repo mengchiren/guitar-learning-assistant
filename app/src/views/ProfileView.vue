@@ -8,7 +8,6 @@ const settings = useSettingsStore()
 
 function toggleDisplayMode() {
   settings.displayMode = settings.displayMode === 'beginner' ? 'full' : 'beginner'
-  settings.saveDisplayMode()
 }
 
 // ---- 数据备份/恢复（v0.5.0）：结构化数据导出 JSON 文件，可恢复 ----

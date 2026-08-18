@@ -1,8 +1,11 @@
 import { defineStore } from 'pinia'
-import { load, save } from '../utils/storage.js'
+import { load } from '../utils/storage.js'
 import { localDateStr, shiftDate } from '../utils/date.js'
+import { newId } from '../utils/id.js'
 
 export const usePracticeStore = defineStore('practice', {
+  // v0.6.0：状态变更自动持久化（persist 插件），不再手动 save
+  persist: { key: 'practice-records', paths: ['records'] },
   state: () => ({
     // record: { id, date: 'YYYY-MM-DD', seconds, tags: [], note }
     records: load('practice-records', []),
@@ -34,18 +37,17 @@ export const usePracticeStore = defineStore('practice', {
     totalSeconds: (s) => s.records.reduce((sum, r) => sum + r.seconds, 0),
   },
   actions: {
+    /**
+     * @param {{date: string, seconds: number, tags: string[], note?: string}} record
+     */
     addRecord({ date, seconds, tags, note }) {
       this.records.push({
-        id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        id: newId(),
         date,
         seconds,
         tags,
         note,
       })
-      this.persist()
-    },
-    persist() {
-      save('practice-records', this.records)
     },
   },
 })

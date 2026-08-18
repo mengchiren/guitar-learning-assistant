@@ -30,10 +30,12 @@
 ## 技术栈
 
 - Vue 3 + Vite + Pinia + Vue Router + vite-plugin-pwa
-- **自研纯前端音频分析引擎**（`app/src/utils/analyze.js`）：手写 FFT/onset 包络/自相关/K-S 调性模板，无任何 ML/音频库依赖，Node 与浏览器通用；**分析在 Web Worker 后台线程跑**（`app/src/workers/analyze.worker.js`），大文件不卡界面
-- 本地存储：localStorage 抽象层（云同步预留）+ IndexedDB（录音）
+- **自研纯前端音频分析引擎**（`app/src/utils/analyze.js`）：手写 FFT/onset 包络/自相关/K-S 调性模板，无任何 ML/音频库依赖，Node 与浏览器通用；**分析在 Web Worker 后台线程跑**（`app/src/workers/analyze.worker.js`），大文件不卡界面；**套路归类规则是数据**（`app/src/data/classifyRules.js`），新增套路不改引擎
+- 本地存储：localStorage 抽象层（**schema 版本 + 迁移 + 变更订阅**，云同步接入点）+ IndexedDB（录音）；**Pinia 自动持久化插件**（store 声明 persist 配置即自动落盘，消灭手动 save 漏调）
+- 导航配置化：`app/src/data/nav.js` 一份清单驱动路由 / 底部 tab / 工具页
+- 设备能力声明式化：`app/src/data/devices.js` 的 params/keyParams 描述设备旋钮，设备建议按当前设备渲染，新增设备只加数据
 - Cloudflare Pages Functions：AI 答疑代理（`app/functions/api/ask.js`，Key 存环境变量，访问令牌防刷）
-- CI：GitHub Actions（规则引擎对拍 + 数据校验 + 合成音频引擎测试 + 构建）
+- CI：GitHub Actions（合成音频引擎测试 + 规则引擎对拍 + 数据校验 + store 冒烟 + 设备建议回归 + 构建）
 
 ## 目录结构
 
@@ -43,15 +45,17 @@
 │   └── src/
 │       ├── components/   # Icon、ToneAdvice、ChordChart、FretboardMap、RecordPanel 等
 │       ├── composables/  # useMediaQuery、useTuner
-│       ├── data/         # devices、templates、seedSongs（29 首）、chords（82 个）、
+│       ├── data/         # nav（路由/tab/工具入口清单）、devices（含能力描述）、templates、
+│       │                 # classifyRules（套路归类规则）、seedSongs（29 首）、chords（82 个）、
 │       │                 # songSheets（19 首曲谱）、fundamentals、courseCatalog
+│       ├── plugins/      # persist.js（Pinia 自动持久化插件）
 │       ├── stores/       # Pinia：practice/timer/metronome/songs/settings/plan/course/sheets/recordings/chat
 │       ├── utils/        # analyze.js（分析引擎）、planEngine.js（规则引擎）、
 │       │                 # recordingsDb.js（IndexedDB）、recordAnalyze.js、toneGuide.js、storage.js、
-│       │                 # analyzeWorker.js（Worker 封装）、audio.js（解码）、date.js、music.js、backup.js
+│       │                 # analyzeWorker.js（Worker 封装）、audio.js（解码）、date.js、music.js、backup.js、id.js
 │       ├── workers/      # analyze.worker.js（分析引擎后台线程）
 │       └── views/        # 页面
-├── .github/workflows/    # CI：规则引擎 25 项 + 数据 767 项 + 合成音频引擎测试 + 构建
+├── .github/workflows/    # CI：合成音频引擎 + 规则 25 项 + 数据 767 项 + 冒烟 20 项 + 设备建议 14 项 + 构建
 ├── spike/                # M0 可行性验证（Python librosa 版）+ 各引擎对拍单测
 ├── 需求文档.md           # 需求规格（唯一权威来源，含修订记录）
 ├── 验收指南.md           # 手机验收清单 + 常见问题
@@ -90,10 +94,11 @@ node spike/test_frontend_analyze.mjs "$FFMPEG"   # 分析引擎 5 首对拍（�
 node spike/test_frontend_synthetic.mjs           # 分析引擎合成音频测试（CI 跑：快/中/慢三档 + 慢歌不加倍）
 node spike/test_plan_engine.mjs                  # 规则引擎 25 项
 node spike/test_sheets.mjs                       # 曲谱/和弦数据 767 项
-node spike/test_stores_smoke.mjs                 # Store 冒烟测试 16 项（CI 跑，防运行时引用错误）
+node spike/test_stores_smoke.mjs                 # Store 冒烟测试 20 项（CI 跑，防运行时引用错误/漏持久化）
+node spike/test_tone_guide.mjs                   # 套路归类规则 + 设备建议回归 14 项（CI 跑）
 ```
 
-**CI**（`.github/workflows/ci.yml`）：push/PR 自动跑合成音频引擎测试 + 规则引擎对拍 + 数据校验 + store 冒烟测试 + 生产构建，全过才允许合并；真实歌曲对拍因版权音频不入库，只在本地跑。
+**CI**（`.github/workflows/ci.yml`）：push/PR 自动跑合成音频引擎测试 + 规则引擎对拍 + 数据校验 + store 冒烟测试 + 设备建议回归 + 生产构建，全过才允许合并；真实歌曲对拍因版权音频不入库，只在本地跑。
 
 ## 部署
 

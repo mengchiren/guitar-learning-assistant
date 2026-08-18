@@ -3,18 +3,13 @@ import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Icon from './components/Icon.vue'
 import { useTimerStore } from './stores/timer.js'
+import { TABS } from './data/nav.js'
 
 const route = useRoute()
 const router = useRouter()
 const timer = useTimerStore()
 
-const tabs = [
-  { path: '/', label: '首页', icon: 'home' },
-  { path: '/plan', label: '计划', icon: 'calendar' },
-  { path: '/tools', label: '工具', icon: 'grid' },
-  { path: '/songs', label: '歌曲', icon: 'music' },
-  { path: '/profile', label: '我的', icon: 'user' },
-]
+// tab 列表由 data/nav.js 统一声明（v0.6.0）
 
 // 外壳「练习中」胶囊：显示 mm:ss，点击回练习页
 const chipTime = computed(() => {
@@ -53,7 +48,7 @@ function goBack() {
       </div>
       <nav class="topnav">
         <router-link
-          v-for="t in tabs"
+          v-for="t in TABS"
           :key="t.path"
           :to="t.path"
           class="topnav-link"
@@ -89,7 +84,7 @@ function goBack() {
     <!-- 移动端：底部导航 -->
     <nav v-if="route.meta.tab" class="tabbar mobile-only">
       <router-link
-        v-for="t in tabs"
+        v-for="t in TABS"
         :key="t.path"
         :to="t.path"
         class="tab"

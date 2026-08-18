@@ -1,35 +1,95 @@
-// 把套路模板翻译成新手友好的内容：
-// 1) 参数速览（最关键的 4 项）；2) 大白话操作流程（一步步照做）；3) 其余可先不动的参数。
+// 把套路模板翻译成新手友好的内容（v0.6.0 设备声明式化）：
+// 1) 参数速览（keyParams）；2) 大白话操作流程（按设备 params 顺序）；3) 其余可先不动的参数。
+// 设备有哪些旋钮、标签、满格值由 data/devices.js 的 params/keyParams 声明——
+// 新增设备只改数据，本文件逻辑不动；设备未声明某参数则自动跳过。
 
-const isOff = (v) => !v || v === '关'
+/**
+ * @param {object} tpl 套路模板（data/templates.js）
+ * @param {{ guitar: object, amp: object }} [devices] 当前设备（data/devices.js 的 GUITARS/AMPS 项）
+ * @returns {{ params: Array<{label: string, value: string}>, steps: string[], fineTune: string[] }}
+ */
+export function beginnerGuide(tpl, { guitar, amp } = {}) {
+  const gParams = guitar?.params || []
+  const aParams = amp?.params || []
+  const gKey = guitar?.keyParams || []
+  const aKey = amp?.keyParams || []
 
-export function beginnerGuide(tpl) {
-  const g = tpl.guitar
-  const a = tpl.amp
-  const eq = `低音 ${a.eq.b} · 中音 ${a.eq.m} · 高音 ${a.eq.t}`
+  const isOff = (v) => !v || v === '关'
 
-  return {
-    // 参数速览：先给具体参数，方便对照音箱面板
-    params: [
-      { label: '琴·档位', value: g.pickup },
-      { label: '通道', value: a.channel },
-      { label: '箱模', value: a.model },
-      { label: 'Gain', value: `${a.gain} / 10` },
-    ],
-    // 大白话操作流程：照着一步步做就能出声
-    steps: [
-      `琴：拾音器拨杆拨到「${g.pickup}」`,
-      `音箱：按下「${a.channel}」通道按钮`,
-      `音箱：箱模旋钮转到「${a.model}」`,
-      `音箱：Gain 增益旋钮拧到「${a.gain}」（满格是 10）`,
-    ],
-    // 新手可先不动：弹起来觉得不对再照着调
-    fineTune: [
-      `琴：音色旋钮拧到「${g.tone}」`,
-      `音箱：EQ 三个旋钮 → ${eq}`,
-      isOff(a.mod) ? '音箱：MOD 效果保持关' : `音箱：MOD 开「${a.mod}」`,
-      isOff(a.delay) ? '音箱：Delay 延迟保持关' : `音箱：Delay 开「${a.delay}」`,
-      `音箱：Reverb 混响开「${a.reverb}」`,
-    ],
+  // 取模板值：guitar 侧 tpl.guitar[field]；amp 侧 tpl.amp[field]（eq 特殊）
+  const valueOf = (side, field) => {
+    const src = side === 'guitar' ? tpl.guitar : tpl.amp
+    if (!src) return undefined
+    if (field === 'eq') return src.eq
+    if (field.startsWith('eq.')) return src.eq?.[field.slice(3)]
+    return src[field]
   }
+
+  const paramValue = (side, p) => {
+    const v = valueOf(side, p.field)
+    if (p.kind === 'gain') return `${v} / ${p.max}`
+    return String(v ?? '')
+  }
+
+  // 步骤文案（按设备参数顺序；eq/effect 不进步骤，进 fineTune）
+  const stepFor = (side, p) => {
+    const v = valueOf(side, p.field)
+    if (side === 'guitar') {
+      return p.kind === 'pickup' ? `琴：拾音器拨杆拨到「${v}」` : `琴：音色旋钮拧到「${v}」`
+    }
+    switch (p.kind) {
+      case 'button':
+        return `音箱：按下「${v}」通道按钮`
+      case 'gain':
+        return `音箱：Gain 增益旋钮拧到「${v}」（满格是 ${p.max}）`
+      case 'knob':
+        return `音箱：${p.label}旋钮转到「${v}」`
+      default:
+        return null // eq / effect 归 fineTune
+    }
+  }
+
+  // 可先不动（非速览参数）：eq 三合一、开关型效果（on/off 完整文案在设备数据里）、其余旋钮
+  const fineFor = (side, p) => {
+    const v = valueOf(side, p.field)
+    if (side === 'guitar') return `琴：音色旋钮拧到「${v}」`
+    if (p.on || p.off) return isOff(v) ? (p.off || '').replace('%s', v) : (p.on || '').replace('%s', v)
+    if (p.kind === 'eq') return `音箱：EQ 三个旋钮 → 低音 ${v.b} · 中音 ${v.m} · 高音 ${v.t}`
+    return `音箱：${p.label}调到「${v}」`
+  }
+
+  // 参数速览：keyParams 顺序（琴在前、音箱在后）
+  const params = []
+  for (const f of gKey) {
+    const p = gParams.find((x) => x.field === f)
+    if (p) params.push({ label: p.label, value: paramValue('guitar', p) })
+  }
+  for (const f of aKey) {
+    const p = aParams.find((x) => x.field === f)
+    if (p) params.push({ label: p.label, value: paramValue('amp', p) })
+  }
+
+  // 操作步骤：keyParams 顺序（琴在前、音箱在后；eq/effect 等无步骤文案的自动跳过）
+  const steps = []
+  for (const f of gKey) {
+    const p = gParams.find((x) => x.field === f)
+    const s = p && stepFor('guitar', p)
+    if (s) steps.push(s)
+  }
+  for (const f of aKey) {
+    const p = aParams.find((x) => x.field === f)
+    const s = p && stepFor('amp', p)
+    if (s) steps.push(s)
+  }
+
+  // 可先不动：keyParams 之外的全部参数（on/off 完整文案在设备数据里）
+  const fineTune = []
+  for (const p of gParams) {
+    if (!gKey.includes(p.field)) fineTune.push(fineFor('guitar', p))
+  }
+  for (const p of aParams) {
+    if (!aKey.includes(p.field)) fineTune.push(fineFor('amp', p))
+  }
+
+  return { params, steps, fineTune }
 }

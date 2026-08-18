@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { load, save } from '../utils/storage.js'
+import { load } from '../utils/storage.js'
 
 // 可切换的模型平台（先接 DeepSeek，其余按需配 Key 即用）
 export const AI_PROVIDERS = [
@@ -14,6 +14,12 @@ function apiBase() {
 }
 
 export const useChatStore = defineStore('chat', {
+  // v0.6.0：状态变更自动持久化（persist 插件），不再手动 save
+  persist: [
+    { key: 'ai-provider', paths: ['provider'] },
+    { key: 'ai-history', paths: ['history'] },
+    { key: 'ask-token', paths: ['token'] },
+  ],
   state: () => ({
     provider: load('ai-provider', 'deepseek'),
     history: load('ai-history', []), // [{ role, content, provider, at }]
@@ -25,13 +31,15 @@ export const useChatStore = defineStore('chat', {
   actions: {
     setProvider(id) {
       this.provider = id
-      save('ai-provider', id)
     },
     setToken(t) {
       this.token = (t || '').trim()
-      save('ask-token', this.token)
     },
     // contextText：页面内入口带来的上下文（歌曲/练习数据），随本次提问一起发给模型
+    /**
+     * @param {string} text 用户提问
+     * @param {string} [contextText] 页面上下文（stashAskContext 传入）
+     */
     async send(text, contextText = '') {
       if (!text.trim() || this.busy) return
       if (!this.token) {
@@ -64,16 +72,14 @@ export const useChatStore = defineStore('chat', {
         this.error = '网络异常，请稍后再试'
       }
       this.busy = false
-      this.persist()
+      this.trimHistory()
     },
     clear() {
       this.history = []
-      this.persist()
     },
-    persist() {
-      // 只保留最近 50 条，防止历史无限增长撑满 localStorage
-      this.history = this.history.slice(-50)
-      save('ai-history', this.history)
+    // 只保留最近 50 条，防止历史无限增长撑满 localStorage
+    trimHistory() {
+      if (this.history.length > 50) this.history = this.history.slice(-50)
     },
   },
 })

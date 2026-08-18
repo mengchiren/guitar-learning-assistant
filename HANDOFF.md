@@ -1,6 +1,6 @@
 # HANDOFF 交接文档
 
-> 给一个完全没有上下文的新对话看。工作目录：`F:\电吉他学习`（Windows 10，Git Bash）。项目名：**练琴搭子 · PickBuddy**。当前版本 **v0.5.1**。
+> 给一个完全没有上下文的新对话看。工作目录：`F:\电吉他学习`（Windows 10，Git Bash）。项目名：**练琴搭子 · PickBuddy**。当前版本 **v0.6.0**。
 
 ## 1. 我们在做什么任务
 
@@ -11,29 +11,30 @@
 - **产品策略（三层）**：种子库人工数据优先 → AI 分析作参考并标置信度 → 人工纠错兜底。**别把 AI 结果当精确数据呈现。**
 - **目标歌曲**：日系动漫乐队歌（轻音、孤独摇滚、MyGO!!!!!、Ave Mujica、哭泣少女乐队）+ Beyond 经典。
 
-**需求的唯一权威来源是 `需求文档.md`（当前 v0.5.1，含完整修订记录）**，任何功能争议以它为准，改需求必须先改它。
+**需求的唯一权威来源是 `需求文档.md`（当前 v0.6.0，含完整修订记录）**，任何功能争议以它为准，改需求必须先改它。
 
 ## 2. 关键文件地图
 
 | 路径 | 作用 |
 |---|---|
-| `需求文档.md` | 需求规格 v0.5.0：功能需求、设备参数、成本评估、路线图（M0~M4）、修订记录 |
+| `需求文档.md` | 需求规格 v0.6.0：功能需求、设备参数、成本评估、路线图（M0~M4）、修订记录 |
 | `HANDOFF.md` | 本交接文档 |
 | `验收指南.md` | 手把手手机验收清单（L 录音 / M AI 答疑含 Key 与 **ASK_TOKEN 令牌**配置步骤 / N 数据备份）+ 反馈模板 + 常见问题 |
-| `README.md` | GitHub 项目主页（功能/目录/测试/CI/部署/隐私/路线图，已同步到 v0.5.0） |
-| `.github/workflows/ci.yml` | **CI（v0.5.0 新增）**：push/PR 自动跑合成音频引擎测试 + 规则引擎 25 项 + 数据 767 项 + 生产构建；真实歌曲对拍因版权音频不入库，只在本地跑 |
-| `spike/` | 验证与测试：Python librosa 版 `analyze.py`、`make_synthetic.py`、**前端引擎对拍 `test_frontend_analyze.mjs`**（本地跑）、**合成音频引擎测试 `test_frontend_synthetic.mjs`（v0.5.0 新增，CI 跑）**、**Store 冒烟测试 `test_stores_smoke.mjs`（v0.5.1 新增，16 项，CI 跑）**、**规则引擎对拍 `test_plan_engine.mjs`（25 项）**、**数据校验 `test_sheets.mjs`（767 项）**、`gen_course_catalog.py`、单文件分析 `analyze_one.mjs`、**批量分析 `batch_analyze_songs.mjs`（结果 `batch_analyze_result.json`）**、**曲谱生成 `write_sheets.py`** |
+| `README.md` | GitHub 项目主页（功能/目录/测试/CI/部署/隐私/路线图，已同步到 v0.6.0） |
+| `.github/workflows/ci.yml` | **CI**：push/PR 自动跑合成音频引擎测试 + 规则引擎 25 项 + 数据 767 项 + **Store 冒烟 20 项** + **设备建议回归 14 项** + 生产构建；真实歌曲对拍因版权音频不入库，只在本地跑 |
+| `spike/` | 验证与测试：Python librosa 版 `analyze.py`、`make_synthetic.py`、**前端引擎对拍 `test_frontend_analyze.mjs`**（本地跑）、**合成音频引擎测试 `test_frontend_synthetic.mjs`（CI 跑）**、**Store 冒烟测试 `test_stores_smoke.mjs`（20 项，CI 跑）**、**套路规则+设备建议回归 `test_tone_guide.mjs`（14 项，CI 跑）**、**规则引擎对拍 `test_plan_engine.mjs`（25 项）**、**数据校验 `test_sheets.mjs`（767 项）**、`gen_course_catalog.py`、单文件分析 `analyze_one.mjs`、**批量分析 `batch_analyze_songs.mjs`（结果 `batch_analyze_result.json`）**、**曲谱生成 `write_sheets.py`** |
 | `spike/.venv/` | Python 3.13 虚拟环境（librosa + imageio-ffmpeg），git 忽略 |
 | `spike/songs/`、`歌曲文件/`、`视频教程/` | 用户音频/视频，**git 忽略**，勿提交（版权内容）。`歌曲文件/` 已重命名为「歌手 - 歌名」 |
 | `app/` | 应用主体（Vue 3 + Vite + PWA） |
-| `app/functions/api/ask.js` | **AI 答疑代理（CF Pages Functions，POST /api/ask）**：三平台 OpenAI 兼容表（deepseek/ark/qwen），Key 只读 CF 环境变量，Origin 白名单 + **访问令牌（`ASK_TOKEN` 环境变量 + 请求头 `X-Ask-Token`，v0.5.0 起必配）**，25s 超时 |
-| `app/src/data/` | `devices.js`、`templates.js`（5 套套路）、**`seedSongs.json`（29 首种子歌）**、`fundamentals.js`（5 项基本功）、**`chords.js`（82 个和弦指法图 + 分组，`findChord`/`CHORD_GROUPS`）**、**`songSheets.js`（19 首种子曲谱，由 `write_sheets.py` 生成）**、`courseCatalog.js`（194 课，脚本生成勿手改） |
-| `app/src/stores/` | Pinia：`practice.js`（打卡）、`settings.js`（提醒/设备/新手模式）、`timer.js`（计时全局）、`metronome.js`（节拍器全局，含 currentBeat）、`songs.js`（用户歌单，getter 叫 **allSongs**、歌名字段叫 **title**）、`plan.js`（达标/歌曲状态）、`course.js`、`sheets.js`（用户自录曲谱）、`recordings.js`（录音元数据，`RECORD_CATEGORIES`）、`chat.js`（AI 聊天，`AI_PROVIDERS`、**`token`/`setToken`（ASK_TOKEN，v0.5.0）**、`stashAskContext`/`takeAskContext`） |
+| `app/functions/api/ask.js` | **AI 答疑代理（CF Pages Functions，POST /api/ask）**：三平台 OpenAI 兼容表（deepseek/ark/qwen），Key 只读 CF 环境变量，Origin 白名单 + **访问令牌（`ASK_TOKEN` 环境变量 + 请求头 `X-Ask-Token`，必配）**，25s 超时 |
+| `app/src/data/` | **`nav.js`（路由/tab/工具页统一清单）**、`devices.js`（**含 params/keyParams 能力描述**）、`templates.js`（5 套套路）、**`classifyRules.js`（套路归类规则表）**、**`seedSongs.json`（29 首种子歌）**、`fundamentals.js`（5 项基本功）、**`chords.js`（82 个和弦指法图 + 分组，`findChord`/`CHORD_GROUPS`）**、**`songSheets.js`（19 首种子曲谱，由 `write_sheets.py` 生成）**、`courseCatalog.js`（194 课，脚本生成勿手改） |
+| `app/src/stores/` | Pinia（**全部用 persist 插件自动落盘，store 里不再有 save 调用**）：`practice.js`（打卡）、`settings.js`（提醒/设备/新手模式）、`timer.js`（计时全局）、`metronome.js`（节拍器全局，含 currentBeat）、`songs.js`（用户歌单，**getter 叫 allSongs、字段叫 title、bpm/key/template 已归一化有效值**）、`plan.js`（达标/歌曲状态）、`course.js`、`sheets.js`（用户自录曲谱）、`recordings.js`（录音元数据，`RECORD_CATEGORIES`）、`chat.js`（AI 聊天，`AI_PROVIDERS`、`token`/`setToken`、`stashAskContext`/`takeAskContext`） |
 | `app/src/composables/` | `useMediaQuery.js`（768px 断点）、`useTuner.js`（麦克风 ACF 调音） |
-| `app/src/utils/` | `analyze.js`（**自研音频分析引擎，改后必须重跑对拍**）、`analyzeWorker.js`（**Worker 封装，v0.5.0：优先后台线程，不可用回退主线程**）、`audio.js`（**统一解码管线 `decodeToMono`，v0.5.0：歌曲分析与录音对拍共用**）、`date.js`（**本地时区日期 `localDateStr`/`shiftDate`，v0.5.0：全工程唯一实现**）、`music.js`（**音名/调性/置信度徽章常量，v0.5.0**）、`backup.js`（**数据备份/恢复，v0.5.0**）、`toneGuide.js`、`storage.js`（localStorage 抽象，key 前缀 `gla:v1:`）、`planEngine.js`（**规则引擎纯函数，改后必须重跑对拍**）、`recordingsDb.js`（IndexedDB：meta/blob 分 store）、`recordAnalyze.js`（录音→BPM，只分析前 3 分钟，**走 Worker**） |
-| `app/src/workers/` | `analyze.worker.js`（**分析引擎后台线程，v0.5.0**，纯函数无 DOM 依赖） |
-| `app/src/components/` | `Icon.vue`（线性 SVG 图标集）、`ToneAdvice.vue`、`ChordChart.vue`（自绘 SVG 指法图）、`FretboardMap.vue`（竖版指板图）、`RecordPanel.vue`（录音面板，双入口复用） |
-| `app/src/views/` | Home/Tools/Songs/SongDetail/SongAnalyze/Practice/Metronome/Tuner/Templates/Devices/Reminders/Profile/Plan/Stats/Course/PlanItem/ChordLibrary/Recordings/Chat（**ChatView 顶部有 ASK_TOKEN 令牌输入卡**；**ProfileView 有数据备份卡**） |
+| `app/src/utils/` | `analyze.js`（**自研音频分析引擎，改后必须重跑对拍**；套路归类走 data/classifyRules.js）、`analyzeWorker.js`（Worker 封装）、`audio.js`（统一解码管线 `decodeToMono`）、`date.js`（本地时区日期，全工程唯一实现）、`music.js`（音名/调性/徽章常量）、`backup.js`（数据备份/恢复）、`id.js`（UUID 生成）、`toneGuide.js`（**按设备 params 渲染新手建议**）、`storage.js`（**schema 版本 + 迁移注册表 + 变更订阅**，key 前缀 `gla:v1:`）、`planEngine.js`（**规则引擎纯函数，改后必须重跑对拍**）、`recordingsDb.js`（IndexedDB：meta/blob 分 store）、`recordAnalyze.js`（录音→BPM，只分析前 3 分钟，走 Worker） |
+| `app/src/plugins/` | `persist.js`（**Pinia 自动持久化插件，防抖 150ms**） |
+| `app/src/workers/` | `analyze.worker.js`（分析引擎后台线程，纯函数无 DOM 依赖） |
+| `app/src/components/` | `Icon.vue`（线性 SVG 图标集）、`ToneAdvice.vue`（**按当前设备渲染**）、`ChordChart.vue`（自绘 SVG 指法图）、`FretboardMap.vue`（竖版指板图）、`RecordPanel.vue`（录音面板，双入口复用） |
+| `app/src/views/` | Home/Tools（**卡片由 nav.js 驱动**）/Songs/SongDetail/SongAnalyze/Practice/Metronome/Tuner/Templates/Devices/Reminders/Profile/Plan/Stats/Course/PlanItem/ChordLibrary/Recordings/Chat（**ChatView 顶部有 ASK_TOKEN 令牌输入卡**；**ProfileView 有数据备份卡**） |
 | `app/public/_redirects` | SPA 深链接回退（CF Pages 需要，别删） |
 
 **路由全景**：`/`(tab) `/plan`(tab) `/practice` `/tools`(tab) `/metronome` `/tuner` `/chords` `/recordings` `/ask` `/songs`(tab) `/songs/new` `/songs/:id` `/profile`(tab) `/stats` `/course` `/devices` `/reminders` `/templates` `/plan-item/basic/:id`。`meta.tab` = 显示底部导航（手机 5 标签：首页/计划/工具/歌曲/我的）。
@@ -60,34 +61,32 @@
 - **曲谱大扩充 + 新歌入库（v0.4.2）**：用户提供 23 首歌曲文件——按 ID3 元数据重命名「歌手 - 歌名」+ 批量分析 BPM/调性/套路；**种子库 7→29 首**（分析值入库标「待人工校准」）；**曲谱 2→19 首**（5 个搜索代理并行检索交叉验证，来源与校准状态全标注；10 首无可靠谱不录，宁缺毋滥）；**和弦图库 49→82 个**（升/降号调标准按法）；校验升级 **767 项断言**全过。
 - **工程评审修复第一批（v0.5.0，用户发起四维评审后确认方案，详见需求文档修订记录）**：①**AI 代理防刷**——新增访问令牌 `ASK_TOKEN`（CF 环境变量 + 请求头 `X-Ask-Token` 校验；Origin 白名单挡不住脚本直连，令牌层补上；**未配令牌时接口拒绝服务**，应用内 AI 答疑页顶部有令牌输入卡）；②**数据备份/恢复**——`utils/backup.js` + 「我的」页导出/恢复（结构化数据 JSON，录音不含，遍历 `gla:v1:` 前缀自动覆盖未来新 store）；③**CI**——`.github/workflows/ci.yml`（合成音频引擎测试 + 规则 25 项 + 数据 767 项 + build）；④**重复代码收敛**——`utils/date.js`（消灭 5 份 `localDateStr` 重复）、`utils/music.js`（PITCH/KEYS/CONF_LABELS）、`utils/audio.js`（`decodeToMono` 统一歌曲分析与录音解码管线）；⑤**分析引擎进 Web Worker**——`workers/analyze.worker.js` + `utils/analyzeWorker.js`（Float32Array 转移所有权零拷贝，Worker 不可用回退主线程）；⑥package.json 版本统一 0.5.0。**本地验证全过**：真实歌曲对拍 5/5、合成 3/3、规则 25/25、数据 767/767、生产构建通过。**待用户操作**：CF 后台配 `ASK_TOKEN` 环境变量 + 重新部署，手机验收（验收指南 M 第一步半 / N 节新增）。
 - **首页空白 bug 修复（v0.5.1，用户电脑端验收发现）**：根因是 v0.5.0 重构 `stores/practice.js` 删了本地 `todayStr` 但 getter 调用点没改（`ReferenceError`，首页三处 getter 全炸；**Vite 构建不查未定义引用，测试也没覆盖 store**）。修复 + **新增 `spike/test_stores_smoke.mjs`（16 项，实例化全部 store 访问全部 getter/action，纯 Node + localStorage 内存 shim，已入 CI）**；顺手把全工程 63 处不带 `.js` 的相对导入统一补齐（`./router`→`./router/index.js`、`seedSongs.json` 加 `with { type: 'json' }`，Node 可直接测 store）。本地回归全过：对拍 5/5、合成 3/3、规则 25/25、数据 767/767、冒烟 16/16、构建通过。
-- 全程约 41 个提交，git 历史即详细变更记录；需求文档修订记录完整到 v0.5.1；README/验收指南/交接文档全同步。
+- **工程评审修复第二批（v0.6.0，用户验收第 1 步后确认开工，方案已确认，详见需求文档修订记录）**：①**数据层重构**——`storage.js` v2（schema 版本 + 按 key 迁移注册表 + save 变更订阅，云同步接入点）、Pinia 自动持久化插件 `plugins/persist.js`（store 声明 persist 配置自动落盘，防抖 150ms，与旧版同 key 同格式零迁移，7 个 store 接入，**store 里不再有 save 调用**）、ID 改 UUID（`utils/id.js`）；②**歌曲模型统一**——`allSongs` 归一化单一实体（bpm/key/template 直接有效值），`effectiveSong` 收进 store，4 个消费方改造；③**导航配置化**——`data/nav.js` 驱动路由/tab/工具页（加页面只加一条）；④**套路规则数据化**——`data/classifyRules.js`（条件 DSL + 置信度分母表，`classify` 已导出），新增套路不改引擎；⑤**设备能力声明式化**——devices.js 的 params/keyParams（含 on/off 文案），toneGuide 按设备渲染、缺参数自动跳过；⑥**JSDoc 契约**——AnalysisResult/Confidence/Song/PlanItem/PlanOutput/StorageMeta。新增 `spike/test_tone_guide.mjs`（14 项：classify 边界点 + 设备建议输出与 v0.5.x 基准逐字符一致 + 缺参数降级），冒烟升级 20 项（含自动落盘断言），均入 CI。**用户可见变化：无**（纯工程改进）。本地回归全过：对拍 5/5、合成 3/3、规则 25/25、数据 767/767、冒烟 20/20、toneGuide 14/14、构建通过。
+- 全程约 43 个提交，git 历史即详细变更记录；需求文档修订记录完整到 v0.6.0；README/验收指南/交接文档全同步。
 
 ## 4. 当前卡在哪
 
-**v0.5.1 已修复用户验收发现的首页空白 bug 并推送**，等用户再验收（首页应恢复正常；AI 答疑若还没配 ASK_TOKEN 令牌会提示配置）：
+**v0.6.0（工程改进第 2 步）已完成并推送，等用户验收**。用户可见变化为零（纯重构），验收重点是「功能没变坏」：
 
-1. **首页空白修复确认**（v0.5.1）：刷新两三次（避开 SW 旧缓存）后首页应正常显示仪表盘/练习包/7 天图。
-2. **配 ASK_TOKEN 访问令牌（必须，否则 AI 答疑不可用）**：CF 后台环境变量加 `ASK_TOKEN`（值 = 我生成的一长串随机字符，会话里发给他；他自己换任意随机字符串也行）→ Retry deployment → 应用内 AI 答疑页顶部输入框填入保存。步骤在验收指南 M 第一步半。
-3. **手机验收 v0.5.0/v0.5.1**（验收指南 N 节数据备份；M 节令牌验收项；顺带确认之前 v0.4.2 的遗留问题）：
-
-**v0.4.2 遗留的待用户反馈**：
+1. **回归确认**：电脑/手机各点一遍（首页、歌曲库、添加歌曲分析、计划页、录音、AI 答疑、数据备份）——所有行为应与 v0.5.1 完全一致；数据（打卡/歌单/曲谱/聊天）在重构后应原样保留（persist 插件与旧版共用同一批 localStorage key，零迁移）。
+2. **ASK_TOKEN 已确认配置**（用户反馈 AI 答疑正常）。
+3. **v0.4.2 遗留的待用户反馈**（功能层面，与本次重构无关）：
 1. **曲谱准确性（重点）**：19 首曲谱中多数标注了来源与置信度；单源/自动检测的（影色舞等）标注「请对照原曲校准」。用户弹到不对的，按他听出来的改数据（人工纠错永远优先）。
 2. **新歌 BPM/调性待校准**：22 首新歌的 BPM/调性多为引擎分析值（`dataFrom` 标「待人工校准」）；用户弹到速度不对的报过来改。已知悬案：天使にふれたよ!（社区谱 100~117 疑似半速）、青春コンプレックス（社区谱 155 vs 分析 185）、ソラノムジカ（分析 129 vs 半速记谱 98）。
 3. 计划页练习包建议、达标标准难度是否合适；和弦图库 82 个指法是否有标错的。
 4. 录音自动对拍准不准（清音录音测不准是预期的）；AI 答疑回答质量与模型切换习惯。
 5. 用户手机验收新版（刷新两三次避开 SW 旧缓存）。
 
-**不要在他反馈前自作主张改设计**，等他给意见再动手。用户的工作方式（已确认）：**大功能先问清需求**——他会要求先指出「架构问题、扩展性问题、安全问题和维护成本」再一起重新设计方案，然后才让动手。**v0.5.0 的评审-方案-确认-实施流程已完成第 1 步，等验收后再做第 2 步（数据层重构/导航配置化/套路设备声明式化/JSDoc 类型）。**
+**不要在他反馈前自作主张改设计**，等他给意见再动手。用户的工作方式（已确认）：**大功能先问清需求**——他会要求先指出「架构问题、扩展性问题、安全问题和维护成本」再一起重新设计方案，然后才让动手。**v0.5.0 评审的四维改进方案两批已全部交付（第 1 批 v0.5.0/v0.5.1，第 2 批 v0.6.0），等 v0.6.0 验收后按 §5 继续。**
 
 ## 5. 下一步计划（按路线图）
 
-1. **等用户配 ASK_TOKEN + 验收 v0.5.0** → 按意见微调（令牌流程、备份体验、曲谱数据校准、BPM 修正、练习包规则、录音/AI 体验）。
-2. **工程改进第 2 步（方案已确认，等第 1 步验收后开工）**：数据层重构（统一 schema + 版本号 + 迁移函数 + Pinia 自动持久化插件 + ID 改 UUID，storage.js 升级带变更订阅为云同步留口）、歌曲模型统一（种子/用户歌收敛单一实体）、导航配置化（nav.js 驱动路由/tab/工具页/首页卡片）、套路与设备声明式化（规则/设备能力进数据文件）、JSDoc 渐进式类型（引擎契约/存储 schema/跨 store 传参）。
-3. **曲谱继续扩充**：用户练到哪首需要谱 → 按「宁缺毋滥、人工整理、标注来源与校准状态」补 `songSheets.js`（改后重跑 `spike/write_sheets.py` 或手改，然后 `node spike/test_sheets.mjs` 校验）；谱里出现新和弦同步补 `chords.js`（校验硬约束：谱中和弦必须在图库有定义）。
-4. **M4-3 剩余**（用户已按「架构/安全/成本」分析法选定前两项为录音、AI 答疑）：**微信推送（推送加）**——个人 token 不能存前端，需 CF Functions 代理 + 环境变量，免费版每日有限额；**Capacitor 安卓壳 + 桌面小组件**——签名/商店上架/双端构建，维护成本最高，等核心稳定再上。
-5. 云同步（Supabase）**已确认暂缓**，等手机/电脑双端都用起来再说；`storage.js`/`recordingsDb.js` 抽象层已留好口，第 2 步升级后同步接入更顺。
-6. pages.dev 免费域名国内访问不稳定，后续可选自定义域名（换域名记得更新 ask.js 的 Origin 白名单 + 可补按 IP 限流）。
-7. P2 成就徽章/等级（统计页做了一部分，徽章未做）。
+1. **等用户验收 v0.6.0（工程改进第 2 步，纯重构无可见变化）** → 确认功能没变坏后，四维评审改进方案收官；后续按用户意见微调。
+2. **曲谱继续扩充**：用户练到哪首需要谱 → 按「宁缺毋滥、人工整理、标注来源与校准状态」补 `songSheets.js`（改后重跑 `spike/write_sheets.py` 或手改，然后 `node spike/test_sheets.mjs` 校验）；谱里出现新和弦同步补 `chords.js`（校验硬约束：谱中和弦必须在图库有定义）。
+3. **M4-3 剩余**（用户已按「架构/安全/成本」分析法选定前两项为录音、AI 答疑）：**微信推送（推送加）**——个人 token 不能存前端，需 CF Functions 代理 + 环境变量，免费版每日有限额；**Capacitor 安卓壳 + 桌面小组件**——签名/商店上架/双端构建，维护成本最高，等核心稳定再上。
+4. 云同步（Supabase）**已确认暂缓**，等手机/电脑双端都用起来再说；`storage.js` 的变更订阅 + 版本迁移 + persist 插件已把同步接入点铺好。
+5. pages.dev 免费域名国内访问不稳定，后续可选自定义域名（换域名记得更新 ask.js 的 Origin 白名单 + 可补按 IP 限流）。
+6. P2 成就徽章/等级（统计页做了一部分，徽章未做）。
 
 ## 6. 踩过的坑（绝对不要踩）
 
@@ -126,14 +125,16 @@
 33. **PowerShell 跑 ffmpeg 对拍的中文路径坑**：工作目录含中文（`F:\电吉他学习`），PowerShell 下 Python 输出的 ffmpeg 路径会乱码（GBK 控制台）导致 spawn 失败——先 `[Console]::OutputEncoding = [System.Text.Encoding]::UTF8` 再取路径；Git Bash 无此问题（HANDOFF 里的 `FFMPEG=$(...)` 用法在 Git Bash 下照旧）。
 34. **合成音频测试的校准陷阱**（`test_frontend_synthetic.mjs`）：完全均匀的冲击串在引擎的自相关上所有周期整数倍 lag 打平，会随机测出 1/2 速甚至 1/3 速——**每拍振幅必须加「缓慢起伏的正弦调制 + 小扰动」**（模拟真实演奏的渐强渐弱，让真周期独占鳌头）；固定种子（42）保证 CI 可复现；「半速加倍」分支在合成音上无法稳定触发（阈值按真实音乐校准），由本地真实歌曲对拍覆盖，别硬凑。
 35. **重构删函数定义必须同步所有调用点**（v0.5.1 血泪教训）：`stores/practice.js` 删了本地 `todayStr` 改用 `utils/date.js` 的 `localDateStr`，但 getter 里的 `todayStr()` 调用点没改 → 首页三处 getter 运行时 `ReferenceError` → **首页空白**。Vite 构建只查语法不查未定义引用，普通测试也不覆盖 store。对策：①改动 store 后必跑 `node spike/test_stores_smoke.mjs`；②**全工程相对导入已统一带 `.js` 扩展名**（`./router` 目录导入是例外，要写 `./router/index.js`；JSON 导入带 `with { type: 'json' }`）——Node 现在可以直接 import store 模块，别回退到不带扩展名的写法。
+36. **Pinia 插件在 `pinia.install(app)` 前只排队不生效**（v0.6.0 踩过）：`createPinia().use(plugin)` 若 pinia 还没装进 Vue app，插件进 `toBeInstalled` 队列，**已创建的 store 拿不到插件**——真实应用里 `app.use(pinia)` 在挂载时触发安装所以正常，但纯 Node 测试（冒烟测试）里只 `setActivePinia(createPinia().use(x))` 不会触发——测试里要 `createApp({}).use(pinia)` 先装一下。冒烟测试已这么写，别删。另：persist 插件是防抖 150ms 落盘，冒烟测试断言落盘前要等 ~350ms。
+37. **Pinia 4 的 `$subscribe`**：`store.$subscribe(cb, { detached: true, deep: true })` 深度监听整个 state——即使只改一个字段也会触发所有 persist 配置的定时器（插件按 key 分别防抖，无碍）；状态初始化（`load()`）不算 mutation 不会触发；**没改过的 store 不会落盘**（如 settings 只读不写就没有对应 localStorage key，不是 bug）。
 
 ## 7. 与用户协作的注意事项
 
 - 用户中文交流、非开发者、零吉他基础，解释方案用「呈现形式/优缺点」的通俗方式。
 - **用户的工作方式（已确认）**：①大功能先问清需求再动手，他会要求先指出「架构问题、扩展性问题、安全问题和维护成本」再一起重新设计方案——照做，别直接写代码；②GitHub 提交不用勤，「大版本一次提交」——但验收中发现的 bug 修复需及时推送让他手机生效；③验收能交给代理做（浏览器模拟手机/桌面视口），他说「你帮我验收」就全流程走一遍出报告。
-- **v0.5.0 流程记录**：用户发起四维评审 → 我把问题清单 + 方案草案给他 → 他要求每个决策点列优缺点 → 他全选推荐项（防刷先做 / 只导结构化数据 / 云同步暂缓 / JSDoc 渐进式）→ 确认分步实施先第 1 步 → 第 1 步完成推送。**第 2 步方案已在他确认的清单里，等第 1 步验收后再动。**
+- **v0.5.0/v0.6.0 流程记录**：用户发起四维评审 → 我把问题清单 + 方案草案给他 → 他要求每个决策点列优缺点 → 他全选推荐项（防刷先做 / 只导结构化数据 / 云同步暂缓 / JSDoc 渐进式）→ 确认分步实施先第 1 步 → 第 1 步验收通过（含抓出首页空白 bug）→ 确认开工第 2 步 → 第 2 步（v0.6.0）完成推送，等验收。
 - 已确认的决定不要重复征求：PWA 形态、推送加、Capacitor（M4）、种子库自建、录音本地优先、瑞士军刀风、纯前端分析、新手模式默认开、项目名、谱子人工整理+仅本地、和弦谱形式、图库页样式、录音双入口/自动对拍/四分类、AI 多平台可切换（先 DeepSeek）/聊天页+页面内入口、**云同步暂缓、备份不含录音、JSDoc 渐进式类型、AI 防刷令牌方案**。
 - 用户时间不固定，学习计划是弹性「练习包」不是固定日历；练习包每项要带「为什么这么建议」（规则透明是验收标准）。
 - 用户会自己上传歌曲到 `歌曲文件/`（酷狗 M800 命名、flac/mp3 混着来）——用 ffmpeg 读 ID3 元数据识别歌名重命名；kgg 按坑 2 处理；慢歌测速不准的（如春日影）靠种子库权威值兜底。
-- 每改完一轮 git commit；需求变更同步进 `需求文档.md` 修订记录（现在到 v0.5.0）；推送失败用坑 28 的重试循环。
+- 每改完一轮 git commit；需求变更同步进 `需求文档.md` 修订记录（现在到 v0.6.0）；推送失败用坑 28 的重试循环。
 - 开发服务器 `http://localhost:4174`（`cd F:/电吉他学习/app && npm run dev -- --port 4174`），会话结束后可能被系统回收。

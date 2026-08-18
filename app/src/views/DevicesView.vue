@@ -6,11 +6,9 @@ const settings = useSettingsStore()
 
 function selectGuitar(id) {
   settings.activeDevices.guitarId = id
-  settings.saveActiveDevices()
 }
 function selectAmp(id) {
   settings.activeDevices.ampId = id
-  settings.saveActiveDevices()
 }
 </script>
 

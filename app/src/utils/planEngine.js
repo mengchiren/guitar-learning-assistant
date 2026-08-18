@@ -96,13 +96,34 @@ function rankSongs(songs, songStatus) {
 }
 
 /**
+ * @typedef {object} PlanItem 练习包单项（跨 store 契约：plan 引擎 → 计划页/首页）
+ * @property {'basic'|'song'|'review'} kind
+ * @property {string} ref 关联 id（基本功 id / 歌曲 id / 'review' / 'free'）
+ * @property {string} title
+ * @property {number} minutes
+ * @property {string} goal 达标标准
+ * @property {string} why 为什么这么建议（规则透明）
+ * @property {boolean} done
+ * @property {string} [desc]
+ */
+
+/**
+ * @typedef {object} PlanOutput 练习包输出
+ * @property {'normal'|'reduce'|'boost'} mode 动态调整模式
+ * @property {string} tierNote 调整说明
+ * @property {{start: string, days: number, totalSeconds: number, goalDays: number, lastWeekDays: number}} week 本周概览
+ * @property {Record<'10'|'30'|'60', PlanItem[]>} packs 三档练习包
+ */
+
+/**
  * 生成练习包
  * @param {object} p
  * @param {Array}  p.records 打卡记录 [{date, seconds, tags, note}]
  * @param {object} p.basicsDone 达标标记 { spider: 'YYYY-MM-DD', ... }
  * @param {object} p.songStatus 歌曲状态 { songId: { state: 'practicing'|'mastered', date } }
- * @param {Array}  p.songs 可选歌曲 [{ id, title, template }]（种子库 + 用户歌）
+ * @param {Array}  p.songs 可选歌曲 [{ id, title, template, bpm }]（种子库 + 用户歌）
  * @param {string} p.todayStr 今天 YYYY-MM-DD（本地时区）
+ * @returns {PlanOutput}
  */
 export function generatePlan({ records, basicsDone = {}, songStatus = {}, songs = [], todayStr }) {
   const thisWeek = weekStartOf(todayStr)

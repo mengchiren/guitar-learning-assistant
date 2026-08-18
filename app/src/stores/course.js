@@ -1,10 +1,12 @@
 import { defineStore } from 'pinia'
-import { load, save } from '../utils/storage.js'
+import { load } from '../utils/storage.js'
 import { COURSE_CATALOG } from '../data/courseCatalog.js'
 
 // 成田课程进度：按套（basic/intermediate/core）记录已学课与当前学到第几课。
 // 课程目录为内置数据（由视频教程文件名解析生成），网页无法直接读本地文件路径。
 export const useCourseStore = defineStore('course', {
+  // v0.6.0：状态变更自动持久化（persist 插件），不再手动 save
+  persist: { key: 'course-progress', paths: ['progress'] },
   state: () => ({
     // { basic: { done: [lessonKey], current: lessonKey }, ... }
     progress: load('course-progress', {}),
@@ -46,12 +48,10 @@ export const useCourseStore = defineStore('course', {
       const idx = course.lessons.findIndex((l) => l.key === key)
       const curIdx = p.current ? course.lessons.findIndex((l) => l.key === p.current) : -1
       if (idx > curIdx) p.current = key
-      save('course-progress', this.progress)
     },
     setCurrent(courseId, key) {
       const p = this.ensure(courseId)
       p.current = key
-      save('course-progress', this.progress)
     },
   },
 })

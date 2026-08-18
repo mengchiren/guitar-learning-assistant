@@ -1,16 +1,16 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { useSongsStore, effectiveSong } from '../stores/songs.js'
+import { useSongsStore } from '../stores/songs.js'
 
 const songs = useSongsStore()
 const q = ref('')
 
+// allSongs 已归一化（bpm/key/template 直接是有效值），无需再拼装
 const list = computed(() => {
   const kw = q.value.trim().toLowerCase()
-  const all = songs.allSongs.map((s) => ({ raw: s, eff: effectiveSong(s) }))
-  if (!kw) return all
-  return all.filter(({ raw }) => {
-    const hay = `${raw.title} ${raw.artist} ${raw.source}`.toLowerCase()
+  if (!kw) return songs.allSongs
+  return songs.allSongs.filter((s) => {
+    const hay = `${s.title} ${s.artist} ${s.source}`.toLowerCase()
     return hay.includes(kw)
   })
 })
@@ -34,28 +34,28 @@ const list = computed(() => {
 
     <div class="song-grid">
       <router-link
-        v-for="({ raw, eff }) in list"
-        :key="raw.id"
-        :to="`/songs/${raw.id}`"
+        v-for="s in list"
+        :key="s.id"
+        :to="`/songs/${s.id}`"
         class="card song-card"
       >
         <div class="song-head">
           <div>
-            <div class="song-title">{{ raw.title }}</div>
-            <div class="dim small">{{ raw.artist }} · {{ raw.source }}</div>
+            <div class="song-title">{{ s.title }}</div>
+            <div class="dim small">{{ s.artist }} · {{ s.source }}</div>
           </div>
           <div class="song-tags">
-            <span class="tag tag-fixed">{{ raw.isSeed ? '种子' : '我的' }}</span>
-            <span class="tag tag-fixed">{{ eff.template || '未归类' }}</span>
+            <span class="tag tag-fixed">{{ s.isSeed ? '种子' : '我的' }}</span>
+            <span class="tag tag-fixed">{{ s.template || '未归类' }}</span>
           </div>
         </div>
         <div class="song-meta dim small">
-          <span v-if="eff.bpm">BPM {{ eff.bpm }}</span>
-          <span v-if="eff.key"> · {{ eff.key }}</span>
-          <span v-if="raw.difficulty"> · 难度：{{ raw.difficulty }}</span>
+          <span v-if="s.bpm">BPM {{ s.bpm }}</span>
+          <span v-if="s.key"> · {{ s.key }}</span>
+          <span v-if="s.difficulty"> · 难度：{{ s.difficulty }}</span>
         </div>
-        <div v-if="eff.bpm || eff.key" class="muted small" style="margin-top: 4px; opacity: 0.7">
-          {{ raw.isSeed ? '种子库数据（M0 校准）' : '来源：' + (raw.source === 'manual' ? '手动录入' : '自动分析') }}
+        <div v-if="s.bpm || s.key" class="muted small" style="margin-top: 4px; opacity: 0.7">
+          {{ s.isSeed ? '种子库数据（M0 校准）' : '来源：' + (s.source === 'manual' ? '手动录入' : '自动分析') }}
         </div>
       </router-link>
     </div>

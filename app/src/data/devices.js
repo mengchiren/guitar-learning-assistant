@@ -1,6 +1,26 @@
-// 设备参数模板库。音色建议会按「当前选中的设备」把套路模板映射为具体旋钮位置。
-// 新增设备时在此扩展即可。参数以实物面板/说明书核对为准。
+// 设备参数模板库（v0.6.0 起含「能力描述」）。音色建议会按「当前选中的设备」把套路模板
+// 映射为具体旋钮位置。新增设备时在此扩展即可，toneGuide.js 按 params 自动渲染，不改代码。
+// 参数以实物面板/说明书核对为准。
 
+/**
+ * @typedef {object} DeviceParam 设备可调参数（套路模板字段 → 设备旋钮的映射描述）
+ * @property {string} field 模板字段名：guitar 侧取 tpl.guitar[field]；amp 侧取 tpl.amp[field]
+ *                            （'eq' 取整个 tpl.amp.eq 对象；eq.b/m/t 取 tpl.amp.eq.b 等）
+ * @property {string} label 展示名
+ * @property {'pickup'|'button'|'knob'|'gain'|'eq'|'effect'} kind 渲染方式：
+ *                           pickup=拾音器拨杆 / button=通道按钮 / knob=旋钮 / gain=带满格 / eq=三段合一 / effect=开关型
+ * @property {number} [max] kind 为 gain 时的满格值
+ */
+
+/**
+ * @typedef {object} Device 设备
+ * @property {string} id
+ * @property {string} name
+ * @property {string[]} keyParams 新手速览优先展示的参数（顺序即展示顺序）
+ * @property {DeviceParam[]} params 全部可调参数（顺序即步骤顺序）
+ */
+
+/** @type {Device[]} */
 export const GUITARS = [
   {
     id: 'ibanez-grx40-lgy',
@@ -19,9 +39,15 @@ export const GUITARS = [
       '音量旋钮关小可把失真「清音化」',
       '零基础阶段先熟悉 1、2、5 档就够用',
     ],
+    keyParams: ['pickup'],
+    params: [
+      { field: 'pickup', label: '琴·档位', kind: 'pickup' },
+      { field: 'tone', label: '音色旋钮', kind: 'knob' },
+    ],
   },
 ]
 
+/** @type {Device[]} */
 export const AMPS = [
   {
     id: 'joyo-jam-buddy-2',
@@ -36,6 +62,16 @@ export const AMPS = [
     knobs: [
       'Guitar Vol', 'Music Vol', 'Bass/Save', 'Mid/Tune', 'Treble/D.Control',
       'Gain/Quit', 'Reverb/D.Vol', 'Delay/D.Type', 'Mod/D.Speed', 'Amp/Ch.Volume',
+    ],
+    keyParams: ['channel', 'model', 'gain'],
+    params: [
+      { field: 'channel', label: '通道', kind: 'button' },
+      { field: 'model', label: '箱模', kind: 'knob' },
+      { field: 'gain', label: 'Gain', kind: 'gain', max: 10 },
+      { field: 'eq', label: 'EQ', kind: 'eq' },
+      { field: 'mod', label: 'MOD', kind: 'effect', off: '音箱：MOD 效果保持关', on: '音箱：MOD 开「%s」' },
+      { field: 'delay', label: 'Delay', kind: 'effect', off: '音箱：Delay 延迟保持关', on: '音箱：Delay 开「%s」' },
+      { field: 'reverb', label: 'Reverb', kind: 'knob', off: '音箱：Reverb 混响保持关', on: '音箱：Reverb 混响开「%s」' },
     ],
   },
 ]

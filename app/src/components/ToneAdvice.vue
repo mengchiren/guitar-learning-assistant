@@ -2,15 +2,19 @@
 import { computed } from 'vue'
 import { useSettingsStore } from '../stores/settings.js'
 import { beginnerGuide } from '../utils/toneGuide.js'
+import { GUITARS, AMPS } from '../data/devices.js'
 
 // 设备设置建议卡：按「我的 → 显示偏好」切换两种模式。
 // beginner：参数速览 + 大白话操作流程；full：全部参数表（9 项网格）。
+// v0.6.0：按当前选中的设备渲染（新设备只改 devices.js 数据，渲染逻辑不动）。
 const props = defineProps({
   tpl: { type: Object, required: true },
 })
 const settings = useSettingsStore()
+const guitar = GUITARS.find((d) => d.id === settings.activeDevices.guitarId)
+const amp = AMPS.find((d) => d.id === settings.activeDevices.ampId)
 // computed 而非一次性计算：同组件实例复用时（路由参数切换）tpl 会变，内容要跟着变
-const beginner = computed(() => beginnerGuide(props.tpl))
+const beginner = computed(() => beginnerGuide(props.tpl, { guitar, amp }))
 </script>
 
 <template>

@@ -3,6 +3,7 @@
 // 帧 RMS/谱质心、K-S 调性模板、三和弦模板、启发式套路归类。
 // 差异：spike 用 librosa CQT 算 chroma，此处用 STFT 谱映射 12 音级近似（JS 无 CQT）。
 // 已知精度（spike 对拍）：BPM 误差 ≤1.5%；调性 4/5；和弦薄弱，仅作参考。
+import { CLASSIFY_RULES, FIELD_MARGINS } from '../data/classifyRules.js'
 
 export const TARGET_SR = 22050
 export const HOP = 512
@@ -195,36 +196,22 @@ function roughChords(chordCols, windowIdx) {
   return out.slice(0, 20)
 }
 
-// 套路归类（spike/analyze.py 的 classify，阈值原样搬）
-function classify({ bpm, rmsDb, centroidHz }) {
-  const en = rmsDb
-  const cen = centroidHz
-  // 每条规则：命中条件 + 各条件到阈值的归一化余量（用于置信度）
-  const rules = [
-    {
-      template: '失真节奏 Riff',
-      hit: bpm >= 140 && en > -14,
-      normMargin: Math.min((bpm - 140) / 10, (en - -14) / 3),
-    },
-    {
-      template: '失真主音 Solo',
-      hit: cen > 2600 && en > -16,
-      normMargin: Math.min((cen - 2600) / 500, (en - -16) / 3),
-    },
-    {
-      template: '轻过载节奏',
-      hit: en > -16,
-      normMargin: (en - -16) / 3,
-    },
-    {
-      template: '清音+合唱氛围',
-      hit: bpm >= 110 && cen > 1500,
-      normMargin: Math.min((bpm - 110) / 10, (cen - 1500) / 500),
-    },
-  ]
-  for (const r of rules) {
-    if (r.hit) {
-      const confidence = r.normMargin < 0.2 ? '低' : r.normMargin < 1 ? '中' : '高'
+// 套路归类（v0.6.0：规则来自 data/classifyRules.js，新增套路只加数据不改引擎；
+// 语义与旧硬编码完全一致——按数组顺序首个命中，余量 = (值-阈值)/FIELD_MARGINS）
+export function classify({ bpm, rmsDb, centroidHz }) {
+  const values = { bpm, rmsDb, centroidHz }
+  for (const r of CLASSIFY_RULES) {
+    const hit = r.conditions.every((c) => {
+      const v = values[c.field]
+      return c.op === '>=' ? v >= c.value : v > c.value
+    })
+    if (hit) {
+      let margin = Infinity
+      for (const c of r.conditions) {
+        const delta = FIELD_MARGINS[c.field] || 1
+        margin = Math.min(margin, (values[c.field] - c.value) / delta)
+      }
+      const confidence = margin < 0.2 ? '低' : margin < 1 ? '中' : '高'
       return { template: r.template, confidence }
     }
   }
@@ -232,9 +219,34 @@ function classify({ bpm, rmsDb, centroidHz }) {
 }
 
 /**
+ * @typedef {object} Confidence 各指标置信度
+ * @property {'高'|'中'|'低'} bpm
+ * @property {'高'|'中'|'低'} key
+ * @property {'高'|'中'|'低'} template
+ * @property {'高'|'中'|'低'} chords
+ */
+
+/**
+ * @typedef {object} AnalysisResult 分析引擎输出契约（消费方：SongAnalyzeView / recordAnalyze / songs store）
+ * @property {number} durationSec 时长（秒）
+ * @property {number} tempoBpm 原始测速（未做半速加倍修正）
+ * @property {number} tempoUseBpm 最终采用 BPM（含半速加倍修正）
+ * @property {boolean} tempoDoubled 是否走了半速加倍
+ * @property {number} rmsDb 平均响度（dB）
+ * @property {number} centroidHz 平均谱质心（Hz）
+ * @property {Array<{key: string, corr: number}>} keyTop3 调性 Top3
+ * @property {string[]} chordsRough 粗略和弦序列
+ * @property {string} template 套路名（对应 templates.js 的 name）
+ * @property {string|null} templateId 套路 id
+ * @property {Confidence} confidence
+ * @property {string[]} notes 人话提示
+ * @property {object} [_debug] debug 模式附加信息（topLags 等）
+ */
+
+/**
  * 分析一段音频。
- * @param {{ samples: Float32Array, sampleRate: number }} input 单声道 PCM
- * @returns 分析结果 JSON（字段与 spike/analyze.py 对齐 + 置信度）
+ * @param {{ samples: Float32Array, sampleRate: number, debug?: boolean }} input 单声道 PCM
+ * @returns {AnalysisResult} 分析结果 JSON（字段与 spike/analyze.py 对齐 + 置信度）
  */
 export function analyzeAudio({ samples, sampleRate, debug = false }) {
   const y = sampleRate === TARGET_SR ? samples : resampleLinear(samples, sampleRate, TARGET_SR)

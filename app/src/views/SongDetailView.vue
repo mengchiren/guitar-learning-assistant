@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useSongsStore, effectiveSong } from '../stores/songs.js'
+import { useSongsStore } from '../stores/songs.js'
 import { findToneTemplate, TONE_TEMPLATES } from '../data/templates.js'
 import { useMetronomeStore } from '../stores/metronome.js'
 import { usePlanStore } from '../stores/plan.js'
@@ -18,9 +18,9 @@ const metro = useMetronomeStore()
 const planStore = usePlanStore()
 const sheetsStore = useSheetsStore()
 
+// allSongs 已归一化：song.bpm/key/template 直接是有效值（纠错 > 手动 > 分析 > 种子值）
 const song = computed(() => songs.byId(route.params.id))
-const eff = computed(() => (song.value ? effectiveSong(song.value) : null))
-const tpl = computed(() => (eff.value?.template ? findToneTemplate(eff.value.template) : null))
+const tpl = computed(() => (song.value?.template ? findToneTemplate(song.value.template) : null))
 
 // 纠错表单（仅用户歌曲）
 const cBpm = ref(null)
@@ -28,16 +28,15 @@ const cKey = ref('')
 const cTemplate = ref('')
 const savedFlash = ref(false)
 
-// 只监听歌曲 id 变化（切歌时重填表单）；监听整个 song 会因 effectiveSong 读深层字段，
-// 保存纠错后连带触发并立刻清掉「已保存」提示
+// 只监听歌曲 id 变化（切歌时重填表单）；监听整个 song 会因读取深层字段连带触发，
+// 保存纠错后立刻清掉「已保存」提示
 watch(
   () => (song.value ? song.value.id : null),
   (id) => {
     if (!id || !song.value) return
-    const e = effectiveSong(song.value)
-    cBpm.value = e.bpm ?? null
-    cKey.value = e.key ?? ''
-    cTemplate.value = e.template ?? ''
+    cBpm.value = song.value.bpm ?? null
+    cKey.value = song.value.key ?? ''
+    cTemplate.value = song.value.template ?? ''
     savedFlash.value = false
   },
   { immediate: true },
@@ -57,19 +56,19 @@ function saveCorrections() {
 }
 
 function openMetronome() {
-  const bpm = Math.min(220, Math.max(40, Math.round(eff.value?.bpm || 100)))
+  const bpm = Math.min(220, Math.max(40, Math.round(song.value?.bpm || 100)))
   metro.bpm = bpm
   router.push('/metronome')
 }
 
 function askAi() {
-  if (!song.value || !eff.value) return
+  if (!song.value) return
   const st = planStore.songStatus[song.value.id]?.state || '未标记'
   const statusText = st === 'practicing' ? '练习中' : st === 'mastered' ? '已掌握' : '还没开始练'
   const chordsText = song.value.chords || song.value.analysis?.chordsRough?.join(' ') || '未知'
   stashAskContext(
     `用户正在看歌曲《${song.value.title}》：
-- BPM：${eff.value.bpm ?? '未知'}，调性：${eff.value.key ?? '未知'}，套路：${eff.value.template ?? '未知'}
+- BPM：${song.value.bpm ?? '未知'}，调性：${song.value.key ?? '未知'}，套路：${song.value.template ?? '未知'}
 - 难度：${song.value.difficulty ?? '未知'}；和弦：${chordsText}
 - 这首歌的练习状态：${statusText}
 - 用户设备：依班娜 GRX40 电吉他 + JOYO Jam Buddy 2 音箱`,
@@ -126,7 +125,7 @@ const sheetChords = computed(() => {
 </script>
 
 <template>
-  <div v-if="song && eff" class="narrow">
+  <div v-if="song" class="narrow">
     <h1 class="page-title">{{ song.title }}</h1>
 
     <div class="card">
@@ -134,7 +133,7 @@ const sheetChords = computed(() => {
         <div>
           <div class="dim small">{{ song.artist || '未知歌手' }}<span v-if="song.source"> · {{ song.source }}</span></div>
           <div class="detail-tags" style="margin-top: 6px">
-            <span class="tag tag-fixed">{{ eff.template || '未归类' }}</span>
+            <span class="tag tag-fixed">{{ song.template || '未归类' }}</span>
             <span v-if="song.isSeed" class="tag tag-fixed">种子库 · M0 校准</span>
             <span v-else class="tag tag-fixed">{{ song.source === 'manual' ? '手动录入' : '自动分析' }}</span>
             <span v-if="song.corrections && Object.values(song.corrections).some(Boolean)" class="tag on tag-fixed">已人工纠错</span>
@@ -148,12 +147,12 @@ const sheetChords = computed(() => {
       <h2>歌曲信息</h2>
       <div class="info-row">
         <span class="dim small">BPM</span>
-        <span class="info-val">{{ eff.bpm ?? '—' }}</span>
+        <span class="info-val">{{ song.bpm ?? '—' }}</span>
         <span v-if="song.analysis" class="badge" :class="CONF_LABELS[song.analysis.confidence.bpm]">{{ song.analysis.confidence.bpm }}</span>
       </div>
       <div class="info-row">
         <span class="dim small">调性</span>
-        <span class="info-val">{{ eff.key ?? '—' }}</span>
+        <span class="info-val">{{ song.key ?? '—' }}</span>
         <span v-if="song.analysis" class="badge" :class="CONF_LABELS[song.analysis.confidence.key]">{{ song.analysis.confidence.key }}</span>
       </div>
       <div v-if="song.analysis && song.analysis.keyTop3.length > 1" class="muted small" style="margin-top: 2px">
@@ -161,7 +160,7 @@ const sheetChords = computed(() => {
       </div>
       <div class="info-row">
         <span class="dim small">套路</span>
-        <span class="info-val">{{ eff.template ?? '—' }}</span>
+        <span class="info-val">{{ song.template ?? '—' }}</span>
         <span v-if="song.analysis" class="badge" :class="CONF_LABELS[song.analysis.confidence.template]">{{ song.analysis.confidence.template }}</span>
       </div>
       <div v-if="song.difficulty" class="info-row">
@@ -268,8 +267,8 @@ const sheetChords = computed(() => {
       <div class="small dim" style="margin-top: 6px">示例：{{ tpl.示例 }}</div>
       <ToneAdvice :tpl="tpl" />
       <p class="muted small" style="margin-top: 8px">{{ tpl.说明 }}</p>
-      <button v-if="eff.bpm" class="btn btn-block" style="margin-top: 12px" @click="openMetronome">
-        用此 BPM 开节拍器（{{ Math.round(eff.bpm) }} BPM）
+      <button v-if="song.bpm" class="btn btn-block" style="margin-top: 12px" @click="openMetronome">
+        用此 BPM 开节拍器（{{ Math.round(song.bpm) }} BPM）
       </button>
     </div>
 

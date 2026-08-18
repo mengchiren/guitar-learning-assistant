@@ -1,51 +1,17 @@
 <script setup>
 import Icon from '../components/Icon.vue'
+import { TOOLS } from '../data/nav.js'
 </script>
 
 <template>
   <div>
     <h1 class="page-title">练习工具</h1>
     <div class="tool-grid">
-      <router-link to="/metronome" class="card tool-card">
-        <span class="tool-icon"><Icon name="metronome" :size="24" /></span>
+      <router-link v-for="t in TOOLS" :key="t.path" :to="t.path" class="card tool-card">
+        <span class="tool-icon"><Icon :name="t.icon" :size="24" /></span>
         <div>
-          <div class="tool-name">节拍器</div>
-          <div class="dim small">练习节奏、跟目标速度</div>
-        </div>
-      </router-link>
-      <router-link to="/tuner" class="card tool-card">
-        <span class="tool-icon"><Icon name="tuner" :size="24" /></span>
-        <div>
-          <div class="tool-name">调音器</div>
-          <div class="dim small">麦克风收音 + 参考音</div>
-        </div>
-      </router-link>
-      <router-link to="/chords" class="card tool-card">
-        <span class="tool-icon"><Icon name="chord" :size="24" /></span>
-        <div>
-          <div class="tool-name">和弦图库</div>
-          <div class="dim small">49 个常用和弦指法图 · 点开可放大</div>
-        </div>
-      </router-link>
-      <router-link to="/recordings" class="card tool-card">
-        <span class="tool-icon"><Icon name="mic" :size="24" /></span>
-        <div>
-          <div class="tool-name">录音回听</div>
-          <div class="dim small">录练习 · 自动对拍 · 回听</div>
-        </div>
-      </router-link>
-      <router-link to="/ask" class="card tool-card">
-        <span class="tool-icon"><Icon name="sparkle" :size="24" /></span>
-        <div>
-          <div class="tool-name">AI 答疑</div>
-          <div class="dim small">练琴问题随时问 · 多模型切换</div>
-        </div>
-      </router-link>
-      <router-link to="/templates" class="card tool-card">
-        <span class="tool-icon"><Icon name="sliders" :size="24" /></span>
-        <div>
-          <div class="tool-name">音色套路库</div>
-          <div class="dim small">5 套常用音色 · 对应你的设备</div>
+          <div class="tool-name">{{ t.name }}</div>
+          <div class="dim small">{{ t.desc }}</div>
         </div>
       </router-link>
     </div>
