@@ -123,6 +123,20 @@ function onPickRestoreFile(e) {
           <span class="knob"></span>
         </button>
       </div>
+      <div class="switch-row" style="margin-top: 12px">
+        <div>
+          <div class="small" style="font-weight: 600">显示看板娘</div>
+          <div class="dim small">右下角常驻小角色，点她说话（仅主题配置了看板娘时）</div>
+        </div>
+        <button
+          class="switch"
+          :class="{ on: settings.mascotEnabled }"
+          :aria-label="settings.mascotEnabled ? '隐藏看板娘' : '显示看板娘'"
+          @click="settings.mascotEnabled = !settings.mascotEnabled"
+        >
+          <span class="knob"></span>
+        </button>
+      </div>
     </div>
     <div class="card">
       <div class="switch-row">

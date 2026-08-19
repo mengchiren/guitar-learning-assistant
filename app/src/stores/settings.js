@@ -9,6 +9,7 @@ export const useSettingsStore = defineStore('settings', {
     { key: 'display-mode', paths: ['displayMode'] },
     { key: 'theme', paths: ['themeId'] },
     { key: 'glass', paths: ['glass'] },
+    { key: 'mascot', paths: ['mascotEnabled'] },
   ],
   state: () => ({
     reminders: load('reminders', { enabled: false, time: '20:00' }),
@@ -22,5 +23,7 @@ export const useSettingsStore = defineStore('settings', {
     themeId: load('theme', 'classic'),
     // 透明毛玻璃（v0.7.1）：开启后卡片/顶栏半透明 + 背景模糊，背景插画更透
     glass: load('glass', false),
+    // 看板娘开关（v0.7.2）：false 时主题配置了看板娘也不显示
+    mascotEnabled: load('mascot', true),
   }),
 })

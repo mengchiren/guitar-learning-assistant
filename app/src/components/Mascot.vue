@@ -8,7 +8,8 @@ import { THEMES } from '../data/themes.js'
 const settings = useSettingsStore()
 
 const theme = computed(() => THEMES.find((t) => t.id === settings.themeId))
-const visible = computed(() => Boolean(theme.value?.mascot))
+// 开关（v0.7.2）：「我的 → 外观主题 → 显示看板娘」；关掉后主题配置了看板娘也不显示
+const visible = computed(() => settings.mascotEnabled && Boolean(theme.value?.mascot))
 
 const LINES = [
   '今天也要加油练琴哦～',
