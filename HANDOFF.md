@@ -1,6 +1,6 @@
 # HANDOFF 交接文档
 
-> 给一个完全没有上下文的新对话看。工作目录：`F:\电吉他学习`（Windows 10，Git Bash）。项目名：**练琴搭子 · PickBuddy**。当前版本 **v0.7.2**。
+> 给一个完全没有上下文的新对话看。工作目录：`F:\电吉他学习`（Windows 10，Git Bash）。项目名：**练琴搭子 · PickBuddy**。当前版本 **v0.7.3**。
 
 ## 1. 我们在做什么任务
 
@@ -68,7 +68,7 @@
 - **设备建议补全（v0.6.4，用户反馈）**：①**琴音量旋钮（VOLUME）补全**——之前只建议了音色旋钮（TONE）；GRX40 两个旋钮现在都给建议：音量进 keyParams（速览第 2 芯片、步骤第 2 步「琴：音量旋钮拧到…」、面板图上音量旋钮红圈高亮），音色留在「可先不动」；6 套套路音量参考：清音 7~8 / 轻过载 8~9 / 失真节奏 8~9 / 金属 9~10 / 主音 8~9；②**箱模名大小写规范化**——用户输入用小写是打字方便，实物为标准大小写（65 Black Nor、J800 Lo、DualRect Red、5153 EL34/6L6、OD 大写），全部按标准写法。回归：toneGuide 46 项（基准重写含音量）、面板渲染 12→13 项（+音量旋钮高亮断言），全过；构建通过。**用户确认本轮结束，等验收。**
 - **外观主题系统（v0.7.0，用户要求"外观有更多样式"：参考 DSH 社区鲸鱼娘主题，指定平泽唯「呆唯风」）**：①`data/themes.js` 主题清单（id/名称/desc/色板 swatch/背景图/看板娘），settings 加 `themeId`（persist key `theme`），App.vue watch 写 `html[data-theme]`；②style.css 增加语义变量（--accent-soft/--accent-soft-2/--ok-soft/--ok-card/--warn-soft/--warn-border/--warn-text/--bar/--heat-1/--heat-2），20+ 视图硬编码色全部收敛，ChordChart/FretboardMap 红点改 CSS class；③首套主题「呆唯 · 轻音海洋」（`[data-theme='yui']`）：奶油暖粉+珊瑚粉+圆角 10px，body 背景图 `--bg-image`（遮罩 `body::before`，浓度变量 `--bg-veil` 默认 0.86），看板娘 `Mascot.vue` 右下角常驻（点她说话）；④「我的」页「外观主题」卡（THEMES 驱动，色板圆点+即时切换）；⑤素材在 `app/public/theme/`（**素材为网上收集的平泽唯形象图 + AI 生成 Q 版角色，个人学习用途、不公开传播；若未来公开分发需换授权素材**）；⑥顺手修 ProfileView「5 套→6 套」、DevicesView「od→OD」。回归 6 组全过 + 构建通过。
 - **主题迭代（v0.7.1，用户反馈三连）**：①**看板娘更萌**——yui 主题看板娘换成 **AI 生成 Q 版 chibi 平泽唯**（`spike/cutout.py` 抠白底→透明+羽化，WebP 压缩 49KB）；②**透明毛玻璃模式**——settings 加 `glass`（persist key `glass`），App.vue 切 `html.glass` class，style.css 里 `html.glass` 覆盖 --bg-card/--bg-input/--border + `.card/.topbar/.subhead/.tabbar/input/select/textarea/.msg-bubble` backdrop blur(14px)，body::before opacity 0.66；「我的 → 外观主题」卡内开关；**html.glass 选择器优先级（0,1,1）高于 [data-theme]（0,1,0），放 CSS 后面即覆盖**；③**第三主题「鲸鱼女仆 · 深海茶会」（`[data-theme='maid']`）**——DSH 社区 dsh-maid-whale-webUI 设计语言：柔雾蓝 #4a86e8、水彩鲸鱼云团背景（素材取自该仓库 BSD-3-Clause）、圆角 12px、AI 生成 Q 版蓝发女仆抱小鲸鱼看板娘（WebP 83KB）；--bg-veil 0.9。回归 6 组全过 + 构建通过。
-- **看板娘迭代（v0.7.2，用户反馈：加启用开关 / 鲸鱼女仆用现成 / 唯的风格不行）**：①settings 加 `mascotEnabled`（persist key `mascot`，默认开）+「我的 → 外观主题」加「显示看板娘」开关，Mascot.vue 的 visible 判断；②**maid 看板娘换现成**——deep-whale-day-night-theme 仓库自带 Q 版透明 companion（day-companion-v1.webp 420×434 RGBA 62KB），与 maid 主题同源风格统一；③**yui 看板娘重制**——AI 生成 2 候选（官方动画风/Q 版厚涂贴纸风），视觉模型评分选 Q 版厚涂（9.8 分：茶色双马尾+黄发卡+深蓝水手服红领巾+红吉他+拨片、张嘴傻笑露虎牙），抠图转 WebP 59KB；官方动画风候选留 `gui-test-screenshots/review-20260819/yui-candidates/` 备选（用户不满意可换）。回归 6 组全过 + 构建通过。**等用户验收。**
+- **看板娘迭代（v0.7.2，用户反馈：加启用开关 / 鲸鱼女仆用现成 / 唯的风格不行）**：①settings 加 `mascotEnabled`（persist key `mascot`，默认开）+「我的 → 外观主题」加「显示看板娘」开关，Mascot.vue 的 visible 判断；②**maid 看板娘换现成**——deep-whale-day-night-theme 仓库自带 Q 版透明 companion（day-companion-v1.webp 420×434 RGBA 62KB），与 maid 主题同源风格统一；③**yui 看板娘重制**——AI 生成 2 候选（官方动画风/Q 版厚涂贴纸风），视觉模型评分先选 Q 版厚涂（9.8 分），**用户验收后改选官方动画画风版（v0.7.3，京都动画 K-ON! 式半身像，抠图转 WebP 31KB）**；Q 版厚涂候选留 `gui-test-screenshots/review-20260819/yui-candidates/` 备选（想换随时换）。回归 6 组全过 + 构建通过。**等用户验收。**
 - 全程约 52 个提交，git 历史即详细变更记录；需求文档修订记录完整到 v0.6.4；README/验收指南/交接文档全同步。
 
 ## 4. 当前卡在哪
