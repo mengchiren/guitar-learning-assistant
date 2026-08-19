@@ -238,7 +238,7 @@ async function loadDevTest() {
   font-weight: 700;
   flex: none;
 }
-.b-high { background: #e8f3ec; border-color: var(--ok); color: var(--ok); }
-.b-mid { background: #fdf3e0; border-color: #d9a441; color: #a97412; }
-.b-low { background: #fdeaea; border-color: var(--accent); color: var(--accent-dark); }
+.b-high { background: var(--ok-soft); border-color: var(--ok); color: var(--ok); }
+.b-mid { background: var(--warn-soft); border-color: var(--warn-border); color: var(--warn-text); }
+.b-low { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-dark); }
 </style>

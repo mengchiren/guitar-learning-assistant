@@ -57,7 +57,7 @@ function selectAmp(id) {
           <span v-if="settings.activeDevices.ampId === a.id" class="tag on">使用中</span>
         </div>
         <div class="small" style="margin-top: 8px">
-          <b>箱头模拟</b>：14 种（65 black / J800 / DualRect / 5153 系列，od 为过载推子版；中文对照见「音箱入门」页）
+          <b>箱头模拟</b>：14 种（65 Black / J800 / DualRect / 5153 系列，OD 为过载推子版；中文对照见「音箱入门」页）
         </div>
         <div class="small" style="margin-top: 4px"><b>EQ</b>：{{ a.eq.join(' / ') }}</div>
         <div class="small" style="margin-top: 4px">

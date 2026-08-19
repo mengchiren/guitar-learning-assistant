@@ -117,7 +117,7 @@ function onToggle(item) {
 .tier-switch { align-items: center; }
 .tier-total { margin-left: auto; }
 
-.plan-item.done { border-color: var(--ok); background: #fbfdfb; }
+.plan-item.done { border-color: var(--ok); background: var(--ok-card); }
 .item-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
 .item-title { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .tag-kind { font-size: 12px; }

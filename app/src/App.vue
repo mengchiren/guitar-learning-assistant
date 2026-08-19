@@ -1,13 +1,25 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Icon from './components/Icon.vue'
 import { useTimerStore } from './stores/timer.js'
+import { useSettingsStore } from './stores/settings.js'
 import { TABS } from './data/nav.js'
+import Mascot from './components/Mascot.vue'
 
 const route = useRoute()
 const router = useRouter()
 const timer = useTimerStore()
+const settings = useSettingsStore()
+
+// 外观主题（v0.7.0）：themeId 变化时切换 html[data-theme]，CSS 变量换肤
+watch(
+  () => settings.themeId,
+  (id) => {
+    document.documentElement.dataset.theme = id || 'classic'
+  },
+  { immediate: true },
+)
 
 // tab 列表由 data/nav.js 统一声明（v0.6.0）
 
@@ -80,6 +92,9 @@ function goBack() {
     <main class="page">
       <router-view />
     </main>
+
+    <!-- 主题看板娘（v0.7.0）：仅当前主题配置了 mascot 时显示 -->
+    <Mascot />
 
     <!-- 移动端：底部导航 -->
     <nav v-if="route.meta.tab" class="tabbar mobile-only">

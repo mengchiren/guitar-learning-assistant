@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import Icon from '../components/Icon.vue'
 import { useSettingsStore } from '../stores/settings.js'
+import { THEMES } from '../data/themes.js'
 import { downloadBackup, parseBackup, restoreBackup } from '../utils/backup.js'
 
 const settings = useSettingsStore()
@@ -72,7 +73,7 @@ function onPickRestoreFile(e) {
         <span class="row-icon"><Icon name="sliders" :size="22" /></span>
         <div>
           <div>音色套路库</div>
-          <div class="dim small">5 套常用音色设置</div>
+          <div class="dim small">6 套常用音色设置</div>
         </div>
       </router-link>
       <router-link to="/stats" class="card row-card">
@@ -89,6 +90,25 @@ function onPickRestoreFile(e) {
           <div class="dim small">成田三套课 · 学到第几课</div>
         </div>
       </router-link>
+    </div>
+    <div class="card">
+      <h2>外观主题</h2>
+      <p class="muted small" style="margin-bottom: 10px">一键换肤，全站跟着变；点一下立即生效，可随时切回。</p>
+      <div class="theme-grid">
+        <button
+          v-for="t in THEMES"
+          :key="t.id"
+          class="theme-card"
+          :class="{ on: settings.themeId === t.id }"
+          @click="settings.themeId = t.id"
+        >
+          <div class="theme-swatches">
+            <span v-for="c in t.swatch" :key="c" class="swatch" :style="{ background: c }"></span>
+          </div>
+          <div class="theme-name">{{ t.name }}</div>
+          <div class="dim small">{{ t.desc }}</div>
+        </button>
+      </div>
     </div>
     <div class="card">
       <div class="switch-row">
@@ -134,8 +154,30 @@ function onPickRestoreFile(e) {
 .row-card { display: flex; gap: 12px; align-items: center; text-decoration: none; color: var(--text); font-weight: 600; }
 .row-icon { display: flex; color: var(--text-dim); }
 
+/* 外观主题选择卡（v0.7.0） */
+.theme-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.theme-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  text-align: left;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  cursor: pointer;
+  color: var(--text);
+  font-family: inherit;
+}
+.theme-card.on { border-color: var(--accent); }
+.theme-swatches { display: flex; gap: 6px; margin-bottom: 4px; }
+.swatch { width: 26px; height: 26px; border-radius: 50%; border: 1px solid rgba(0, 0, 0, 0.12); }
+.theme-name { font-size: 15px; font-weight: 700; }
+
 @media (min-width: 768px) {
   .profile-grid { grid-template-columns: repeat(3, 1fr); gap: 16px; }
   .profile-grid .card { margin-bottom: 0; }
+  .theme-grid { grid-template-columns: 1fr 1fr; }
 }
 </style>

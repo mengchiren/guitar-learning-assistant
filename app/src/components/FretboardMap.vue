@@ -48,7 +48,7 @@ const BOTTOM_Y = NUT_Y + FRET_H * 4
           text-anchor="middle"
           font-size="12"
           font-weight="700"
-          fill="#e30613"
+          class="fret-num"
         >
           {{ f }}
         </text>
@@ -74,4 +74,6 @@ const BOTTOM_Y = NUT_Y + FRET_H * 4
   flex-direction: column;
   align-items: center;
 }
+/* 指法数字：跟随主题强调色 */
+.fret-num { fill: var(--accent); }
 </style>

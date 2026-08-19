@@ -7,6 +7,7 @@ export const useSettingsStore = defineStore('settings', {
     { key: 'reminders', paths: ['reminders'] },
     { key: 'active-devices', paths: ['activeDevices'] },
     { key: 'display-mode', paths: ['displayMode'] },
+    { key: 'theme', paths: ['themeId'] },
   ],
   state: () => ({
     reminders: load('reminders', { enabled: false, time: '20:00' }),
@@ -16,5 +17,7 @@ export const useSettingsStore = defineStore('settings', {
     }),
     // 设备建议显示方式：beginner = 参数速览 + 大白话操作流程；full = 全部参数表
     displayMode: load('display-mode', 'beginner'),
+    // 外观主题（v0.7.0）：data/themes.js 的 id；classic 为默认
+    themeId: load('theme', 'classic'),
   }),
 })

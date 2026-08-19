@@ -84,7 +84,7 @@ const topMarks = computed(() => {
           :cx="d.x"
           :cy="d.y"
           r="5"
-          fill="#e30613"
+          class="dot"
         />
       </template>
       <template v-else>
@@ -113,4 +113,6 @@ const topMarks = computed(() => {
   color: var(--text-dim);
   text-align: center;
 }
+/* 按弦点：跟随主题强调色 */
+.dot { fill: var(--accent); }
 </style>

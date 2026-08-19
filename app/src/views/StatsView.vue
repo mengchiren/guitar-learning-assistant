@@ -180,7 +180,7 @@ const songsStatus = computed(() => {
 
 .week-bars { display: flex; gap: 10px; height: 110px; align-items: flex-end; }
 .week-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 3px; }
-.week-bar { width: 100%; max-width: 40px; background: #d6d3cb; border-radius: 3px 3px 0 0; }
+.week-bar { width: 100%; max-width: 40px; background: var(--bar); border-radius: 3px 3px 0 0; }
 .week-bar.today { background: var(--accent); }
 .week-val { font-weight: 700; }
 
@@ -190,8 +190,8 @@ const songsStatus = computed(() => {
   border-radius: 4px; font-size: 12px; color: var(--text-dim); background: var(--bg-input);
 }
 .heat-cell.empty { background: transparent; }
-.heat-cell.h1 { background: #f6c9cd; }
-.heat-cell.h2 { background: #e89aa1; }
+.heat-cell.h1 { background: var(--heat-1); }
+.heat-cell.h2 { background: var(--heat-2); }
 .heat-cell.h3 { background: var(--accent); color: #fff; font-weight: 700; }
 .heat-legend { display: flex; align-items: center; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
 .heat-legend .heat-cell { width: 18px; aspect-ratio: 1; font-size: 0; }

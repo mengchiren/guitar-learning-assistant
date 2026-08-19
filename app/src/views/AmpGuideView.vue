@@ -122,7 +122,7 @@ const items = computed(() => [
   padding: 10px 12px;
   border: 1px solid var(--accent);
   border-radius: 8px;
-  background: #fdeaea;
+  background: var(--accent-soft);
 }
 .guide-title { display: flex; align-items: center; gap: 8px; }
 

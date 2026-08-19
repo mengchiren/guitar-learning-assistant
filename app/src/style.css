@@ -11,6 +11,48 @@
   --danger: #d0342c;
   --ok: #2e7d4f;
   --radius: 6px;
+  /* 语义衍生色（v0.7.0 起收敛各视图硬编码，主题换肤只改这些） */
+  --accent-soft: #fdeaea;   /* 选中/提醒浅底 */
+  --accent-soft-2: #fdf1f1; /* 课程当前行底 */
+  --ok-soft: #e8f3ec;       /* 达标徽章底 */
+  --ok-card: #fbfdfb;       /* 已完成卡片底 */
+  --warn-soft: #fdf3e0;     /* 中置信底 */
+  --warn-border: #d9a441;
+  --warn-text: #a97412;
+  --bar: #d6d3cb;           /* 柱状图/未达标记 */
+  --heat-1: #f6c9cd;        /* 热力图 1~9 分 */
+  --heat-2: #e89aa1;        /* 热力图 10~29 分 */
+  /* 主题背景（classic 无图；主题在 [data-theme] 块里覆盖） */
+  --bg-image: none;
+}
+
+/* 呆唯 · 轻音海洋（v0.7.0）：奶油暖粉 + 海盐青 + 珊瑚粉强调。
+   灵感：轻音少女平泽唯（茶发/黄发卡/校服）x 鲸鱼娘式海洋萌系。
+   素材 public/theme/（个人学习用途，不公开传播）。 */
+[data-theme='yui'] {
+  color-scheme: light;
+  --bg: #fff5ec;
+  --bg-card: #fffdf9;
+  --bg-input: #fdf1e5;
+  --border: #ead9c8;
+  --text: #3d2f28;
+  --text-dim: #8f7c6c;
+  --accent: #f08a94;        /* 珊瑚粉（呆唯腮红感） */
+  --accent-dark: #d76a76;
+  --danger: #d0342c;
+  --ok: #4e9a6e;
+  --radius: 10px;           /* 圆润 */
+  --accent-soft: #fdeeee;
+  --accent-soft-2: #fdf3f1;
+  --ok-soft: #e7f3ea;
+  --ok-card: #fafdf9;
+  --warn-soft: #fdf3e0;
+  --warn-border: #d9a441;
+  --warn-text: #a97412;
+  --bar: #f0dfd0;
+  --heat-1: #fbd3d8;
+  --heat-2: #f3a8b0;
+  --bg-image: url('/theme/yui-bg-desktop.jpg');
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -21,6 +63,20 @@ body {
   color: var(--text);
   font-size: 16px;
   -webkit-font-smoothing: antialiased;
+  /* 主题背景图（v0.7.0）：主题变量控制，默认 none；图上盖 86% 底色遮罩保证可读性 */
+  background-image: var(--bg-image);
+  background-size: cover;
+  background-position: center 25%;
+  background-attachment: fixed;
+}
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  opacity: 0.86;
+  z-index: -1;
+  pointer-events: none;
 }
 #app { height: 100%; }
 
@@ -147,7 +203,7 @@ label { font-size: 14px; color: var(--text-dim); display: block; margin: 10px 0 
   cursor: pointer;
   user-select: none;
 }
-.tag.on { background: #fdeaea; border-color: var(--accent); color: var(--accent-dark); }
+.tag.on { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-dark); }
 
 .tabbar {
   position: fixed;
@@ -181,7 +237,7 @@ label { font-size: 14px; color: var(--text-dim); display: block; margin: 10px 0 
 .switch-row { display: flex; justify-content: space-between; align-items: center; }
 .switch { width: 52px; height: 30px; border-radius: 999px; background: var(--bg-input); border: 1px solid var(--border); position: relative; cursor: pointer; }
 .switch .knob { position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: var(--text-dim); transition: 0.2s; }
-.switch.on { background: #fdeaea; border-color: var(--accent); }
+.switch.on { background: var(--accent-soft); border-color: var(--accent); }
 .switch.on .knob { left: 25px; background: var(--accent); }
 
 /* ---------- 桌面端外壳（≥768px） ---------- */
@@ -230,7 +286,7 @@ label { font-size: 14px; color: var(--text-dim); display: block; margin: 10px 0 
   white-space: nowrap;
 }
 .topnav-link:hover { color: var(--text); background: var(--bg-input); }
-.topnav-link.active { color: var(--accent-dark); background: #fdeaea; }
+.topnav-link.active { color: var(--accent-dark); background: var(--accent-soft); }
 .topbar-tools { display: flex; gap: 6px; flex: none; }
 .tool-btn {
   width: 38px;

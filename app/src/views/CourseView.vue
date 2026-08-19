@@ -94,7 +94,7 @@ function isCurrent(key) {
   border-radius: 6px;
 }
 .lesson-row + .lesson-row { border-top: 1px dashed var(--border); }
-.lesson-row.current { background: #fdf1f1; }
+.lesson-row.current { background: var(--accent-soft-2); }
 .lesson-row.done .lesson-title { color: var(--text-dim); text-decoration: line-through; }
 .lesson-no { width: 30px; flex: none; }
 .lesson-title { flex: 1; }

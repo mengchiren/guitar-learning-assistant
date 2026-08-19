@@ -140,7 +140,7 @@ const packItems = computed(() => (plan.value.mode === 'reduce' ? plan.value.pack
 }
 .week-bars { display: flex; gap: 8px; height: 90px; align-items: flex-end; }
 .week-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; justify-content: flex-end; gap: 4px; }
-.week-bar { width: 100%; max-width: 34px; background: #d6d3cb; border-radius: 3px 3px 0 0; }
+.week-bar { width: 100%; max-width: 34px; background: var(--bar); border-radius: 3px 3px 0 0; }
 .week-bar.today { background: var(--accent); }
 .week-label { font-size: 11px; }
 .list-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
