@@ -109,6 +109,20 @@ function onPickRestoreFile(e) {
           <div class="dim small">{{ t.desc }}</div>
         </button>
       </div>
+      <div class="switch-row" style="margin-top: 12px">
+        <div>
+          <div class="small" style="font-weight: 600">透明毛玻璃</div>
+          <div class="dim small">卡片/面板半透明 + 模糊，背景插画更透出来</div>
+        </div>
+        <button
+          class="switch"
+          :class="{ on: settings.glass }"
+          :aria-label="settings.glass ? '关闭透明毛玻璃' : '开启透明毛玻璃'"
+          @click="settings.glass = !settings.glass"
+        >
+          <span class="knob"></span>
+        </button>
+      </div>
     </div>
     <div class="card">
       <div class="switch-row">

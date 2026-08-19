@@ -20,6 +20,14 @@ watch(
   },
   { immediate: true },
 )
+// 透明毛玻璃（v0.7.1）：开启后卡片/面板半透明，背景插画透出来
+watch(
+  () => settings.glass,
+  (on) => {
+    document.documentElement.classList.toggle('glass', Boolean(on))
+  },
+  { immediate: true },
+)
 
 // tab 列表由 data/nav.js 统一声明（v0.6.0）
 

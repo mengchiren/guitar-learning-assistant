@@ -1,6 +1,6 @@
 # HANDOFF 交接文档
 
-> 给一个完全没有上下文的新对话看。工作目录：`F:\电吉他学习`（Windows 10，Git Bash）。项目名：**练琴搭子 · PickBuddy**。当前版本 **v0.7.0**。
+> 给一个完全没有上下文的新对话看。工作目录：`F:\电吉他学习`（Windows 10，Git Bash）。项目名：**练琴搭子 · PickBuddy**。当前版本 **v0.7.1**。
 
 ## 1. 我们在做什么任务
 
@@ -66,17 +66,18 @@
 - **图形化设备配置说明（v0.6.2，用户反馈文字版仍难用 + 讨论确认方案 A/双模块/音箱+吉他）**：①devices.js 加 panel 面板布局数据（JAM BUDDY 2 十旋钮三脚钉含多功能按压说明、GRX40 琴身+档位+旋钮）；②`AmpPanel.vue`/`GuitarPanel.vue` SVG 组件（数值旋钮指针 7:30→4:30、高亮红圈+值标签、interactive 点按）；③ToneAdvice 新手模式集成面板图（歌曲详情/套路库共用）；④**「音箱入门」页 `/amp-guide`**（工具页入口，点旋钮看说明 + 6 套套路对照表 + 教学视频提示）；⑤`amp` 图标 + nav 卡片；⑥回归：toneGuide 41 项（+面板数据↔套路模板一致性校验）、新增 `test_panels_render.mjs`（11 项，**Vue SSR 编译 SFC 渲染 SVG 断言高亮/指针/值标签**——inlineTemplate 编译 + import→require 转换的沙箱技巧），均入 CI。全量回归通过：对拍 5/5、合成 3/3、规则 25/25、数据 767/767、冒烟 20/20、toneGuide 41/41、面板渲染 11/11、构建通过。
 - **设备建议修正（v0.6.3，用户实物反馈两个真错误）**：①**通道双脚钉**——CHANNEL（CLEAN/DRIVE）+ DRIVE MODE（RHYTHM/LEAD）两步讲全，`channelMap` 数据驱动：步骤拆两步、速览芯片显示「DRIVE → RHYTHM」/「CLEAN」、面板两个脚钉联动高亮；②**箱模名按实物 14 种更正**（65 Black/J800/DualRect/5153 系列，OD=过载推子版）+ `modelNotes` 中文对照 + 入门页 14 种对照表；模板映射：清音→65 Black Nor、轻过载→65 Black Nor OD、失真节奏→J800 Lo、金属→DualRect Red、主音→J800 Hi OD。回归：toneGuide 41→46 项（+channelMap/14 种名单/虚构名禁止校验）、面板渲染 11→12 项，均过；构建通过。
 - **设备建议补全（v0.6.4，用户反馈）**：①**琴音量旋钮（VOLUME）补全**——之前只建议了音色旋钮（TONE）；GRX40 两个旋钮现在都给建议：音量进 keyParams（速览第 2 芯片、步骤第 2 步「琴：音量旋钮拧到…」、面板图上音量旋钮红圈高亮），音色留在「可先不动」；6 套套路音量参考：清音 7~8 / 轻过载 8~9 / 失真节奏 8~9 / 金属 9~10 / 主音 8~9；②**箱模名大小写规范化**——用户输入用小写是打字方便，实物为标准大小写（65 Black Nor、J800 Lo、DualRect Red、5153 EL34/6L6、OD 大写），全部按标准写法。回归：toneGuide 46 项（基准重写含音量）、面板渲染 12→13 项（+音量旋钮高亮断言），全过；构建通过。**用户确认本轮结束，等验收。**
-- **外观主题系统（v0.7.0，用户要求"外观有更多样式"：参考 DSH 社区鲸鱼娘主题，指定平泽唯「呆唯风」）**：①`data/themes.js` 主题清单（id/名称/desc/色板 swatch/背景图/看板娘），settings 加 `themeId`（persist key `theme`），App.vue watch 写 `html[data-theme]`；②style.css 增加语义变量（--accent-soft/--accent-soft-2/--ok-soft/--ok-card/--warn-soft/--warn-border/--warn-text/--bar/--heat-1/--heat-2），20+ 视图硬编码色全部收敛，ChordChart/FretboardMap 红点改 CSS class；③首套主题「呆唯 · 轻音海洋」（`[data-theme='yui']`）：奶油暖粉+珊瑚粉+圆角 10px，body 背景图 `--bg-image`（86% 遮罩 body::before），看板娘 `Mascot.vue` 右下角常驻（点她说话）；④「我的」页「外观主题」卡（THEMES 驱动，色板圆点+即时切换）；⑤素材在 `app/public/theme/`（yui-bg-desktop.jpg 263KB 平泽唯弹吉他壁纸压缩、yui-mascot.png 平泽唯人偶透明 PNG），SW precache 自动纳入；**素材为网上收集的平泽唯形象图（个人学习用途、不公开传播；若未来公开分发需换授权素材或 AI 原创）**；⑥顺手修 ProfileView「5 套→6 套」、DevicesView「od→OD」。回归 6 组全过 + 构建通过（截图验证：注入 localStorage 换肤链路生效）。**待用户验收：「我的 → 外观主题」切换两套主题，换肤后刷新两三次避开 SW 缓存。**
+- **外观主题系统（v0.7.0，用户要求"外观有更多样式"：参考 DSH 社区鲸鱼娘主题，指定平泽唯「呆唯风」）**：①`data/themes.js` 主题清单（id/名称/desc/色板 swatch/背景图/看板娘），settings 加 `themeId`（persist key `theme`），App.vue watch 写 `html[data-theme]`；②style.css 增加语义变量（--accent-soft/--accent-soft-2/--ok-soft/--ok-card/--warn-soft/--warn-border/--warn-text/--bar/--heat-1/--heat-2），20+ 视图硬编码色全部收敛，ChordChart/FretboardMap 红点改 CSS class；③首套主题「呆唯 · 轻音海洋」（`[data-theme='yui']`）：奶油暖粉+珊瑚粉+圆角 10px，body 背景图 `--bg-image`（遮罩 `body::before`，浓度变量 `--bg-veil` 默认 0.86），看板娘 `Mascot.vue` 右下角常驻（点她说话）；④「我的」页「外观主题」卡（THEMES 驱动，色板圆点+即时切换）；⑤素材在 `app/public/theme/`（**素材为网上收集的平泽唯形象图 + AI 生成 Q 版角色，个人学习用途、不公开传播；若未来公开分发需换授权素材**）；⑥顺手修 ProfileView「5 套→6 套」、DevicesView「od→OD」。回归 6 组全过 + 构建通过。
+- **主题迭代（v0.7.1，用户反馈三连）**：①**看板娘更萌**——yui 主题看板娘换成 **AI 生成 Q 版 chibi 平泽唯**（`spike/cutout.py` 抠白底→透明+羽化，WebP 压缩 49KB）；②**透明毛玻璃模式**——settings 加 `glass`（persist key `glass`），App.vue 切 `html.glass` class，style.css 里 `html.glass` 覆盖 --bg-card/--bg-input/--border + `.card/.topbar/.subhead/.tabbar/input/select/textarea/.msg-bubble` backdrop blur(14px)，body::before opacity 0.66；「我的 → 外观主题」卡内开关；**html.glass 选择器优先级（0,1,1）高于 [data-theme]（0,1,0），放 CSS 后面即覆盖**；③**第三主题「鲸鱼女仆 · 深海茶会」（`[data-theme='maid']`）**——DSH 社区 dsh-maid-whale-webUI 设计语言：柔雾蓝 #4a86e8、水彩鲸鱼云团背景（素材取自该仓库 BSD-3-Clause）、圆角 12px、AI 生成 Q 版蓝发女仆抱小鲸鱼看板娘（WebP 83KB）；--bg-veil 0.9。回归 6 组全过 + 构建通过。**等用户验收。**
 - 全程约 52 个提交，git 历史即详细变更记录；需求文档修订记录完整到 v0.6.4；README/验收指南/交接文档全同步。
 
 ## 4. 当前卡在哪
 
-**v0.7.0（外观主题系统）已推送，等用户验收**。验收重点：
+**v0.7.1（主题迭代：Q 版看板娘 + 毛玻璃 + 鲸鱼女仆主题）已推送，等用户验收**。验收重点：
 
-1. **「我的 → 外观主题」**：点「呆唯 · 轻音海洋」立即全站换肤（奶油粉底 + 珊瑚粉按钮 + 桌面背景隐约有平泽唯弹吉他插画），再点「经典瑞士军刀」切回；切换后刷新两三次避开 SW 旧缓存。
-2. **看板娘**：呆唯主题下右下角常驻小角色（平泽唯人偶图），点她说话（随机鼓励语）；经典主题下不显示。
+1. **「我的 → 外观主题」**：现在有 **3 套主题**（经典瑞士军刀 / 呆唯·轻音海洋 / 鲸鱼女仆·深海茶会），点一下即时切换；下方新增**「透明毛玻璃」开关**——开启后卡片/面板半透明 + 模糊，背景插画更透（三套主题通用）。
+2. **看板娘**：呆唯主题是 **Q 版 chibi 平泽唯**（茶色双马尾+黄发卡+红吉他）；鲸鱼女仆主题是 **Q 版蓝发女仆抱小鲸鱼**。点她们说话。
 3. **手机端**：背景插画被遮罩压暗不影响阅读；看板娘悬浮在底部导航上方不遮挡。
-4. **数据无损**：主题选择存 localStorage（`gla:v1:theme`），其余数据不受影响。
+4. **数据无损**：主题/毛玻璃选择存 localStorage，其余数据不受影响；切换后刷新两三次避开 SW 旧缓存。
 5. **v0.4.2/v0.6.x 遗留的待用户反馈**（功能层面，与本次无关）：
 1. **曲谱准确性（重点）**：19 首曲谱中多数标注了来源与置信度；单源/自动检测的（影色舞等）标注「请对照原曲校准」。用户弹到不对的，按他听出来的改数据（人工纠错永远优先）。
 2. **新歌 BPM/调性待校准**：22 首新歌的 BPM/调性多为引擎分析值（`dataFrom` 标「待人工校准」）；用户弹到速度不对的报过来改。已知悬案：天使にふれたよ!（社区谱 100~117 疑似半速）、青春コンプレックス（社区谱 155 vs 分析 185）、ソラノムジカ（分析 129 vs 半速记谱 98）。

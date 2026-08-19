@@ -8,6 +8,7 @@ export const useSettingsStore = defineStore('settings', {
     { key: 'active-devices', paths: ['activeDevices'] },
     { key: 'display-mode', paths: ['displayMode'] },
     { key: 'theme', paths: ['themeId'] },
+    { key: 'glass', paths: ['glass'] },
   ],
   state: () => ({
     reminders: load('reminders', { enabled: false, time: '20:00' }),
@@ -19,5 +20,7 @@ export const useSettingsStore = defineStore('settings', {
     displayMode: load('display-mode', 'beginner'),
     // 外观主题（v0.7.0）：data/themes.js 的 id；classic 为默认
     themeId: load('theme', 'classic'),
+    // 透明毛玻璃（v0.7.1）：开启后卡片/顶栏半透明 + 背景模糊，背景插画更透
+    glass: load('glass', false),
   }),
 })

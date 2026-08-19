@@ -28,7 +28,16 @@ export const THEMES = [
     desc: '奶油暖粉 + 海盐青 + 平泽唯看板娘（轻音少女）',
     swatch: ['#fff5ec', '#f08a94', '#5fa8c9', '#f5c96b', '#8a6a4f'],
     bgImage: '/theme/yui-bg-desktop.jpg',
-    mascot: '/theme/yui-mascot.png',
+    mascot: '/theme/yui-mascot.webp',
     mascotName: '唯',
+  },
+  {
+    id: 'maid',
+    name: '鲸鱼女仆 · 深海茶会',
+    desc: '柔雾蓝 + 鲸鱼云团背景 + 女仆看板娘（DSH 社区鲸鱼娘风格）',
+    swatch: ['#f7fafc', '#5b9bd5', '#a7d0e8', '#fadadd', '#2a5caa'],
+    bgImage: '/theme/maid-bg.webp',
+    mascot: '/theme/maid-mascot.webp',
+    mascotName: '小鲸',
   },
 ]

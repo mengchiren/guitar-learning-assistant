@@ -55,6 +55,34 @@
   --bg-image: url('/theme/yui-bg-desktop.jpg');
 }
 
+[data-theme='maid'] {
+  color-scheme: light;
+  /* 鲸鱼女仆 · 深海茶会（v0.7.1）：柔雾蓝 + 水彩鲸鱼云团（DSH 社区 maid-whale 主题风格） */
+  --bg: #f2f7fb;
+  --bg-card: #ffffff;
+  --bg-input: #eef4f9;
+  --border: #d5e3ef;
+  --text: #24303c;
+  --text-dim: #71808f;
+  --accent: #4a86e8;        /* 柔雾蓝 */
+  --accent-dark: #2a5caa;
+  --danger: #d0342c;
+  --ok: #3d9a7a;
+  --radius: 12px;
+  --accent-soft: #e8f2fd;
+  --accent-soft-2: #eef5fc;
+  --ok-soft: #e7f3ee;
+  --ok-card: #f6fbf8;
+  --warn-soft: #fdf3e0;
+  --warn-border: #d9a441;
+  --warn-text: #a97412;
+  --bar: #d7e3ee;
+  --heat-1: #cfe3f7;
+  --heat-2: #a9cdf0;
+  --bg-image: url('/theme/maid-bg.webp');
+  --bg-veil: 0.9; /* 水彩背景浅，遮罩浓一点保可读性 */
+}
+
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 html, body { height: 100%; }
 body {
@@ -74,7 +102,7 @@ body::before {
   position: fixed;
   inset: 0;
   background: var(--bg);
-  opacity: 0.86;
+  opacity: var(--bg-veil, 0.86);
   z-index: -1;
   pointer-events: none;
 }
@@ -151,7 +179,7 @@ h1.page-title::before {
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  background: #ffffff;
+  background: var(--bg-card);
   color: var(--text);
   text-decoration: none;
 }
@@ -197,7 +225,7 @@ label { font-size: 14px; color: var(--text-dim); display: block; margin: 10px 0 
 .tag {
   padding: 7px 14px;
   border-radius: 999px;
-  background: #ffffff;
+  background: var(--bg-card);
   border: 1px solid var(--border);
   font-size: 14px;
   cursor: pointer;
@@ -340,3 +368,27 @@ label { font-size: 14px; color: var(--text-dim); display: block; margin: 10px 0 
   .shell.with-tabbar .timer-chip--float { bottom: calc(68px + env(safe-area-inset-bottom)); }
   .shell:not(.with-tabbar) .timer-chip--float { bottom: calc(16px + env(safe-area-inset-bottom)); }
 }
+
+/* ---------- 透明毛玻璃模式（v0.7.1） ----------
+   开关在「我的 → 外观主题 → 透明毛玻璃」；开启后卡片/面板半透明 + 背景模糊，
+   背景插画更透出来。html.glass 优先级高于 [data-theme] 的主题变量（选择器带元素+类）。 */
+html.glass {
+  --bg-card: rgba(255, 255, 255, 0.55);
+  --bg-input: rgba(255, 255, 255, 0.42);
+  --border: rgba(20, 20, 20, 0.1);
+}
+html.glass body::before { opacity: 0.66; }
+html.glass .card,
+html.glass .topbar,
+html.glass .subhead,
+html.glass .tabbar,
+html.glass input,
+html.glass select,
+html.glass textarea,
+html.glass .msg-bubble {
+  backdrop-filter: blur(14px) saturate(1.25);
+  -webkit-backdrop-filter: blur(14px) saturate(1.25);
+}
+html.glass .tabbar,
+html.glass .topbar,
+html.glass .subhead { background: rgba(255, 255, 255, 0.6); }
