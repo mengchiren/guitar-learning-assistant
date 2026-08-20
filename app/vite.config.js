@@ -24,11 +24,16 @@ export default defineConfig({
         background_color: '#f4f3ef',
         icons: [
           { src: 'icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
-          { src: 'icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'maskable' }
+          { src: 'icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'maskable' },
+          // v0.8.0：补 PNG 档（部分安卓桌面对 SVG 图标兼容性差）
+          { src: 'icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+          { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
         ]
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,woff2}'],
+        // v0.8.0：主题素材（public/theme/ 的 webp/jpg）纳入预缓存，断网也换肤
+        globPatterns: ['**/*.{js,css,html,svg,woff2,webp,jpg,png}'],
         navigateFallback: 'index.html'
       }
     })

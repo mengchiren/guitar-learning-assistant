@@ -13,17 +13,18 @@ const props = defineProps({
   tpl: { type: Object, required: true },
 })
 const settings = useSettingsStore()
-const guitar = GUITARS.find((d) => d.id === settings.activeDevices.guitarId)
-const amp = AMPS.find((d) => d.id === settings.activeDevices.ampId)
+// v0.8.0：设备按 computed 解析——「我的设备」切换后建议卡即时跟随（原为 setup 一次取值）
+const guitar = computed(() => GUITARS.find((d) => d.id === settings.activeDevices.guitarId))
+const amp = computed(() => AMPS.find((d) => d.id === settings.activeDevices.ampId))
 // computed 而非一次性计算：同组件实例复用时（路由参数切换）tpl 会变，内容要跟着变
-const beginner = computed(() => beginnerGuide(props.tpl, { guitar, amp }))
+const beginner = computed(() => beginnerGuide(props.tpl, { guitar: guitar.value, amp: amp.value }))
 
 // 面板图数据：套路值 → 面板字段；高亮 = 设备 keyParams（新手必须动的）。
 // 通道特殊：JAM BUDDY 2 是双脚钉（CHANNEL=CLEAN/DRIVE，DRIVE MODE=RHYTHM/LEAD），
 // 按 channelMap 拆成脚钉状态，DRIVE 时 DRIVE MODE 脚钉一起高亮。
 const ampValues = computed(() => {
   const a = props.tpl.amp
-  const step = amp?.channelMap?.[a.channel] || null
+  const step = amp.value?.channelMap?.[a.channel] || null
   return {
     channel: step ? step.channel : a.channel,
     driveMode: step?.driveMode || undefined,
@@ -39,10 +40,10 @@ const ampValues = computed(() => {
 })
 const guitarValues = computed(() => ({ pickup: props.tpl.guitar.pickup, volume: props.tpl.guitar.volume, tone: props.tpl.guitar.tone }))
 const ampHighlight = computed(() => {
-  const base = amp?.keyParams || []
+  const base = amp.value?.keyParams || []
   return ampValues.value.driveMode ? [...base, 'driveMode'] : base
 })
-const guitarHighlight = guitar?.keyParams || []
+const guitarHighlight = computed(() => guitar.value?.keyParams || [])
 </script>
 
 <template>

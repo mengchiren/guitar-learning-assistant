@@ -104,7 +104,7 @@ function isCurrent(key) {
 }
 .check-btn.on { color: var(--ok); }
 .set-cur-btn {
-  flex: none; border: 1px solid var(--border); background: #fff;
+  flex: none; border: 1px solid var(--border); background: var(--bg-card);
   color: var(--text-dim); font-size: 12px; padding: 2px 8px;
   border-radius: 999px; cursor: pointer;
 }

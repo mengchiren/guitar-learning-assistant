@@ -1,9 +1,10 @@
 <script setup>
-import { ref, computed, onUnmounted } from 'vue'
+import { ref, computed, watch, onUnmounted } from 'vue'
 import { usePracticeStore } from '../stores/practice.js'
 import { useSettingsStore } from '../stores/settings.js'
 import { usePlanStore } from '../stores/plan.js'
 import { useMediaQuery } from '../composables/useMediaQuery.js'
+import { localDateStr } from '../utils/date.js'
 import Icon from '../components/Icon.vue'
 
 const practice = usePracticeStore()
@@ -27,6 +28,25 @@ const shouldRemind = computed(
     nowHHMM.value >= settings.reminders.time &&
     practice.todaySeconds === 0
 )
+
+// 系统通知（v0.8.0）：到点且今天未练时，若已授权则弹系统通知；每天最多一条。
+// 注意：Android 上需要已安装 PWA 且 Chrome 支持才稳定，失败不影响应用内「到点啦」横幅。
+const NOTIFIED_KEY = 'gla:v1:notified-date'
+function maybeSystemNotify(on) {
+  if (!on) return
+  if (!('Notification' in window) || Notification.permission !== 'granted') return
+  try {
+    if (localStorage.getItem(NOTIFIED_KEY) === localDateStr()) return
+    localStorage.setItem(NOTIFIED_KEY, localDateStr())
+    new Notification('练琴搭子', {
+      body: '到点啦，今天还没练琴！10 分钟爬格子也好过没有。',
+      icon: '/icon.svg',
+    })
+  } catch {
+    /* 通知/标记失败不阻塞应用 */
+  }
+}
+watch(shouldRemind, maybeSystemNotify, { immediate: true })
 
 const fmt = (s) => {
   const m = Math.floor(s / 60)

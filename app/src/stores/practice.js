@@ -5,10 +5,24 @@ import { newId } from '../utils/id.js'
 
 export const usePracticeStore = defineStore('practice', {
   // v0.6.0：状态变更自动持久化（persist 插件），不再手动 save
-  persist: { key: 'practice-records', paths: ['records'] },
+  // v0.8.0：新增 draft（「已结束待保存」的打卡草稿：标签/备注/完成状态），
+  // 进程被杀/误关后重开仍能继续完成保存，与 timer 会话恢复配套。
+  persist: [
+    { key: 'practice-records', paths: ['records'] },
+    { key: 'practice-draft', paths: ['draft'] },
+  ],
   state: () => ({
     // record: { id, date: 'YYYY-MM-DD', seconds, tags: [], note }
     records: load('practice-records', []),
+    // draft: { finished, tags, note } —— 结束计时后未保存的草稿（PracticeView 读写）
+    draft: (() => {
+      const d = load('practice-draft', { finished: false, tags: [], note: '' })
+      return {
+        finished: Boolean(d && d.finished),
+        tags: Array.isArray(d && d.tags) ? d.tags : [],
+        note: typeof (d && d.note) === 'string' ? d.note : '',
+      }
+    })(),
   }),
   getters: {
     todaySeconds: (s) =>

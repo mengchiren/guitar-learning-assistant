@@ -97,7 +97,8 @@ function onKeydown(e) {
         <p>例如：F 和弦按不响怎么办？扫弦总刮到别的弦？这周练习包怎么安排？</p>
       </div>
 
-      <template v-for="(m, i) in chat.history" :key="i">
+      <!-- :key 用 role+at（毫秒时间戳）而非 index：trim 历史重排/删除时不丢状态（v0.8.0） -->
+      <template v-for="(m, i) in chat.history" :key="m.role + '-' + (m.at || i)">
         <div class="msg-row" :class="m.role">
           <div class="msg-bubble">
             <div class="msg-text">{{ m.content }}</div>
@@ -144,7 +145,7 @@ function onKeydown(e) {
 .msg-row.assistant { justify-content: flex-start; }
 .msg-bubble { max-width: 88%; padding: 10px 14px; border-radius: 12px; }
 .msg-row.user .msg-bubble { background: var(--accent, #e30613); color: #fff; border-bottom-right-radius: 4px; }
-.msg-row.assistant .msg-bubble { background: #fff; border: 1px solid var(--line, #e4e2da); border-bottom-left-radius: 4px; }
+.msg-row.assistant .msg-bubble { background: var(--bg-card); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
 .msg-text { white-space: pre-wrap; word-break: break-word; font-size: 15px; line-height: 1.6; }
 .input-row { margin-top: 10px; }
 .input-row textarea { width: 100%; }

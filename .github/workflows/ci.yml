@@ -27,13 +27,13 @@ jobs:
       - name: 规则引擎对拍（25 项）
         run: node spike/test_plan_engine.mjs
 
-      - name: Store 冒烟测试（20 项，v0.5.1）
+      - name: Store 冒烟测试（24 项，v0.5.1 起，v0.8.0 增计时/草稿落盘/失败通知/备份覆盖）
         run: node spike/test_stores_smoke.mjs
 
-      - name: 套路归类规则 + 设备建议回归（41 项，v0.6.0）
+      - name: 套路归类规则 + 设备建议回归（53 项，v0.6.0 起，v0.8.0 增套路名映射护栏）
         run: node spike/test_tone_guide.mjs
 
-      - name: 面板组件渲染冒烟（11 项，v0.6.2）
+      - name: 面板组件渲染冒烟（13 项，v0.6.2）
         run: node spike/test_panels_render.mjs
 
       - name: 数据完整性校验（767 项）

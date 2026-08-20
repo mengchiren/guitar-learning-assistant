@@ -3,7 +3,7 @@
 // ②beginnerGuide 设备声明式化后，默认设备（GRX40 + Jam Buddy 2）的输出必须与
 //   v0.5.x 硬编码版逐字符一致（基准为 spike/dump_tone_guide.mjs 抓取的旧输出）。
 // 用法: node spike/test_tone_guide.mjs
-import { classify } from '../app/src/utils/analyze.js'
+import { classify, TEMPLATE_IDS } from '../app/src/utils/analyze.js'
 import { beginnerGuide } from '../app/src/utils/toneGuide.js'
 import { TONE_TEMPLATES } from '../app/src/data/templates.js'
 import { GUITARS, AMPS } from '../app/src/data/devices.js'
@@ -32,7 +32,7 @@ check('classify: Riff 边界（bpm 恰好 140，余量 0）', classify({ bpm: 14
 check('classify: Riff 余量不足为低', classify({ bpm: 140, rmsDb: -13.5, centroidHz: 2000 }), { template: '失真节奏 Riff', confidence: '低' })
 check('classify: 主音 Solo', classify({ bpm: 100, rmsDb: -15, centroidHz: 3000 }), { template: '失真主音 Solo', confidence: '中' })
 check('classify: 轻过载', classify({ bpm: 100, rmsDb: -15, centroidHz: 1000 }), { template: '轻过载节奏', confidence: '中' })
-check('classify: 清音+合唱', classify({ bpm: 120, rmsDb: -20, centroidHz: 1600 }), { template: '清音+合唱氛围', confidence: '中' })
+check('classify: 清音+合唱', classify({ bpm: 120, rmsDb: -20, centroidHz: 1600 }), { template: '清音 + 合唱氛围', confidence: '中' })
 check('classify: 兜底清音伴奏', classify({ bpm: 80, rmsDb: -20, centroidHz: 1000 }), { template: '清音伴奏', confidence: '中' })
 check('classify: Solo 优先于轻过载（规则顺序）', classify({ bpm: 100, rmsDb: -15, centroidHz: 2700 }), { template: '失真主音 Solo', confidence: '中' })
 
@@ -212,6 +212,12 @@ check('channelMap 只含 CLEAN/DRIVE 与 RHYTHM/LEAD', Object.values(devices.amp
 check('14 种箱模名齐全无重复', new Set(devices.amp.ampModels).size === 14 && devices.amp.ampModels.length === 14, true)
 check('模板箱模名都在 14 种实物名单里', TONE_TEMPLATES.every((t) => devices.amp.ampModels.includes(t.amp.model)), true)
 check('模板不再出现虚构箱模名', ['Rock', 'Metal', 'Blues', 'Funk', 'Clean'].every((n) => !devices.amp.ampModels.includes(n)), true)
+
+// ---- 6. 套路名 → 模板 id 映射一致性（v0.8.0 护栏：v0.6.1 新增金属 Riff 时曾漏映射） ----
+for (const t of TONE_TEMPLATES) {
+  check(`TEMPLATE_IDS 覆盖套路「${t.name}」且 id 一致`, TEMPLATE_IDS[t.name], t.id)
+}
+check('classify 金属命中 → TEMPLATE_IDS 有 heavy 映射', TEMPLATE_IDS['金属 Riff'], 'heavy')
 
 console.log(`\n结果：${pass}/${pass + fail} 项通过（${fail} 项失败）`)
 process.exit(fail > 0 ? 1 : 0)

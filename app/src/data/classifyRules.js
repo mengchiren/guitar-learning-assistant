@@ -38,7 +38,7 @@ export const CLASSIFY_RULES = [
     conditions: [{ field: 'rmsDb', op: '>', value: -16 }],
   },
   {
-    template: '清音+合唱氛围',
+    template: '清音 + 合唱氛围',
     conditions: [
       { field: 'bpm', op: '>=', value: 110 },
       { field: 'centroidHz', op: '>', value: 1500 },

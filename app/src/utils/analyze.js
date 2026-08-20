@@ -15,12 +15,15 @@ const PITCH = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
 const MAJ = [6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88]
 const MIN = [6.33, 2.68, 3.52, 5.38, 2.6, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17]
 
-// 套路归类 → 模板 id（对应 app/src/data/templates.js 的 TONE_TEMPLATES）
+// 套路归类 → 模板 id（对应 app/src/data/templates.js 的 TONE_TEMPLATES；
+// v0.8.0 起与 templates.js 的 name 完全一致，含空格——曾因「清音 + 合唱氛围」少空格
+// 导致归类命中的歌 findToneTemplate 匹配不到模板，详情页设备建议缺失）
 export const TEMPLATE_IDS = {
   清音伴奏: 'clean',
-  '清音+合唱氛围': 'clean-chorus',
+  '清音 + 合唱氛围': 'clean-chorus',
   轻过载节奏: 'light-od',
   '失真节奏 Riff': 'crunch',
+  '金属 Riff': 'heavy',
   '失真主音 Solo': 'lead',
 }
 
@@ -191,7 +194,7 @@ function roughChords(chordCols, windowIdx) {
       n++
       i++
     }
-    if (n >= 2) out.push(n > 1 ? `${seq[i]}x${n}` : seq[i])
+    if (n >= 2) out.push(`${seq[i]}x${n}`)
   }
   return out.slice(0, 20)
 }
@@ -258,6 +261,12 @@ export function analyzeAudio({ samples, sampleRate, debug = false }) {
   const re = new Float32Array(N_FFT)
   const im = new Float32Array(N_FFT)
   let prevMag = new Float32Array(N_FFT / 2)
+  // v0.8.0：帧循环内缓冲复用（原来每帧新建 4 个数组，Worker 里 GC 压力大）；
+  // 输出与旧实现完全一致（每个元素都被覆盖写或先 fill(0)）
+  const mag = new Float32Array(N_FFT / 2)
+  const semi = new Float32Array(SEMI_COUNT)
+  const col = new Float32Array(12)
+  const chordCol = new Float32Array(12)
 
   // 和弦窗口：48 均布帧（与 spike linspace 一致，astype(int) 截断）
   const nWindows = 48
@@ -297,7 +306,6 @@ export function analyzeAudio({ samples, sampleRate, debug = false }) {
     }
     fft(re, im)
 
-    const mag = new Float32Array(N_FFT / 2)
     let flux = 0
     let centW = 0
     let centS = 0
@@ -325,7 +333,7 @@ export function analyzeAudio({ samples, sampleRate, debug = false }) {
     // chroma：能量按半音聚合 + 逐八度归一化（CQT 逐八度等权，避免低频能量碾压高频）
     // 小数 midi 线性插值分配到相邻半音：STFT 低频区 bin 宽（~10.8Hz）与半音宽度相当，
     // 直接取整会把能量抹到错误音级
-    const semi = new Float32Array(SEMI_COUNT)
+    semi.fill(0)
     for (let k = 0; k < N_FFT / 2; k++) {
       if (!binInRange[k]) continue
       const energy = mag[k] * mag[k]
@@ -335,7 +343,7 @@ export function analyzeAudio({ samples, sampleRate, debug = false }) {
       if (m0 >= SEMI_MIN && m0 <= SEMI_MAX) semi[m0 - SEMI_MIN] += (1 - frac) * energy
       if (m0 + 1 >= SEMI_MIN && m0 + 1 <= SEMI_MAX) semi[m0 + 1 - SEMI_MIN] += frac * energy
     }
-    const col = new Float32Array(12)
+    col.fill(0)
     for (let oStart = SEMI_MIN; oStart <= SEMI_MAX; oStart += 12) {
       const oEnd = Math.min(oStart + 11, SEMI_MAX)
       let oSum = 0
@@ -352,12 +360,13 @@ export function analyzeAudio({ samples, sampleRate, debug = false }) {
         let n2 = 0
         for (let p = 0; p < 12; p++) n2 += col[p] * col[p]
         const norm = Math.sqrt(n2) || 1
-        const c = new Float32Array(12)
-        for (let p = 0; p < 12; p++) c[p] = col[p] / norm
-        chordCols.set(f, c)
+        for (let p = 0; p < 12; p++) chordCol[p] = col[p] / norm
+        chordCols.set(f, chordCol.slice())
       }
     }
-    prevMag = mag
+    // v0.8.0：mag 已复用（帧外单数组），这里必须拷贝而非引用赋值——
+    // 否则 prevMag 与 mag 指向同一数组，下一帧 flux 计算时 prevMag 已被覆写，谱通量恒 0
+    prevMag.set(mag)
   }
 
   // onset 包络 = 谱通量 + 帧能量差分，各自 max 归一化后相加（能量差分抗镲片高频噪声）

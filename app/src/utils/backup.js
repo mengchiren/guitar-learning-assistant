@@ -64,9 +64,22 @@ export function parseBackup(text) {
 
 /**
  * 恢复备份数据，返回恢复的条目数。
- * 注意：调用后应刷新页面，让各 store 重新读取。
+ * 语义是「覆盖」：先清空本应用全部 key（含备份里没有的新 key），再写入备份数据——
+ * 旧备份恢复进新版本应用不会得到两种状态的混合。
+ * 注意：调用后应立即刷新页面，让各 store 重新读取；本函数会先等 ~250ms
+ * 让 persist 插件挂起的防抖写入落地（旧值，随后被清空），避免恢复后被旧内存态写回。
  */
-export function restoreBackup(backup) {
+export async function restoreBackup(backup) {
+  // 等挂起的 persist 防抖写入（≤150ms）先落地，随后统一清空覆盖
+  await new Promise((r) => setTimeout(r, 250))
+  // 清空全部本应用 key（含备份里没有的）
+  const keys = []
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i)
+    if (key && key.startsWith(PREFIX)) keys.push(key)
+  }
+  for (const key of keys) localStorage.removeItem(key)
+  // 写入备份数据
   const data = backup.data || {}
   let count = 0
   for (const [key, value] of Object.entries(data)) {

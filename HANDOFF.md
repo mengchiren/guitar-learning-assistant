@@ -1,6 +1,6 @@
 # HANDOFF 交接文档
 
-> 给一个完全没有上下文的新对话看。工作目录：`F:\电吉他学习`（Windows 10，Git Bash）。项目名：**练琴搭子 · PickBuddy**。当前版本 **v0.7.3**。
+> 给一个完全没有上下文的新对话看。工作目录：`F:\电吉他学习`（Windows 10，Git Bash）。项目名：**练琴搭子 · PickBuddy**。当前版本 **v0.8.0**。
 
 ## 1. 我们在做什么任务
 
@@ -28,10 +28,10 @@
 | `app/` | 应用主体（Vue 3 + Vite + PWA） |
 | `app/functions/api/ask.js` | **AI 答疑代理（CF Pages Functions，POST /api/ask）**：三平台 OpenAI 兼容表（deepseek/ark/qwen），Key 只读 CF 环境变量，Origin 白名单 + **访问令牌（`ASK_TOKEN` 环境变量 + 请求头 `X-Ask-Token`，必配）**，25s 超时 |
 | `app/src/data/` | **`nav.js`（路由/tab/工具页统一清单）**、`devices.js`（**含 params 能力描述 + panel 面板布局坐标/量程/说明**）、`templates.js`（**6 套套路**）、**`classifyRules.js`（套路归类规则表）**、**`seedSongs.json`（29 首种子歌）**、`fundamentals.js`（5 项基本功）、**`chords.js`（82 个和弦指法图 + 分组，`findChord`/`CHORD_GROUPS`）**、**`songSheets.js`（19 首种子曲谱，由 `write_sheets.py` 生成）**、`courseCatalog.js`（194 课，脚本生成勿手改）、**`themes.js`（v0.7.0 外观主题清单：id/名称/色板/素材）** |
-| `app/src/stores/` | Pinia（**全部用 persist 插件自动落盘，store 里不再有 save 调用**）：`practice.js`（打卡）、`settings.js`（提醒/设备/新手模式）、`timer.js`（计时全局）、`metronome.js`（节拍器全局，含 currentBeat）、`songs.js`（用户歌单，**getter 叫 allSongs、字段叫 title、bpm/key/template 已归一化有效值**）、`plan.js`（达标/歌曲状态）、`course.js`、`sheets.js`（用户自录曲谱）、`recordings.js`（录音元数据，`RECORD_CATEGORIES`）、`chat.js`（AI 聊天，`AI_PROVIDERS`、`token`/`setToken`、`stashAskContext`/`takeAskContext`） |
+| `app/src/stores/` | Pinia（**全部用 persist 插件自动落盘，store 里不再有 save 调用**）：`practice.js`（打卡 + **v0.8.0 打卡草稿 draft**）、`settings.js`（提醒/设备/新手模式）、`timer.js`（**v0.8.0 起会话落盘 `timer-session`：running/startedAt/accumulated + 跨天脏会话作废 + 启动 init() 恢复 tick**）、`metronome.js`（节拍器全局，含 currentBeat）、`songs.js`（用户歌单，**getter 叫 allSongs、字段叫 title、bpm/key/template 已归一化有效值**）、`plan.js`（达标/歌曲状态）、`course.js`、`sheets.js`（用户自录曲谱）、`recordings.js`（录音元数据，`RECORD_CATEGORIES`）、`chat.js`（AI 聊天，`AI_PROVIDERS`、`token`/`setToken`、`stashAskContext`/`takeAskContext`） |
 | `app/src/composables/` | `useMediaQuery.js`（768px 断点）、`useTuner.js`（麦克风 ACF 调音） |
-| `app/src/utils/` | `analyze.js`（**自研音频分析引擎，改后必须重跑对拍**；套路归类走 data/classifyRules.js）、`analyzeWorker.js`（Worker 封装）、`audio.js`（统一解码管线 `decodeToMono`）、`date.js`（本地时区日期，全工程唯一实现）、`music.js`（音名/调性/徽章常量）、`backup.js`（数据备份/恢复）、`id.js`（UUID 生成）、`toneGuide.js`（**按设备 params 渲染新手建议**）、`storage.js`（**schema 版本 + 迁移注册表 + 变更订阅**，key 前缀 `gla:v1:`）、`planEngine.js`（**规则引擎纯函数，改后必须重跑对拍**）、`recordingsDb.js`（IndexedDB：meta/blob 分 store）、`recordAnalyze.js`（录音→BPM，只分析前 3 分钟，走 Worker） |
-| `app/src/plugins/` | `persist.js`（**Pinia 自动持久化插件，防抖 150ms**） |
+| `app/src/utils/` | `analyze.js`（**自研音频分析引擎，改后必须重跑对拍**；v0.8.0 帧内缓冲复用 + TEMPLATE_IDS 补 heavy；套路归类走 data/classifyRules.js）、`analyzeWorker.js`（Worker 封装）、`audio.js`（统一解码管线 `decodeToMono`）、`date.js`（本地时区日期，全工程唯一实现）、`music.js`（音名/调性/徽章常量）、`backup.js`（**v0.8.0 恢复 = 先清空全部 gla:v1: key 再写入，真「覆盖」语义**）、`id.js`（UUID 生成）、`toneGuide.js`（**按设备 params 渲染新手建议**）、`storage.js`（**schema 版本 + 迁移注册表 + 变更订阅 + v0.8.0 存储失败通知 `onStorageError`**，key 前缀 `gla:v1:`）、`planEngine.js`（**规则引擎纯函数，改后必须重跑对拍**）、`recordingsDb.js`（**IndexedDB：meta/blob 分 store，v0.8.0 增删改单事务原子化**）、`recordAnalyze.js`（录音→BPM，只分析前 3 分钟，走 Worker） |
+| `app/src/plugins/` | `persist.js`（**Pinia 自动持久化插件，防抖 150ms，v0.8.0 落盘失败 catch + 通知全局横幅**） |
 | `app/src/workers/` | `analyze.worker.js`（分析引擎后台线程，纯函数无 DOM 依赖） |
 | `app/src/components/` | `Icon.vue`（线性 SVG 图标集，含 amp）、`ToneAdvice.vue`（**新手模式集成面板图**）、`AmpPanel.vue`（**音箱面板 SVG：数值旋钮指针角度/循环旋钮高亮+值标签/脚钉 LED，interactive 点按**）、`GuitarPanel.vue`（**吉他示意 SVG：档位单点/区间高亮**）、`ChordChart.vue`（自绘 SVG 指法图）、`FretboardMap.vue`（竖版指板图）、`RecordPanel.vue`（录音面板，双入口复用）、**`Mascot.vue`（v0.7.0 主题看板娘：右下角常驻，点她说话，仅主题配置了 mascot 素材时显示）** |
 | `app/src/views/` | Home/Tools（**卡片由 nav.js 驱动**）/Songs/SongDetail/SongAnalyze/Practice/Metronome/Tuner/Templates/Devices/Reminders/Profile/Plan/Stats/Course/PlanItem/ChordLibrary/Recordings/Chat（**ChatView 顶部有 ASK_TOKEN 令牌输入卡**；**ProfileView 有数据备份卡**；**AmpGuideView「音箱入门」v0.6.2：面板点按图解 + 套路对照表**） |
@@ -69,17 +69,23 @@
 - **外观主题系统（v0.7.0，用户要求"外观有更多样式"：参考 DSH 社区鲸鱼娘主题，指定平泽唯「呆唯风」）**：①`data/themes.js` 主题清单（id/名称/desc/色板 swatch/背景图/看板娘），settings 加 `themeId`（persist key `theme`），App.vue watch 写 `html[data-theme]`；②style.css 增加语义变量（--accent-soft/--accent-soft-2/--ok-soft/--ok-card/--warn-soft/--warn-border/--warn-text/--bar/--heat-1/--heat-2），20+ 视图硬编码色全部收敛，ChordChart/FretboardMap 红点改 CSS class；③首套主题「呆唯 · 轻音海洋」（`[data-theme='yui']`）：奶油暖粉+珊瑚粉+圆角 10px，body 背景图 `--bg-image`（遮罩 `body::before`，浓度变量 `--bg-veil` 默认 0.86），看板娘 `Mascot.vue` 右下角常驻（点她说话）；④「我的」页「外观主题」卡（THEMES 驱动，色板圆点+即时切换）；⑤素材在 `app/public/theme/`（**素材为网上收集的平泽唯形象图 + AI 生成 Q 版角色，个人学习用途、不公开传播；若未来公开分发需换授权素材**）；⑥顺手修 ProfileView「5 套→6 套」、DevicesView「od→OD」。回归 6 组全过 + 构建通过。
 - **主题迭代（v0.7.1，用户反馈三连）**：①**看板娘更萌**——yui 主题看板娘换成 **AI 生成 Q 版 chibi 平泽唯**（`spike/cutout.py` 抠白底→透明+羽化，WebP 压缩 49KB）；②**透明毛玻璃模式**——settings 加 `glass`（persist key `glass`），App.vue 切 `html.glass` class，style.css 里 `html.glass` 覆盖 --bg-card/--bg-input/--border + `.card/.topbar/.subhead/.tabbar/input/select/textarea/.msg-bubble` backdrop blur(14px)，body::before opacity 0.66；「我的 → 外观主题」卡内开关；**html.glass 选择器优先级（0,1,1）高于 [data-theme]（0,1,0），放 CSS 后面即覆盖**；③**第三主题「鲸鱼女仆 · 深海茶会」（`[data-theme='maid']`）**——DSH 社区 dsh-maid-whale-webUI 设计语言：柔雾蓝 #4a86e8、水彩鲸鱼云团背景（素材取自该仓库 BSD-3-Clause）、圆角 12px、AI 生成 Q 版蓝发女仆抱小鲸鱼看板娘（WebP 83KB）；--bg-veil 0.9。回归 6 组全过 + 构建通过。
 - **看板娘迭代（v0.7.2，用户反馈：加启用开关 / 鲸鱼女仆用现成 / 唯的风格不行）**：①settings 加 `mascotEnabled`（persist key `mascot`，默认开）+「我的 → 外观主题」加「显示看板娘」开关，Mascot.vue 的 visible 判断；②**maid 看板娘换现成**——deep-whale-day-night-theme 仓库自带 Q 版透明 companion（day-companion-v1.webp 420×434 RGBA 62KB），与 maid 主题同源风格统一；③**yui 看板娘重制**——AI 生成 2 候选（官方动画风/Q 版厚涂贴纸风），视觉模型评分先选 Q 版厚涂（9.8 分），**用户验收后改选官方动画画风版（v0.7.3，京都动画 K-ON! 式半身像，抠图转 WebP 31KB）**；Q 版厚涂候选留 `gui-test-screenshots/review-20260819/yui-candidates/` 备选（想换随时换）。回归 6 组全过 + 构建通过。**等用户验收。**
-- 全程约 52 个提交，git 历史即详细变更记录；需求文档修订记录完整到 v0.6.4；README/验收指南/交接文档全同步。
+- **代码审查修复（v0.8.0，用户用 GLM 5.3 做了全量代码审查，逐条核实后按 A+B+C 三组全部实施）**：**A 组数据可靠性主线**——①**计时落盘 + 打卡草稿闭环**：timer store 加 persist（`timer-session`，running/startedAt/accumulated，now 不入库），启动 `init()` 恢复 tick；**恢复防护**：running 会话跨天或超 12 小时（如昨晚忘关）自动作废防误记；PracticeView 的 finished/tags/note 移入 practice store 的 `draft`（persist `practice-draft`）——进程被杀/误关后重开，计时和「已结束待保存」草稿都在；②**录音保存错误处理 + 原子化**：RecordPanel.saveRec 包 try/catch（失败提示 + 不重置表单 + 不再假「已保存」，<1 秒提示太短不保存）；recordingsDb 新增 `addRecording`/`deleteRecording` 单事务双 store（原来 blob/meta 两个独立事务，配额满会留孤儿 blob）；③**落盘失败全局告警**：storage.js 新增 `onStorageError` 通知（save 失败抛错同时通知），persist 插件 catch 落盘失败，App.vue 挂「存储空间不足」横幅（可关闭，兑现 storage.js「宁可暴露问题」的注释）；④**备份恢复修复**：restoreBackup 先等 250ms 冲刷挂起 persist 写入 → **清空全部 gla:v1: key 再写备份**（真「覆盖」语义，不再混合新旧状态）→ ProfileView 立即 reload（去掉 1.2s 窗口期，期间 store 变更会覆盖回旧内存态）；confirm 文案改「清除当前全部数据并恢复备份」。**B 组契约/视觉**——⑤**TEMPLATE_IDS 补 heavy + 护栏**：补「金属 Riff」→heavy；**护栏测试立刻抓到 GLM 也没发现的隐藏 bug**：classifyRules 输出「清音+合唱氛围」（无空格）与 templates.js name「清音 + 合唱氛围」（带空格）不一致 → 用户上传归为此套路的歌 findToneTemplate 匹配不到、详情页设备建议缺失（种子库 29 首恰好无此套路所以一直没暴露）——统一为 templates.js 权威名（classifyRules + TEMPLATE_IDS + 测试期望 3 处同步）；⑥**硬编码色收敛**：style.css 5 处（subhead/tabbar/topbar/timer-chip/btn:active）+ 3 个视图弹层（zoom-card/del-card/set-cur-btn）+ ChatView 气泡（含 `--line` 旧变量名）全部改语义变量，glass 覆盖列表补 timer-chip/zoom-card/del-card；⑦**调音器**：useTuner 自相关按有效窗长归一化（原来除以全长能量，lag 越大分数越低→强二次谐波吉他音色偏高八度误判），TunerView 指针 `50+cents/2`（±50 音分满程，原来 /0.5 是 ±25 打满，与文字 ±50 对不上）；⑧**PWA**：globPatterns 加 webp/jpg/png（11 个主题素材全部进 precache，断网可换肤），manifest 补 192/512 PNG 图标（`spike/make_icons.py` Pillow 重绘 icon.svg 图形生成，像素校验过）。**C 组小修**——系统通知落地（HomeView 到点且已授权时 new Notification，每天一条防重复，RemindersView 文案同步）、metronome `await ctx.resume()`、analyze.js 死分支清理 + 帧内缓冲复用、ToneAdvice 设备改 computed、package.json version 0.5.0→0.7.3、ChatView 消息 key 改 role+at。**踩到并修复一个自引 bug**：mag 缓冲复用后 `prevMag = mag` 变成自引用（同数组），谱通量恒 0，真实对拍 4/5 抓出（雑踏 184.6 vs 171 超 3% 阈值），基线对比确认后改 `prevMag.set(mag)`，对拍恢复 5/5——**教训：帧内缓冲复用必须检查跨帧引用的数组（见坑 39）**。回归全过：对拍 5/5、合成 3/3、规则 25/25、数据 767/767、冒烟 24/24（+timer 落盘/draft 落盘/失败通知/备份覆盖 4 项）、toneGuide 53/53（+套路名映射护栏 7 项）、面板 13/13、构建通过（precache 82 项 1215KB）。**待用户验收。**
+- 全程约 53 个提交，git 历史即详细变更记录；需求文档修订记录完整到 v0.8.0；README/验收指南/交接文档全同步。
 
 ## 4. 当前卡在哪
 
-**v0.7.2（看板娘迭代：启用开关 + 现成鲸鱼娘 + 重制 Q 版唯）已推送，等用户验收**。验收重点：
+**v0.8.0（GLM 代码审查修复：数据可靠性主线 + 契约/视觉 + 小修，A+B+C 全部实施）已提交，等用户验收**。验收重点：
 
-1. **「我的 → 外观主题」**：3 套主题 + 「透明毛玻璃」+ 新增「**显示看板娘**」开关（关闭后看板娘消失）。
-2. **看板娘**：呆唯主题 = 新 Q 版厚涂唯（茶色双马尾+黄发卡+红吉他，张嘴傻笑）；鲸鱼女仆主题 = deep-whale 仓库现成 Q 版人鱼女仆（蓝发女仆装+鱼尾+持书）。若唯的形象还不满意，备选官方动画风候选在 `gui-test-screenshots/review-20260819/yui-candidates/yui-candidate-2.png`，说一声就换。
-3. **手机端**：背景插画被遮罩压暗不影响阅读；看板娘悬浮在底部导航上方不遮挡。
-4. **数据无损**：主题/毛玻璃/看板娘开关都存 localStorage，其余数据不受影响；切换后刷新两三次避开 SW 旧缓存。
-5. **v0.4.2/v0.6.x 遗留的待用户反馈**（功能层面，与本次无关）：
+1. **计时不丢**：开始练习 → 中途直接杀浏览器/切后台被回收 → 重开应用，外壳胶囊还在、累计秒数还在；结束计时填了标签备注后杀掉 → 重开还能继续保存打卡（草稿恢复）。**脏会话防护**：故意让计时跨天（如改系统时间）重开应自动清零，不误记。
+2. **录音保存失败有提示**：录完保存时（正常情况）显示「已保存」；太短（<1 秒）提示「未保存」；模拟存储满（DevTools Application 面板手动塞满 localStorage 5MB）保存录音应提示「存储空间不足」且录音还在表单里可重试。
+3. **存储满横幅**：localStorage 塞满后改任何设置/打卡，页面底部弹「存储空间不足」横幅可关闭；清出空间后不再弹。
+4. **备份恢复覆盖语义**：「我的 → 从备份恢复」→ confirm 写「将清除当前全部数据并恢复备份」→ 确认后立即刷新；恢复后旧版残留数据（如备份后新增的 store key）应被清掉，不混合。
+5. **主题色收敛**：三套主题 + 毛玻璃下检查顶栏/底栏/子页返回栏/练习胶囊/和弦放大弹层/删除确认弹层/聊天气泡不再纯白穿帮；毛玻璃下这些元素半透明带模糊。
+6. **调音器**：对着参考音（页面按钮播放）看指针是否对准中线、±50 音分内不钉边；真实吉他/手机外放验证不再偏高八度（此条需实机，代理只能验证指针量程逻辑）。
+7. **PWA**：断网刷新页面主题背景/看板娘仍在（已进 precache）；安卓桌面安装后图标为 PNG 高清（可选验证）。
+8. **系统通知**：提醒设置页授权 → 把提醒时间调到当前分钟前后 → 打开首页（今天未练）→ 应弹系统通知（桌面 Chrome 可验；安卓需已安装 PWA，失败不阻塞，应用内横幅兜底）。
+9. **回归**：六组 CI 测试全过（对拍 5/5 本地 + 合成 3/3 + 规则 25/25 + 数据 767/767 + 冒烟 24/24 + toneGuide 53/53 + 面板 13/13）+ 构建通过（precache 82 项 1215KB）。
+10. **v0.4.2/v0.6.x 遗留的待用户反馈**（功能层面，与本次无关）：
 1. **曲谱准确性（重点）**：19 首曲谱中多数标注了来源与置信度；单源/自动检测的（影色舞等）标注「请对照原曲校准」。用户弹到不对的，按他听出来的改数据（人工纠错永远优先）。
 2. **新歌 BPM/调性待校准**：22 首新歌的 BPM/调性多为引擎分析值（`dataFrom` 标「待人工校准」）；用户弹到速度不对的报过来改。已知悬案：天使にふれたよ!（社区谱 100~117 疑似半速）、青春コンプレックス（社区谱 155 vs 分析 185）、ソラノムジカ（分析 129 vs 半速记谱 98）。
 3. 计划页练习包建议、达标标准难度是否合适；和弦图库 82 个指法是否有标错的。
@@ -90,7 +96,7 @@
 
 ## 5. 下一步计划（按路线图）
 
-1. **等用户验收 v0.7.0（外观主题）** → 按反馈微调（色板/背景/看板娘素材可换）。
+1. **等用户验收 v0.8.0（代码审查修复）** → 按反馈微调；v0.7.x 主题系统已验收过的功能（三主题/毛玻璃/看板娘）顺带复验。
 2. **曲谱继续扩充**：用户练到哪首需要谱 → 按「宁缺毋滥、人工整理、标注来源与校准状态」补 `songSheets.js`（改后重跑 `spike/write_sheets.py` 或手改，然后 `node spike/test_sheets.mjs` 校验）；谱里出现新和弦同步补 `chords.js`（校验硬约束：谱中和弦必须在图库有定义）。
 3. **M4-3 剩余**（用户已按「架构/安全/成本」分析法选定前两项为录音、AI 答疑）：**微信推送（推送加）**——个人 token 不能存前端，需 CF Functions 代理 + 环境变量，免费版每日有限额；**Capacitor 安卓壳 + 桌面小组件**——签名/商店上架/双端构建，维护成本最高，等核心稳定再上。
 4. 云同步（Supabase）**已确认暂缓**，等手机/电脑双端都用起来再说；`storage.js` 的变更订阅 + 版本迁移 + persist 插件已把同步接入点铺好。
@@ -137,6 +143,8 @@
 36. **Pinia 插件在 `pinia.install(app)` 前只排队不生效**（v0.6.0 踩过）：`createPinia().use(plugin)` 若 pinia 还没装进 Vue app，插件进 `toBeInstalled` 队列，**已创建的 store 拿不到插件**——真实应用里 `app.use(pinia)` 在挂载时触发安装所以正常，但纯 Node 测试（冒烟测试）里只 `setActivePinia(createPinia().use(x))` 不会触发——测试里要 `createApp({}).use(pinia)` 先装一下。冒烟测试已这么写，别删。另：persist 插件是防抖 150ms 落盘，冒烟测试断言落盘前要等 ~350ms。
 37. **Pinia 4 的 `$subscribe`**：`store.$subscribe(cb, { detached: true, deep: true })` 深度监听整个 state——即使只改一个字段也会触发所有 persist 配置的定时器（插件按 key 分别防抖，无碍）；状态初始化（`load()`）不算 mutation 不会触发；**没改过的 store 不会落盘**（如 settings 只读不写就没有对应 localStorage key，不是 bug）。
 38. **主题换肤相关（v0.7.0）**：①**localStorage 值是 JSON 序列化后的**——persist 插件存 `JSON.stringify(value)`，外部注入/手工设置时记得存 `"yui"` 而不是 `yui`（`JSON.parse` 会抛错回退默认值，曾导致换肤截图验证失败）；②**CSS 变量换肤链路**：settings.themeId → App.vue watch（immediate）→ `document.documentElement.dataset.theme` → style.css `[data-theme='yui']` 变量块；body 背景图用 `--bg-image` + `body::before` 固定 86% 遮罩（z-index:-1）保证可读性，**别删 body::before**；③**SVG 属性不支持 CSS 变量**——`fill="#e30613"` 这类 presentation attribute 不能写 `fill="var(--accent)"`，要改 CSS class（如 `.dot { fill: var(--accent) }`），ChordChart/FretboardMap 已改；④**新主题三处**：`data/themes.js` 加一条（id/名称/desc/swatch/素材）+ style.css 加 `[data-theme='xxx']` 变量块 +（可选）`public/theme/` 放素材；⑤**素材版权**：平泽唯形象图为个人学习用途收集（用户已确认不传播、不注重版权）；若站点要公开分发，需换授权素材或 AI 原创；⑥主题素材会进 SW precache（precache 体积会涨，注意图片压缩，建议 <300KB/张）；⑦换肤即时生效无需刷新，但线上更新后仍需刷新两三次避开旧 SW。
+39. **帧内缓冲复用的自引用坑（v0.8.0 血泪教训）**：把 `const mag = new Float32Array(...)` 从帧循环提到循环外复用时，**必须检查跨帧引用的数组**——原代码循环末尾 `prevMag = mag`（每帧新建时没问题，引用赋值指向新数组），复用后变成 prevMag 与 mag 同数组：下一帧先覆写 mag 再算 `flux += max(0, m - prevMag[k])` → 恒 0 → **谱通量全灭、BPM 测速漂移**（真实对拍 4/5 抓出：雑踏 184.6 vs 171 误差 8%）。修复：`prevMag.set(mag)`（拷贝）。**教训：改引擎缓冲复用后必须重跑真实对拍 5 首**——合成测试只靠 envRms 分量仍能过（3/3），抓不到谱通量丢失。
+40. **套路名空格统一（v0.8.0）**：`classifyRules.js` 的 template、`analyze.js` 的 TEMPLATE_IDS key、`templates.js` 的 name 必须完全一致（含空格）——曾因「清音 + 合唱氛围」在 classifyRules 少空格，归类命中的歌 `findToneTemplate` 匹配不到模板，**详情页设备建议缺失**（种子库 29 首恰好无此套路所以没暴露）。`test_tone_guide.mjs` 第 6 节已有「TEMPLATE_IDS 覆盖全部套路名且 id 一致」护栏，新增套路/改名后必须过它。
 
 ## 7. 与用户协作的注意事项
 

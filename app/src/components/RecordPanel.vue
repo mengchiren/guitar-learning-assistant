@@ -128,7 +128,11 @@ function onBpmInput() {
 }
 
 async function saveRec() {
-  if (lastBlob.value && secs.value >= 1) {
+  if (!lastBlob.value || secs.value < 1) {
+    error.value = '录音太短（不足 1 秒），没有保存。'
+    return
+  }
+  try {
     const song = songId.value ? songs.allSongs.find((s) => s.id === songId.value) : null
     await recordings.add({
       blob: lastBlob.value,
@@ -145,6 +149,13 @@ async function saveRec() {
         mimeType: lastMime.value,
       },
     })
+  } catch (e) {
+    // v0.8.0：保存失败必须让用户知道——不重置表单（录音还在，可重试），也不显示「已保存」
+    error.value =
+      e && e.name === 'QuotaExceededError'
+        ? '保存失败：存储空间不足，可到「工具 → 录音回听」删除旧录音后再试。'
+        : '保存失败：' + (e?.message || '未知错误') + ' 录音还在本页，可重试或丢弃。'
+    return
   }
   resetPanel()
   savedTip.value = true

@@ -1,9 +1,10 @@
 <script setup>
-import { computed, watch } from 'vue'
+import { computed, watch, ref, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Icon from './components/Icon.vue'
 import { useTimerStore } from './stores/timer.js'
 import { useSettingsStore } from './stores/settings.js'
+import { onStorageError } from './utils/storage.js'
 import { TABS } from './data/nav.js'
 import Mascot from './components/Mascot.vue'
 
@@ -11,6 +12,20 @@ const route = useRoute()
 const router = useRouter()
 const timer = useTimerStore()
 const settings = useSettingsStore()
+
+// 恢复上次练习会话（v0.8.0）：进程被杀/刷新后重开，计时与 tick 都要续上
+timer.init()
+
+// 存储失败横幅（v0.8.0）：localStorage 满等导致落盘失败时提示用户，不静默丢数据
+const storageError = ref('')
+let offStorageError = null
+onMounted(() => {
+  offStorageError = onStorageError(() => {
+    storageError.value =
+      '存储空间不足，最近的更改可能没有保存。请到「我的」页导出备份，并删除旧录音或清空聊天记录后重试。'
+  })
+})
+onUnmounted(() => offStorageError && offStorageError())
 
 // 外观主题（v0.7.0）：themeId 变化时切换 html[data-theme]，CSS 变量换肤
 watch(
@@ -100,6 +115,12 @@ function goBack() {
     <main class="page">
       <router-view />
     </main>
+
+    <!-- 存储失败横幅（v0.8.0）：落盘失败时持续显示，手动关闭 -->
+    <div v-if="storageError" class="storage-banner" role="alert">
+      <span>{{ storageError }}</span>
+      <button class="storage-banner-close" aria-label="关闭提示" @click="storageError = ''">×</button>
+    </div>
 
     <!-- 主题看板娘（v0.7.0）：仅当前主题配置了 mascot 时显示 -->
     <Mascot />

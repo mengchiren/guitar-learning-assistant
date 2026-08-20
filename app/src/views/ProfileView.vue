@@ -34,11 +34,13 @@ function onPickRestoreFile(e) {
   reader.onload = async () => {
     try {
       const backup = parseBackup(String(reader.result))
-      if (!window.confirm(`将用备份文件覆盖当前全部数据（${Object.keys(backup.data).length} 项），确定恢复？`)) return
+      const n = Object.keys(backup.data).length
+      if (!window.confirm(`将清除当前全部数据并恢复备份（备份含 ${n} 项数据），确定恢复？`)) return
       restoring.value = true
-      const n = restoreBackup(backup)
-      backupMsg.value = `已恢复 ${n} 项数据，页面即将刷新…`
-      setTimeout(() => window.location.reload(), 1200)
+      await restoreBackup(backup)
+      // v0.8.0：恢复完成立即刷新——旧版等 1.2 秒期间任何 store 变更/挂起写入
+      // 都可能把旧内存态覆盖回刚恢复的数据，窗口越长越危险
+      window.location.reload()
     } catch (err) {
       backupMsg.value = '恢复失败：' + (err?.message || '文件格式不对')
       restoring.value = false

@@ -2,7 +2,8 @@
 // 职责：①统一 key 前缀；②schema 版本与迁移（未来数据结构变更只改 MIGRATIONS 表，
 // 老数据在 load 时自动升级写回，业务代码无感）；③变更订阅（save 时通知，云同步接入点）。
 // 本地实现用 localStorage；云同步（Supabase）接入时替换 save/load 实现即可，业务代码不受影响。
-// 注意：save 失败（如 localStorage 满）会抛错——宁可暴露问题，也不静默丢数据。
+// 注意：save 失败（如 localStorage 满）会抛错——宁可暴露问题，也不静默丢数据；
+// v0.8.0 起同时通知全局监听者（onStorageError），UI 据此弹「存储不足」横幅。
 
 const PREFIX = 'gla:v1:'
 const META_KEY = 'gla:v1:meta'
@@ -39,6 +40,31 @@ function writeMeta(meta) {
 
 /** key → 订阅者集合（云同步预留：save 后通知） */
 const subscribers = new Map()
+
+// 存储失败监听者（v0.8.0）：save 抛错（localStorage 满等）时逐个通知，UI 弹横幅
+const errorListeners = new Set()
+
+/**
+ * 订阅存储失败事件（save 抛错时触发）。返回取消订阅函数。
+ * @param {(err: unknown) => void} fn
+ * @returns {() => void}
+ */
+export function onStorageError(fn) {
+  errorListeners.add(fn)
+  return () => {
+    errorListeners.delete(fn)
+  }
+}
+
+function notifyStorageError(err) {
+  for (const fn of errorListeners) {
+    try {
+      fn(err)
+    } catch {
+      /* 监听者异常不影响主流程 */
+    }
+  }
+}
 
 /**
  * 读取并反序列化。带版本迁移：老数据自动升级。
@@ -78,9 +104,14 @@ export function load(key, fallback) {
   }
 }
 
-/** 序列化并写入，同时通知该 key 的订阅者。 */
+/** 序列化并写入，同时通知该 key 的订阅者。失败抛错并通知全局监听者（不静默）。 */
 export function save(key, value) {
-  localStorage.setItem(PREFIX + key, JSON.stringify(value))
+  try {
+    localStorage.setItem(PREFIX + key, JSON.stringify(value))
+  } catch (err) {
+    notifyStorageError(err)
+    throw err
+  }
   const subs = subscribers.get(key)
   if (subs) {
     for (const fn of subs) {

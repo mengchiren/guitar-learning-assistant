@@ -43,7 +43,7 @@ onUnmounted(() => tuner.stop())
       <div class="needle-track">
         <div
           class="needle"
-          :style="{ left: Math.max(0, Math.min(100, 50 + tuner.cents.value / 0.5)) + '%' }"
+          :style="{ left: Math.max(0, Math.min(100, 50 + tuner.cents.value / 2)) + '%' }"
         ></div>
         <div class="needle-center"></div>
       </div>

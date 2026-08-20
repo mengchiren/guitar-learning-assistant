@@ -9,13 +9,20 @@ const practice = usePracticeStore()
 const timer = useTimerStore()
 
 const TAG_OPTIONS = ['歌曲', '基本功', '课程', '自由练习']
-const tags = ref([])
-const note = ref('')
-const finished = ref(false)
 const saved = ref(false)
 const backfillDate = ref(localDateStr())
 const backfillMinutes = ref(30)
 const backfillDone = ref(false)
+
+// 打卡草稿（v0.8.0）存 practice.draft 并自动落盘：结束计时后离开/进程被杀，
+// 重开应用标签/备注还在，能继续完成保存（与 timer 会话恢复配套）。
+const draft = practice.draft
+const finished = computed(() => draft.finished)
+const tags = computed(() => draft.tags)
+const note = computed({
+  get: () => draft.note,
+  set: (v) => (draft.note = v),
+})
 
 const clock = computed(() => {
   const total = Math.floor(timer.elapsedSec)
@@ -25,14 +32,14 @@ const clock = computed(() => {
 })
 
 function toggleTag(t) {
-  const i = tags.value.indexOf(t)
-  if (i >= 0) tags.value.splice(i, 1)
-  else tags.value.push(t)
+  const i = draft.tags.indexOf(t)
+  if (i >= 0) draft.tags.splice(i, 1)
+  else draft.tags.push(t)
 }
 
 function finish() {
   timer.stop()
-  finished.value = true
+  draft.finished = true
 }
 
 function saveRecord() {
@@ -40,10 +47,13 @@ function saveRecord() {
   practice.addRecord({
     date: localDateStr(),
     seconds: secs,
-    tags: [...tags.value],
-    note: note.value,
+    tags: [...draft.tags],
+    note: draft.note,
   })
   timer.reset()
+  draft.finished = false
+  draft.tags = []
+  draft.note = ''
   saved.value = true
 }
 

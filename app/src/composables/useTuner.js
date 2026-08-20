@@ -66,7 +66,9 @@ export function useTuner() {
     for (let lag = minLag; lag <= maxLag; lag++) {
       let s = 0
       for (let i = 0; i < dec.length - lag; i++) s += dec[i] * dec[i + lag]
-      const r = s / energy
+      // v0.8.0：自相关按有效窗长归一化——s 只累加 dec.length-lag 项，
+      // 若除以全长能量，lag 越大分数系统性越低，强二次谐波的吉他音色会偏向高八度误判
+      const r = s / (energy * ((dec.length - lag) / dec.length))
       if (r > best) {
         best = r
         bestLag = lag

@@ -122,7 +122,7 @@ body::before {
   position: sticky;
   top: 0;
   z-index: 9;
-  background: rgba(255, 255, 255, 0.96);
+  background: var(--bg-card);
   border-bottom: 1px solid var(--border);
   padding: 8px 12px;
   display: flex;
@@ -183,7 +183,7 @@ h1.page-title::before {
   color: var(--text);
   text-decoration: none;
 }
-.btn:active { background: #f1f0eb; }
+.btn:active { background: var(--bg-input); }
 .btn:disabled { opacity: 0.35; cursor: not-allowed; }
 .btn-primary { background: var(--accent); border-color: var(--accent); color: #ffffff; }
 .btn-primary:active { background: var(--accent-dark); }
@@ -238,7 +238,7 @@ label { font-size: 14px; color: var(--text-dim); display: block; margin: 10px 0 
   bottom: 0;
   left: 0;
   right: 0;
-  background: #ffffff;
+  background: var(--bg-card);
   border-top: 1px solid var(--border);
   display: flex;
   z-index: 10;
@@ -273,7 +273,7 @@ label { font-size: 14px; color: var(--text-dim); display: block; margin: 10px 0 
   position: sticky;
   top: 0;
   z-index: 10;
-  background: #ffffff;
+  background: var(--bg-card);
   border-bottom: 1px solid var(--border);
   height: 56px;
   padding: 0 16px;
@@ -335,7 +335,7 @@ label { font-size: 14px; color: var(--text-dim); display: block; margin: 10px 0 
   gap: 7px;
   padding: 6px 13px;
   border-radius: 999px;
-  background: #ffffff;
+  background: var(--bg-card);
   border: 1px solid var(--accent);
   color: var(--accent-dark);
   font-size: 13px;
@@ -382,6 +382,9 @@ html.glass .card,
 html.glass .topbar,
 html.glass .subhead,
 html.glass .tabbar,
+html.glass .timer-chip,
+html.glass .zoom-card,
+html.glass .del-card,
 html.glass input,
 html.glass select,
 html.glass textarea,
@@ -392,3 +395,34 @@ html.glass .msg-bubble {
 html.glass .tabbar,
 html.glass .topbar,
 html.glass .subhead { background: rgba(255, 255, 255, 0.6); }
+
+/* 存储失败横幅（v0.8.0）：落盘失败时提示，不静默丢数据 */
+.storage-banner {
+  position: fixed;
+  left: 50%;
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 60;
+  max-width: min(560px, calc(100vw - 32px));
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--warn-soft);
+  border: 1px solid var(--warn-border);
+  color: var(--warn-text);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  font-size: 13px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+}
+.shell.with-tabbar .storage-banner { bottom: calc(68px + env(safe-area-inset-bottom)); }
+.storage-banner-close {
+  flex: none;
+  border: none;
+  background: none;
+  color: inherit;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 4px;
+}

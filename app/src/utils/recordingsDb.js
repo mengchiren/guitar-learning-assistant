@@ -65,10 +65,39 @@ export async function getBlob(id) {
   return row ? row.blob : null
 }
 
-export async function deleteRecording(id) {
-  const db = await openDb()
-  await Promise.all([
-    request(db, META, 'readwrite', (s) => s.delete(id)),
-    request(db, BLOBS, 'readwrite', (s) => s.delete(id)),
-  ])
+// 单事务写 meta + blob（v0.8.0）：两个 object store 在同一事务里提交，
+// 任一步失败整体回滚，不会留下「blob 存了、meta 没存」的孤儿录音。
+export function addRecording(meta, blob) {
+  return withTransaction([META, BLOBS], (tx) => {
+    tx.objectStore(META).put(meta)
+    tx.objectStore(BLOBS).put({ id: meta.id, blob })
+  })
+}
+
+// 单事务删 meta + blob（v0.8.0）：原子删除，不再可能留下孤儿 blob。
+export function deleteRecording(id) {
+  return withTransaction([META, BLOBS], (tx) => {
+    tx.objectStore(META).delete(id)
+    tx.objectStore(BLOBS).delete(id)
+  })
+}
+
+function withTransaction(storeNames, fn) {
+  return new Promise((resolve, reject) => {
+    openDb().then(
+      (db) => {
+        const tx = db.transaction(storeNames, 'readwrite')
+        try {
+          fn(tx)
+        } catch (e) {
+          reject(e)
+          return
+        }
+        tx.oncomplete = () => resolve()
+        tx.onerror = () => reject(tx.error || new Error('数据库写入失败'))
+        tx.onabort = () => reject(tx.error || new Error('数据库写入已回滚'))
+      },
+      (err) => reject(err),
+    )
+  })
 }

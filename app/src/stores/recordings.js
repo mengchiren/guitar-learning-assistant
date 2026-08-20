@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { getAllMeta, getBlob, putMeta, putBlob, deleteRecording } from '../utils/recordingsDb.js'
+import { getAllMeta, getBlob, addRecording, deleteRecording } from '../utils/recordingsDb.js'
 
 // 录音分类与打卡一致（歌曲/基本功/课程/自由练习），统计页以后可串起来
 export const RECORD_CATEGORIES = ['歌曲', '基本功', '课程', '自由练习']
@@ -22,8 +22,7 @@ export const useRecordingsStore = defineStore('recordings', {
     async add({ blob, meta }) {
       const id = makeId()
       const rec = { ...meta, id, createdAt: Date.now() }
-      await putBlob(id, blob)
-      await putMeta(rec)
+      await addRecording(rec, blob) // 单事务：meta+blob 一起成功或一起回滚
       this.list.unshift(rec)
     },
     async remove(id) {

@@ -22,7 +22,8 @@ async function requestNotif() {
     return
   }
   const p = await Notification.requestPermission()
-  notifStatus.value = p === 'granted' ? '✅ 系统通知已授权' : '系统通知未授权（应用内提醒仍可用）'
+  notifStatus.value =
+    p === 'granted' ? '✅ 系统通知已授权（打开应用时到点会弹系统通知）' : '系统通知未授权（应用内提醒仍可用）'
 }
 </script>
 
@@ -61,7 +62,8 @@ async function requestNotif() {
     <div class="card">
       <h2>提醒方式说明（M1）</h2>
       <p class="muted small">
-        当前版本：应用打开时（首页）会检查提醒时间，到点且今天还没练，会显示「到点啦」提示。
+        当前版本：应用打开时（首页）会检查提醒时间，到点且今天还没练，会显示「到点啦」提示；
+        已授权系统通知时，同时会弹一条系统通知（每天最多一条）。
         系统级推送与微信推送（推送加）将在后续版本接入，届时不打开应用也能收到提醒。
       </p>
       <button class="btn btn-block" style="margin-top: 10px" @click="requestNotif">请求系统通知权限</button>

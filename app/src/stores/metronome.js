@@ -41,10 +41,11 @@ export const useMetronomeStore = defineStore('metronome', {
         beatIndex++
       }
     },
-    start() {
+    async start() {
       if (this.running) return
       if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)()
-      ctx.resume()
+      // v0.8.0：resume 后等音频上下文真正跑起来再排拍，否则第一次点击可能无声
+      await ctx.resume()
       nextTime = ctx.currentTime + 0.05
       beatIndex = 0
       this.schedule()

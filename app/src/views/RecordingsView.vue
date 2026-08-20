@@ -163,7 +163,7 @@ onUnmounted(stopPlay)
   padding: 24px;
 }
 .del-card {
-  background: #fff;
+  background: var(--bg-card);
   border-radius: 12px;
   padding: 20px;
   width: 100%;

@@ -35,7 +35,13 @@ export function persistPlugin({ store, options }) {
             const paths = cfg.paths || Object.keys(state)
             const data = {}
             for (const p of paths) data[p] = state[p]
-            save(key, paths.length === 1 ? data[paths[0]] : data)
+            try {
+              save(key, paths.length === 1 ? data[paths[0]] : data)
+            } catch (err) {
+              // v0.8.0：落盘失败不静默——storage.save 已通知全局监听者（App 弹横幅），
+              // 这里吞掉异常避免 setTimeout 里出现未捕获错误，下次变更会再次尝试。
+              console.error('[persist] 保存失败', key, err)
+            }
           }, DEBOUNCE_MS),
         )
       }

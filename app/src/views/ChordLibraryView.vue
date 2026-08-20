@@ -76,7 +76,7 @@ const groups = computed(() =>
   padding: 24px;
 }
 .zoom-card {
-  background: #fff;
+  background: var(--bg-card);
   border-radius: 12px;
   padding: 24px;
   display: flex;

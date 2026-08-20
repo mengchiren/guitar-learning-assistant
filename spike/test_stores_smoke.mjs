@@ -186,6 +186,72 @@ touch('persist 落盘格式与旧版一致（单字段存值本身）', () => {
   const provider = mem.get('gla:v1:ai-provider')
   if (provider !== '"deepseek"') throw new Error(`ai-provider 格式不对: ${provider}`)
 })
+touch('persist 自动落盘：timer-session（v0.8.0 计时会话）', () => {
+  const raw = mem.get('gla:v1:timer-session')
+  if (!raw) throw new Error('未落盘')
+  const s = JSON.parse(raw)
+  for (const f of ['running', 'startedAt', 'accumulated']) {
+    if (!(f in s)) throw new Error(`字段缺失 ${f}`)
+  }
+  if ('now' in s) throw new Error('now 是每秒 tick 不应落盘')
+})
+
+// ---- v0.8.0 新增：打卡草稿落盘 / 落盘失败通知 / 备份恢复覆盖语义 ----
+await (async () => {
+  try {
+    practice.draft.finished = true
+    await new Promise((r) => setTimeout(r, 350))
+    const raw = mem.get('gla:v1:practice-draft')
+    if (!raw) throw new Error('practice-draft 未落盘')
+    if (JSON.parse(raw).finished !== true) throw new Error('draft 内容不对')
+    practice.draft.finished = false
+    pass++
+    console.log('✓ persist 自动落盘：practice-draft（v0.8.0 打卡草稿）')
+  } catch (e) {
+    fail++
+    console.log(`✗ persist 自动落盘 practice-draft: ${e.message}`)
+  }
+})()
+
+await (async () => {
+  try {
+    // persist 落盘失败：插件捕获不崩，且 storage 通知全局监听者（App 横幅）
+    let notified = 0
+    const off = storage.onStorageError(() => notified++)
+    const orig = localStorage.setItem
+    localStorage.setItem = (k, v) => {
+      if (k === 'gla:v1:practice-draft') throw new Error('QuotaExceededError')
+      return orig(k, v)
+    }
+    practice.draft.finished = true
+    await new Promise((r) => setTimeout(r, 350))
+    localStorage.setItem = orig
+    practice.draft.finished = false
+    off()
+    if (notified < 1) throw new Error(`存储失败通知 ${notified} 次，期望 ≥1`)
+    pass++
+    console.log('✓ persist 落盘失败被捕获且通知全局监听者（v0.8.0）')
+  } catch (e) {
+    fail++
+    console.log(`✗ persist 落盘失败通知: ${e.message}`)
+  }
+})()
+
+await (async () => {
+  try {
+    const { restoreBackup } = await import('../app/src/utils/backup.js')
+    mem.set('gla:v1:legacy-extra', '"x"') // 模拟备份导出后新增的 key
+    const n = await restoreBackup({ app: 'guitar-learning-assistant', data: { 'smoke-backup': { ok: 1 } } })
+    if (n !== 1) throw new Error(`恢复条数 ${n}，期望 1`)
+    if (mem.has('gla:v1:legacy-extra')) throw new Error('未清空备份里没有的多余 key')
+    if (!mem.has('gla:v1:smoke-backup')) throw new Error('未写入备份数据')
+    pass++
+    console.log('✓ restoreBackup 覆盖语义（先清空再写入，v0.8.0）')
+  } catch (e) {
+    fail++
+    console.log(`✗ restoreBackup 覆盖语义: ${e.message}`)
+  }
+})()
 
 console.log(`\n结果：${pass}/${pass + fail} 项通过（${fail} 项失败）`)
 process.exit(fail > 0 ? 1 : 0)
