@@ -5,13 +5,16 @@ import Icon from './components/Icon.vue'
 import { useTimerStore } from './stores/timer.js'
 import { useSettingsStore } from './stores/settings.js'
 import { onStorageError } from './utils/storage.js'
-import { TABS } from './data/nav.js'
+import { TABS, ROUTES } from './data/nav.js'
 import Mascot from './components/Mascot.vue'
 
 const route = useRoute()
 const router = useRouter()
 const timer = useTimerStore()
 const settings = useSettingsStore()
+
+// v0.9.0：tab 页面 KeepAlive 保活名单（组件名 = 文件名，见各 view 的 defineOptions）
+const KEEP_ALIVE = ['HomeView', 'PlanView', 'ToolsView', 'SongsView', 'ProfileView']
 
 // 恢复上次练习会话（v0.8.0）：进程被杀/刷新后重开，计时与 tick 都要续上
 timer.init()
@@ -24,6 +27,10 @@ onMounted(() => {
     storageError.value =
       '存储空间不足，最近的更改可能没有保存。请到「我的」页导出备份，并删除旧录音或清空聊天记录后重试。'
   })
+  // v0.9.0：空闲时预加载 5 个 tab 页面的 chunk（弱网/首次访问时减少切换等待）
+  const warm = () => ROUTES.filter((r) => r.meta?.tab).forEach((r) => r.component())
+  if ('requestIdleCallback' in window) requestIdleCallback(warm, { timeout: 2000 })
+  else setTimeout(warm, 1200)
 })
 onUnmounted(() => offStorageError && offStorageError())
 
@@ -113,7 +120,12 @@ function goBack() {
     </router-link>
 
     <main class="page">
-      <router-view />
+      <!-- v0.9.0：tab 页面 KeepAlive 保活，切换即时显示（不再每次全量重建） -->
+      <router-view v-slot="{ Component }">
+        <KeepAlive :include="KEEP_ALIVE">
+          <component :is="Component" />
+        </KeepAlive>
+      </router-view>
     </main>
 
     <!-- 存储失败横幅（v0.8.0）：落盘失败时持续显示，手动关闭 -->

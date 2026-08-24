@@ -1,5 +1,7 @@
 <script setup>
-import { ref, computed, watch, onUnmounted } from 'vue'
+// v0.9.0：KeepAlive 保活名单用组件名匹配（App.vue KEEP_ALIVE）
+defineOptions({ name: 'HomeView' })
+import { ref, computed, watch, onActivated, onDeactivated } from 'vue'
 import { usePracticeStore } from '../stores/practice.js'
 import { useSettingsStore } from '../stores/settings.js'
 import { usePlanStore } from '../stores/plan.js'
@@ -14,8 +16,14 @@ const planStore = usePlanStore()
 const isDesktop = useMediaQuery('(min-width: 768px)')
 
 const tick = ref(0)
-const clockTimer = setInterval(() => tick.value++, 30000)
-onUnmounted(() => clearInterval(clockTimer))
+// v0.9.0：首页被 KeepAlive 保活后 onUnmounted 不再触发，定时器改由
+// onDeactivated/onActivated 管理（页面不可见时停止 30s 刷新）
+let clockTimer = null
+function startClock() { if (!clockTimer) clockTimer = setInterval(() => tick.value++, 30000) }
+function stopClock() { if (clockTimer) { clearInterval(clockTimer); clockTimer = null } }
+onActivated(startClock)
+onDeactivated(stopClock)
+startClock()
 
 const nowHHMM = computed(() => {
   tick.value

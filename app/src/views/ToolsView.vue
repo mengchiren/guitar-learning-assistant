@@ -1,4 +1,6 @@
 <script setup>
+// v0.9.0：KeepAlive 保活名单用组件名匹配（App.vue KEEP_ALIVE）
+defineOptions({ name: 'ToolsView' })
 import Icon from '../components/Icon.vue'
 import { TOOLS } from '../data/nav.js'
 </script>

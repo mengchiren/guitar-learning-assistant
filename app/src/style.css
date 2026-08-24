@@ -83,6 +83,12 @@
   --bg-veil: 0.9; /* 水彩背景浅，遮罩浓一点保可读性 */
 }
 
+/* v0.9.0：移动端用低分辨率背景图（省流量 + 低端机合成成本低），桌面保留原图 */
+@media (max-width: 767.98px) {
+  [data-theme='yui'] { --bg-image: url('/theme/yui-bg-mobile.webp'); }
+  [data-theme='maid'] { --bg-image: url('/theme/maid-bg-mobile.webp'); }
+}
+
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 html, body { height: 100%; }
 body {
@@ -395,6 +401,25 @@ html.glass .msg-bubble {
 html.glass .tabbar,
 html.glass .topbar,
 html.glass .subhead { background: rgba(255, 255, 255, 0.6); }
+
+/* v0.9.0：手机端毛玻璃降级——backdrop-filter 在低端安卓 GPU 上最贵（每个卡片单独 blur），
+   降半径保滚动/切换流畅；桌面保留完整 14px。 */
+@media (max-width: 767.98px) {
+  html.glass .card,
+  html.glass .topbar,
+  html.glass .subhead,
+  html.glass .tabbar,
+  html.glass .timer-chip,
+  html.glass .zoom-card,
+  html.glass .del-card,
+  html.glass input,
+  html.glass select,
+  html.glass textarea,
+  html.glass .msg-bubble {
+    backdrop-filter: blur(6px) saturate(1.1);
+    -webkit-backdrop-filter: blur(6px) saturate(1.1);
+  }
+}
 
 /* 存储失败横幅（v0.8.0）：落盘失败时提示，不静默丢数据 */
 .storage-banner {

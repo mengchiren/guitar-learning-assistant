@@ -1,4 +1,6 @@
 <script setup>
+// v0.9.0：KeepAlive 保活名单用组件名匹配（App.vue KEEP_ALIVE）
+defineOptions({ name: 'ProfileView' })
 import { ref } from 'vue'
 import Icon from '../components/Icon.vue'
 import { useSettingsStore } from '../stores/settings.js'

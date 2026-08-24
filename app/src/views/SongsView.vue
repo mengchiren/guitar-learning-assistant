@@ -1,4 +1,6 @@
 <script setup>
+// v0.9.0：KeepAlive 保活名单用组件名匹配（App.vue KEEP_ALIVE）
+defineOptions({ name: 'SongsView' })
 import { ref, computed } from 'vue'
 import { useSongsStore } from '../stores/songs.js'
 
