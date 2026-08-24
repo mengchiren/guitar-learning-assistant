@@ -90,16 +90,9 @@ function goBack() {
 </script>
 
 <template>
-  <div class="shell" :class="{ 'with-tabbar': route.meta.tab }">
-    <!-- 移动端：二级页返回栏 -->
-    <header v-if="!route.meta.tab" class="subhead mobile-only">
-      <button class="back-btn" aria-label="返回" @click="goBack">
-        <Icon name="chevron-left" :size="22" />
-      </button>
-    </header>
-
-    <!-- 桌面端：顶部导航栏 -->
-    <header class="topbar desktop-only">
+  <!-- 桌面端：顶部导航栏（v0.10.1 起全宽铺满，内部 topbar-inner 与内容区对齐） -->
+  <header class="topbar desktop-only">
+    <div class="topbar-inner">
       <div class="topbar-left">
         <button v-if="!route.meta.tab" class="back-btn" aria-label="返回" @click="goBack">
           <Icon name="chevron-left" :size="20" />
@@ -132,6 +125,15 @@ function goBack() {
           <Icon name="tuner" :size="20" />
         </router-link>
       </div>
+    </div>
+  </header>
+
+  <div class="shell" :class="{ 'with-tabbar': route.meta.tab }">
+    <!-- 移动端：二级页返回栏 -->
+    <header v-if="!route.meta.tab" class="subhead mobile-only">
+      <button class="back-btn" aria-label="返回" @click="goBack">
+        <Icon name="chevron-left" :size="22" />
+      </button>
     </header>
 
     <!-- 移动端：练习中悬浮胶囊 -->

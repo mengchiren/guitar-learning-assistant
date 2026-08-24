@@ -84,7 +84,8 @@ const packItems = computed(() => (plan.value.mode === 'reduce' ? plan.value.pack
             <div class="hero-num">{{ todayText }}</div>
             <div class="dim small">今日累计练习</div>
           </div>
-          <div v-if="!isDesktop" class="hero-side">
+          <!-- v0.10.1：连续打卡并入 hero 卡（手机/桌面统一三区），不再单独一张卡 -->
+          <div class="hero-side">
             <div class="hero-streak">{{ practice.streakDays }} 天</div>
             <div class="dim small">连续打卡</div>
           </div>
@@ -109,11 +110,6 @@ const packItems = computed(() => (plan.value.mode === 'reduce' ? plan.value.pack
       </div>
 
       <div class="home-side">
-        <div v-if="isDesktop" class="card">
-          <div class="streak-big">{{ practice.streakDays }} 天</div>
-          <div class="dim small">连续打卡</div>
-        </div>
-
         <div class="card">
           <h2>今日练习包（弹性）</h2>
           <div v-for="t in packItems" :key="t.kind + t.ref" class="list-row">
@@ -158,7 +154,6 @@ const packItems = computed(() => (plan.value.mode === 'reduce' ? plan.value.pack
 .hero-streak { font-size: 22px; font-weight: 800; color: var(--accent); }
 .hero-side { text-align: right; }
 .hero-btn { flex: none; }
-.streak-big { font-size: 28px; font-weight: 800; color: var(--accent); }
 .remind-banner {
   display: flex;
   align-items: center;

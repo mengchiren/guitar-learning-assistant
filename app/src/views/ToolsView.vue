@@ -27,7 +27,8 @@ import { TOOLS } from '../data/nav.js'
 .tool-name { font-size: 17px; font-weight: 700; }
 
 @media (min-width: 768px) {
-  .tool-grid { grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  /* v0.10.1：按宽度自动列数（768~1280 区间 3~4 列），不再固定 3 列留孤卡 */
+  .tool-grid { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; }
   .tool-grid .card { margin-bottom: 0; }
 }
 </style>

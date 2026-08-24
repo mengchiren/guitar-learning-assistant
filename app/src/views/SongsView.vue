@@ -78,7 +78,8 @@ const list = computed(() => {
 .song-meta { margin-top: 8px; }
 
 @media (min-width: 768px) {
-  .song-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; align-items: start; }
+  /* v0.10.1：按宽度自动列数（768~1280 区间 2~3 列） */
+  .song-grid { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; align-items: start; }
   .song-grid .card { margin-bottom: 0; }
 }
 </style>

@@ -51,7 +51,7 @@ const groups = computed(() =>
 <style scoped>
 .chord-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, 1fr); /* 手机保持 4 列 */
   gap: 8px;
 }
 .chord-btn {
@@ -86,6 +86,6 @@ const groups = computed(() =>
 }
 
 @media (min-width: 768px) {
-  .chord-grid { grid-template-columns: repeat(6, 1fr); }
+  .chord-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
 }
 </style>

@@ -343,6 +343,7 @@ label { font-size: 14px; color: var(--text-dim); display: block; margin: 10px 0 
 .switch.on .knob { left: 25px; background: var(--accent); }
 
 /* ---------- 桌面端外壳（≥768px） ---------- */
+/* v0.10.1：顶栏全宽铺满（脱离 shell 容器），内部 topbar-inner 与内容区对齐 */
 .topbar {
   position: sticky;
   top: 0;
@@ -350,7 +351,12 @@ label { font-size: 14px; color: var(--text-dim); display: block; margin: 10px 0 
   background: var(--bg-card);
   border-bottom: 1px solid var(--border);
   height: 56px;
-  padding: 0 16px;
+}
+.topbar-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  height: 100%;
+  padding: 0 32px;
   display: flex;
   align-items: center;
   gap: 20px;
@@ -426,7 +432,7 @@ label { font-size: 14px; color: var(--text-dim); display: block; margin: 10px 0 
 @media (min-width: 768px) {
   .mobile-only { display: none; }
   .desktop-only { display: flex; }
-  .shell { max-width: 1120px; }
+  .shell { max-width: 1280px; } /* v0.10.1：1120→1280 */
   .page { padding: 24px 32px 40px; }
   .narrow { max-width: 680px; margin: 0 auto; }
 }
