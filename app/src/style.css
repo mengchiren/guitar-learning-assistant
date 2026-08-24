@@ -83,6 +83,74 @@
   --bg-veil: 0.9; /* 水彩背景浅，遮罩浓一点保可读性 */
 }
 
+/* DeepSeek 极简（v0.10.0，用户选定并升级为默认主题）：
+   参考 DeepSeek Harness——近白大留白、白卡细边框大圆角、克制深蓝、
+   顶部淡蓝光晕（--bg-image 用径向渐变，非图片素材），普通主题无遮罩（--bg-veil: 0）。 */
+[data-theme='dsh'] {
+  color-scheme: light;
+  --bg: #fbfbfd;
+  --bg-card: #ffffff;
+  --bg-input: #f4f5f7;
+  --border: #e9eaee;
+  --text: #14161a;
+  --text-dim: #6f737d;
+  --accent: #3d6ff2;        /* DeepSeek 蓝 */
+  --accent-dark: #2f5ce0;
+  --danger: #d0342c;
+  --ok: #2f9e62;
+  --radius: 16px;
+  --accent-soft: #eaf0fe;
+  --accent-soft-2: #f0f4fe;
+  --ok-soft: #e7f4ec;
+  --ok-card: #f7fcf8;
+  --warn-soft: #fdf3e0;
+  --warn-border: #d9a441;
+  --warn-text: #a97412;
+  --bar: #b9ccfb;
+  --heat-1: #cfe0fd;
+  --heat-2: #9cc0fb;
+  --bg-image: radial-gradient(90% 55% at 50% 12%, #eef3fe 0%, rgba(238, 243, 254, 0) 62%);
+  --bg-veil: 0;
+}
+/* 深色模式：仅 dsh 提供（html.dark 由 App.vue 按 darkMode 设置切换） */
+html.dark[data-theme='dsh'] {
+  color-scheme: dark;
+  --bg: #101114;
+  --bg-card: #17181c;
+  --bg-input: #22242a;
+  --border: #2a2d34;
+  --text: #e7e9ef;
+  --text-dim: #9aa0ab;
+  --accent: #5b8cff;
+  --accent-dark: #7ba3ff;
+  --danger: #e05a52;
+  --ok: #45c27e;
+  --accent-soft: rgba(91, 140, 255, 0.16);
+  --accent-soft-2: rgba(91, 140, 255, 0.12);
+  --ok-soft: rgba(69, 194, 126, 0.16);
+  --ok-card: rgba(69, 194, 126, 0.08);
+  --warn-soft: rgba(217, 164, 65, 0.16);
+  --warn-border: #d9a441;
+  --warn-text: #e0b45c;
+  --bar: rgba(91, 140, 255, 0.45);
+  --heat-1: rgba(91, 140, 255, 0.35);
+  --heat-2: rgba(91, 140, 255, 0.6);
+  --bg-image: radial-gradient(90% 55% at 50% 12%, rgba(91, 140, 255, 0.1) 0%, rgba(91, 140, 255, 0) 62%);
+  --bg-veil: 0;
+}
+/* dsh 专属细节：页面标题前的色块改为蓝色小圆点（极简），与 DSH 的点状点缀一致 */
+[data-theme='dsh'] h1.page-title::before {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+}
+/* dsh 深色 + 毛玻璃：玻璃变量是浅色半透明，深色下要换成深色半透明（优先级高于 html.glass） */
+html.dark[data-theme='dsh'].glass {
+  --bg-card: rgba(30, 32, 38, 0.68);
+  --bg-input: rgba(40, 42, 50, 0.62);
+  --border: rgba(255, 255, 255, 0.12);
+}
+
 /* v0.9.0：移动端用低分辨率背景图（省流量 + 低端机合成成本低），桌面保留原图 */
 @media (max-width: 767.98px) {
   [data-theme='yui'] { --bg-image: url('/theme/yui-bg-mobile.webp'); }

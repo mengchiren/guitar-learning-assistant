@@ -1,6 +1,6 @@
 # HANDOFF 交接文档
 
-> 给一个完全没有上下文的新对话看。工作目录：`F:\电吉他学习`（Windows 10，Git Bash）。项目名：**练琴搭子 · PickBuddy**。当前版本 **v0.9.0**。
+> 给一个完全没有上下文的新对话看。工作目录：`F:\电吉他学习`（Windows 10，Git Bash）。项目名：**练琴搭子 · PickBuddy**。当前版本 **v0.10.0**。
 
 ## 1. 我们在做什么任务
 
@@ -70,21 +70,21 @@
 - **主题迭代（v0.7.1，用户反馈三连）**：①**看板娘更萌**——yui 主题看板娘换成 **AI 生成 Q 版 chibi 平泽唯**（`spike/cutout.py` 抠白底→透明+羽化，WebP 压缩 49KB）；②**透明毛玻璃模式**——settings 加 `glass`（persist key `glass`），App.vue 切 `html.glass` class，style.css 里 `html.glass` 覆盖 --bg-card/--bg-input/--border + `.card/.topbar/.subhead/.tabbar/input/select/textarea/.msg-bubble` backdrop blur(14px)，body::before opacity 0.66；「我的 → 外观主题」卡内开关；**html.glass 选择器优先级（0,1,1）高于 [data-theme]（0,1,0），放 CSS 后面即覆盖**；③**第三主题「鲸鱼女仆 · 深海茶会」（`[data-theme='maid']`）**——DSH 社区 dsh-maid-whale-webUI 设计语言：柔雾蓝 #4a86e8、水彩鲸鱼云团背景（素材取自该仓库 BSD-3-Clause）、圆角 12px、AI 生成 Q 版蓝发女仆抱小鲸鱼看板娘（WebP 83KB）；--bg-veil 0.9。回归 6 组全过 + 构建通过。
 - **看板娘迭代（v0.7.2，用户反馈：加启用开关 / 鲸鱼女仆用现成 / 唯的风格不行）**：①settings 加 `mascotEnabled`（persist key `mascot`，默认开）+「我的 → 外观主题」加「显示看板娘」开关，Mascot.vue 的 visible 判断；②**maid 看板娘换现成**——deep-whale-day-night-theme 仓库自带 Q 版透明 companion（day-companion-v1.webp 420×434 RGBA 62KB），与 maid 主题同源风格统一；③**yui 看板娘重制**——AI 生成 2 候选（官方动画风/Q 版厚涂贴纸风），视觉模型评分先选 Q 版厚涂（9.8 分），**用户验收后改选官方动画画风版（v0.7.3，京都动画 K-ON! 式半身像，抠图转 WebP 31KB）**；Q 版厚涂候选留 `gui-test-screenshots/review-20260819/yui-candidates/` 备选（想换随时换）。回归 6 组全过 + 构建通过。**等用户验收。**
 - **代码审查修复（v0.8.0，用户用 GLM 5.3 做了全量代码审查，逐条核实后按 A+B+C 三组全部实施）**：**A 组数据可靠性主线**——①**计时落盘 + 打卡草稿闭环**：timer store 加 persist（`timer-session`，running/startedAt/accumulated，now 不入库），启动 `init()` 恢复 tick；**恢复防护**：running 会话跨天或超 12 小时（如昨晚忘关）自动作废防误记；PracticeView 的 finished/tags/note 移入 practice store 的 `draft`（persist `practice-draft`）——进程被杀/误关后重开，计时和「已结束待保存」草稿都在；②**录音保存错误处理 + 原子化**：RecordPanel.saveRec 包 try/catch（失败提示 + 不重置表单 + 不再假「已保存」，<1 秒提示太短不保存）；recordingsDb 新增 `addRecording`/`deleteRecording` 单事务双 store（原来 blob/meta 两个独立事务，配额满会留孤儿 blob）；③**落盘失败全局告警**：storage.js 新增 `onStorageError` 通知（save 失败抛错同时通知），persist 插件 catch 落盘失败，App.vue 挂「存储空间不足」横幅（可关闭，兑现 storage.js「宁可暴露问题」的注释）；④**备份恢复修复**：restoreBackup 先等 250ms 冲刷挂起 persist 写入 → **清空全部 gla:v1: key 再写备份**（真「覆盖」语义，不再混合新旧状态）→ ProfileView 立即 reload（去掉 1.2s 窗口期，期间 store 变更会覆盖回旧内存态）；confirm 文案改「清除当前全部数据并恢复备份」。**B 组契约/视觉**——⑤**TEMPLATE_IDS 补 heavy + 护栏**：补「金属 Riff」→heavy；**护栏测试立刻抓到 GLM 也没发现的隐藏 bug**：classifyRules 输出「清音+合唱氛围」（无空格）与 templates.js name「清音 + 合唱氛围」（带空格）不一致 → 用户上传归为此套路的歌 findToneTemplate 匹配不到、详情页设备建议缺失（种子库 29 首恰好无此套路所以一直没暴露）——统一为 templates.js 权威名（classifyRules + TEMPLATE_IDS + 测试期望 3 处同步）；⑥**硬编码色收敛**：style.css 5 处（subhead/tabbar/topbar/timer-chip/btn:active）+ 3 个视图弹层（zoom-card/del-card/set-cur-btn）+ ChatView 气泡（含 `--line` 旧变量名）全部改语义变量，glass 覆盖列表补 timer-chip/zoom-card/del-card；⑦**调音器**：useTuner 自相关按有效窗长归一化（原来除以全长能量，lag 越大分数越低→强二次谐波吉他音色偏高八度误判），TunerView 指针 `50+cents/2`（±50 音分满程，原来 /0.5 是 ±25 打满，与文字 ±50 对不上）；⑧**PWA**：globPatterns 加 webp/jpg/png（11 个主题素材全部进 precache，断网可换肤），manifest 补 192/512 PNG 图标（`spike/make_icons.py` Pillow 重绘 icon.svg 图形生成，像素校验过）。**C 组小修**——系统通知落地（HomeView 到点且已授权时 new Notification，每天一条防重复，RemindersView 文案同步）、metronome `await ctx.resume()`、analyze.js 死分支清理 + 帧内缓冲复用、ToneAdvice 设备改 computed、package.json version 0.5.0→0.7.3、ChatView 消息 key 改 role+at。**踩到并修复一个自引 bug**：mag 缓冲复用后 `prevMag = mag` 变成自引用（同数组），谱通量恒 0，真实对拍 4/5 抓出（雑踏 184.6 vs 171 超 3% 阈值），基线对比确认后改 `prevMag.set(mag)`，对拍恢复 5/5——**教训：帧内缓冲复用必须检查跨帧引用的数组（见坑 39）**。回归全过：对拍 5/5、合成 3/3、规则 25/25、数据 767/767、冒烟 24/24（+timer 落盘/draft 落盘/失败通知/备份覆盖 4 项）、toneGuide 53/53（+套路名映射护栏 7 项）、面板 13/13、构建通过（precache 82 项 1215KB）。**待用户验收。**
-- **v0.9.0（性能优化 A 方案 + 风格预览，用户提「切换界面卡」与「风格不合心意」后按流程先分析再实施）**：**性能**——①**tab 页面 KeepAlive 保活**（App.vue `KeepAlive :include` + 5 个 view `defineOptions({name})`，切回零重建；HomeView 定时器改 onActivated/onDeactivated）；②**tab 互切不强制回顶**（router scrollBehavior：to/from 都 meta.tab 时返回 undefined，保留各自滚动位置）；③**tab chunk 空闲预加载**（App.vue onMounted requestIdleCallback 预热 5 个 tab 路由）；④**移动端低分辨率背景图**（`spike/make_theme_mobile.py`：yui 257KB jpg→1170 宽 webp 109KB、maid 64KB→780 宽 32KB，style.css 媒体查询 <768px 切换）；⑤**毛玻璃移动降级**（<768px blur 14px→6px saturate 1.1，backdrop-filter 低端安卓 GPU 最贵）。**风格**——①问卷确定方向（可爱二次元/多邻国+星铁参考/浅色带深色可切换/8px 圆角/密度不变/适度动效/渐变底/主色随主题）；②**临时预览页 `StylePreviewView.vue` + 路由 `/style-preview`**（3 款整页效果稿：星河指挥台=星铁磨砂金边、冒险打卡站=多邻国绿、甜品练习室=粉紫萌系；`?v=x&mode=dark` 直达），**风格定稿后删除**（线上可访问，无入口链接）；截图在 `gui-test-screenshots/style-preview/`。回归 6 组全过 + 构建过（precache 86 项 1373KB）；**KeepAlive 生效已用 DOM 同节点证明**（切走切回同一元素；注意 MutationObserver 对 Vue 整页切换只记 1 条（fragment 一次插入），毫秒测量不可信，见坑 44）。**待用户：手机验收 + 风格选款。**
+- **v0.9.0（性能优化 A 方案，用户提「切换界面卡」后按流程先分析再实施）**：①**tab 页面 KeepAlive 保活**（App.vue `KeepAlive :include` + 5 个 view `defineOptions({name})`，切回零重建；HomeView 定时器改 onActivated/onDeactivated）；②**tab 互切不强制回顶**（router scrollBehavior：to/from 都 meta.tab 时返回 undefined，保留各自滚动位置）；③**tab chunk 空闲预加载**（App.vue onMounted requestIdleCallback 预热 5 个 tab 路由）；④**移动端低分辨率背景图**（`spike/make_theme_mobile.py`：yui 257KB jpg→1170 宽 webp 109KB、maid 64KB→780 宽 32KB，style.css 媒体查询 <768px 切换）；⑤**毛玻璃移动降级**（<768px blur 14px→6px saturate 1.1，backdrop-filter 低端安卓 GPU 最贵）。回归 6 组全过 + 构建过；**KeepAlive 生效已用 DOM 同节点证明**（切走切回同一元素；注意 MutationObserver 对 Vue 整页切换只记 1 条（fragment 一次插入），毫秒测量不可信，见坑 44）。
+- **v0.10.0（界面风格落地：新默认主题「DeepSeek 极简」，用户从 3 款风格稿+临时预览页中选型，拍板参考 DeepSeek Harness）**：①`data/themes.js` 新增 dsh 主题并排第一（DEFAULT）——近白 #fbfbfd 大留白、白卡细边框大圆角 16px、克制深蓝 #3d6ff2、页顶淡蓝光晕（`--bg-image` 用径向渐变，无图片素材、不进 precache）、标题色块改蓝色小圆点（`[data-theme='dsh'] h1.page-title::before`）；②**深色模式**：settings 新增 `darkMode`（persist key `dark-mode`，system/light/dark 三档，我的→外观主题卡内选择，默认 system），App.vue 按 matchMedia + 设置同步 `html.dark`；深色变量块 `html.dark[data-theme='dsh']`（**仅 dsh 提供深色**，其他主题忽略该设置）；深色下毛玻璃变量用 `html.dark[data-theme='dsh'].glass` 覆盖（html.glass 的浅色半透明会穿帮）；③**默认值迁移**：settings 的 `loadThemeId()`——旧默认 classic 自动迁到 dsh（用户仍可手动切回）；④删除临时风格预览页（StylePreviewView.vue + /style-preview 路由，截图留档 `gui-test-screenshots/style-preview/`）。回归 6 组全过 + 构建过（precache 84 项 1362KB）。**待用户验收。**
 - 全程约 53 个提交，git 历史即详细变更记录；需求文档修订记录完整到 v0.8.0；README/验收指南/交接文档全同步。
 
 ## 4. 当前卡在哪
 
-**v0.9.0（切换卡顿优化 A 方案 + 风格预览，A 方案用户已确认并实施）已提交**，等用户手机验收 + 风格选款。验收重点：
+**v0.10.0（DeepSeek 极简默认主题 + 深色模式 + v0.9.0 性能优化）已提交**，等用户验收。验收重点：
 
-1. **切换不卡**（重点，手机实测）：底部 5 个 tab 来回切换应立即显示（KeepAlive 零重建），尤其是和弦图库/课程页这种大页面第二次进入不再整页重建；tab 各自滚动位置保持（互切不跳回顶部）。
-2. **网速慢/首次访问**：打开应用后等几秒再切 tab，应无明显白屏等待（tab chunk 已预热 + SW precache）。
-3. **毛玻璃手机体验**：开启毛玻璃后手机上滚动应明显比之前顺（手机端已降为 blur 6px）；桌面保持原 14px 效果。
-4. **背景图**：手机上（yui/maid 主题）背景为移动版（更小更快加载，视觉应无明显差异）。
-5. **回归**：六组 CI 测试全过 + 构建过（precache 86 项 1373KB）。
-6. **风格选款**：手机/电脑打开 `https://guitar-learning-assistant.pages.dev/style-preview`（线上已有，刷新两三次避开 SW 缓存）或看 `gui-test-screenshots/style-preview/` 截图，用户选 ①②③ 或混合意见 → 定稿后删除临时预览页，落地为新主题体系（含深浅色）。
-7. **v0.8.0 遗留验收**（计时落盘/录音保存提示/存储满横幅/备份覆盖/主题色收敛/调音器/PWA/系统通知 8 项）未验完的可顺带。
-8. **v0.4.2/v0.6.x 遗留的待用户反馈**（功能层面，与本次无关）：
+1. **新默认主题**（重点）：打开应用（刷新两三次避开 SW 旧缓存）看首页/计划页/我的页——近白底 + 蓝点标题 + 白卡大圆角 + 深蓝按钮；「我的 → 外观主题」第一张卡「DeepSeek 极简」选中；切回经典/sai 唯/鲸鱼女仆正常（顺序：dsh/classic/yui/maid）。
+2. **深色模式**：我的 → 外观主题 → 深色模式三档（跟随系统/浅色/深色）；切「深色」看全站深蓝黑风格；切「跟随系统」后系统深色时自动深色；**切到其他主题时深色设置不生效（仅 dsh 支持，文案已注明）**。
+3. **旧用户迁移**：主题选择是「经典瑞士军刀」的用户打开后应变为 DeepSeek 极简（仍可手动切回）。
+4. **性能**（v0.9.0）：5 个 tab 来回切立即显示、滚动位置保持；和弦库/课程第二次进入不再重建；毛玻璃手机不卡；背景图手机版加载快。
+5. **回归**：六组 CI 测试全过 + 构建过（precache 84 项 1362KB）。
+6. **v0.8.0 遗留验收**（计时落盘/录音保存提示/存储满横幅/备份覆盖/主题色收敛/调音器/PWA/系统通知 8 项）未验完的可顺带。
+7. **v0.4.2/v0.6.x 遗留的待用户反馈**（功能层面，与本次无关）：
 1. **曲谱准确性（重点）**：19 首曲谱中多数标注了来源与置信度；单源/自动检测的（影色舞等）标注「请对照原曲校准」。用户弹到不对的，按他听出来的改数据（人工纠错永远优先）。
 2. **新歌 BPM/调性待校准**：22 首新歌的 BPM/调性多为引擎分析值（`dataFrom` 标「待人工校准」）；用户弹到速度不对的报过来改。已知悬案：天使にふれたよ!（社区谱 100~117 疑似半速）、青春コンプレックス（社区谱 155 vs 分析 185）、ソラノムジカ（分析 129 vs 半速记谱 98）。
 3. 计划页练习包建议、达标标准难度是否合适；和弦图库 82 个指法是否有标错的。
@@ -95,7 +95,7 @@
 
 ## 5. 下一步计划（按路线图）
 
-1. **等用户验收 v0.9.0（切换卡顿优化）** + **风格选款**（在线 `/style-preview` 3 款或截图）→ 定稿后：删除临时预览页与路由，把选中款落地为新主题体系（每主题浅/深两套变量 + 系统/手动跟随），全站硬编码色收敛仍按主题变量走；v0.8.0 遗留验收顺带。按反馈微调。
+1. **等用户验收 v0.10.0（DeepSeek 极简默认主题 + 深色模式 + 切换性能优化）** → 按反馈微调；v0.8.0 遗留验收顺带。
 2. **曲谱继续扩充**：用户练到哪首需要谱 → 按「宁缺毋滥、人工整理、标注来源与校准状态」补 `songSheets.js`（改后重跑 `spike/write_sheets.py` 或手改，然后 `node spike/test_sheets.mjs` 校验）；谱里出现新和弦同步补 `chords.js`（校验硬约束：谱中和弦必须在图库有定义）。
 3. **M4-3 剩余**（用户已按「架构/安全/成本」分析法选定前两项为录音、AI 答疑）：**微信推送（推送加）**——个人 token 不能存前端，需 CF Functions 代理 + 环境变量，免费版每日有限额；**Capacitor 安卓壳 + 桌面小组件**——签名/商店上架/双端构建，维护成本最高，等核心稳定再上。
 4. 云同步（Supabase）**已确认暂缓**，等手机/电脑双端都用起来再说；`storage.js` 的变更订阅 + 版本迁移 + persist 插件已把同步接入点铺好。
@@ -145,6 +145,7 @@
 39. **帧内缓冲复用的自引用坑（v0.8.0 血泪教训）**：把 `const mag = new Float32Array(...)` 从帧循环提到循环外复用时，**必须检查跨帧引用的数组**——原代码循环末尾 `prevMag = mag`（每帧新建时没问题，引用赋值指向新数组），复用后变成 prevMag 与 mag 同数组：下一帧先覆写 mag 再算 `flux += max(0, m - prevMag[k])` → 恒 0 → **谱通量全灭、BPM 测速漂移**（真实对拍 4/5 抓出：雑踏 184.6 vs 171 误差 8%）。修复：`prevMag.set(mag)`（拷贝）。**教训：改引擎缓冲复用后必须重跑真实对拍 5 首**——合成测试只靠 envRms 分量仍能过（3/3），抓不到谱通量丢失。
 40. **套路名空格统一（v0.8.0）**：`classifyRules.js` 的 template、`analyze.js` 的 TEMPLATE_IDS key、`templates.js` 的 name 必须完全一致（含空格）——曾因「清音 + 合唱氛围」在 classifyRules 少空格，归类命中的歌 `findToneTemplate` 匹配不到模板，**详情页设备建议缺失**（种子库 29 首恰好无此套路所以没暴露）。`test_tone_guide.mjs` 第 6 节已有「TEMPLATE_IDS 覆盖全部套路名且 id 一致」护栏，新增套路/改名后必须过它。
 41. **KeepAlive 保活相关（v0.9.0）**：①**include 匹配组件名**——`<script setup>` SFC 编译器不自动设 name 选项，必须显式 `defineOptions({ name: 'XView' })`，否则 include 静默不匹配、保活不生效；②**页面级定时器生命周期**——保活后组件不卸载，`onUnmounted` 不再触发（HomeView 的 30s clockTimer 改 `onDeactivated` 停 / `onActivated` 启）；③**滚动**——保活后 DOM 留在原位，router scrollBehavior 里 tab↔tab 互切要返回 `undefined`（不滚动），否则 `{top:0}` 会把滚到一半的页面踢回顶部；④**录音等含卸载清理的组件别放进保活名单**（RecordPanel「切走即停录音」靠 onUnmounted，仅挂在 PracticeView/RecordingsView 这两个非 tab 页，安全）；⑤Chunk 预热只对未访问过的路由有意义（SW precache 其实已含全部产物）。**测量陷阱**：Vue 3 路由切换时 DOM 是**整个 fragment 一次插入**，MutationObserver **只记 1 条**——用 mutation 计数/稳定时间测切换耗时不可信（prof-nav.mjs 第一版数据作废），可信的验证是「切走切回根元素同一」（DOM 复用证明，见 `gui-test-screenshots/diag-keepalive2.mjs`）或 rAF 双帧计时（awaitPromise:true）。
+42. **主题/深色模式相关（v0.10.0）**：①`--bg-image` 不只收 url，**radial-gradient 字符串也行**（dsh 光晕就这么干的，零素材）；但 `--bg-veil` 默认 0.86 的 body::before 白罩会盖掉渐变——**纯渐变背景的主题必须 `--bg-veil: 0`**；②**深色只有 dsh**：`html.dark[data-theme='dsh']` 变量块，App.vue 按 `settings.darkMode`（system/light/dark）+ matchMedia 切 `html.dark` class；其他主题无深色块自动忽略（设置页文案已注明）；③**html.glass 的优先级低于 `html.dark[data-theme='dsh']`**（0,1,1 < 0,2,1），所以 dsh 深色下毛玻璃靠 `html.dark[data-theme='dsh'].glass`（0,3,1）覆盖半透明变量，**别删**；④v0.10.0 起默认主题是 dsh，settings 的 `loadThemeId()` 里 classic→dsh 迁移（localStorage 里存的是 JSON 字符串，写值用 `save()` 别裸写）；⑤**本地 preview + SW 干扰截图**：vite preview 会注册 SW，同一 Chrome profile 二次访问会用旧 SW 缓存（旧 index.html 旧 JS）——验证新构建的截图必须**新 user-data-dir 新 Chrome**；dev(4175) 无此问题因为是 dev 模式。
 
 ## 7. 与用户协作的注意事项
 

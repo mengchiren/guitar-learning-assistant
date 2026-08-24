@@ -51,6 +51,27 @@ watch(
   { immediate: true },
 )
 
+// 深色模式（v0.10.0）：darkMode = system（跟随系统）/ light / dark。
+// 深色变量只在 [data-theme='dsh'] 有定义，其他主题忽略（保持浅色）。
+const sysDark = ref(window.matchMedia('(prefers-color-scheme: dark)').matches)
+watch(
+  [() => settings.darkMode, sysDark],
+  () => {
+    const dark =
+      settings.darkMode === 'dark' || (settings.darkMode === 'system' && sysDark.value)
+    document.documentElement.classList.toggle('dark', dark)
+  },
+  { immediate: true },
+)
+let offSysDark = null
+onMounted(() => {
+  const mq = window.matchMedia('(prefers-color-scheme: dark)')
+  const onChange = (e) => (sysDark.value = e.matches)
+  mq.addEventListener('change', onChange)
+  offSysDark = () => mq.removeEventListener('change', onChange)
+})
+onUnmounted(() => offSysDark && offSysDark())
+
 // tab 列表由 data/nav.js 统一声明（v0.6.0）
 
 // 外壳「练习中」胶囊：显示 mm:ss，点击回练习页

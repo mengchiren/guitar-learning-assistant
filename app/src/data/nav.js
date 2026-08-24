@@ -34,8 +34,6 @@ export const ROUTES = [
   { path: '/reminders', component: () => import('../views/RemindersView.vue'), meta: { title: '提醒设置' } },
   { path: '/templates', component: () => import('../views/TemplatesView.vue'), meta: { title: '音色套路库' } },
   { path: '/amp-guide', component: () => import('../views/AmpGuideView.vue'), meta: { title: '音箱入门' } },
-  // 临时：风格预览（用户选型后删除本路由与 StylePreviewView.vue）
-  { path: '/style-preview', component: () => import('../views/StylePreviewView.vue'), meta: { title: '风格预览' } },
 ]
 
 /** 底部导航 / 顶栏 tab（ROUTES 里 meta.tab 的子集） */

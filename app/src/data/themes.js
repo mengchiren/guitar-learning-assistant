@@ -17,9 +17,15 @@
 
 export const THEMES = [
   {
+    id: 'dsh',
+    name: 'DeepSeek 极简',
+    desc: '近白大留白 + 深蓝强调 + 大圆角轻边卡片（参考 DeepSeek Harness），默认主题 · 支持深色模式',
+    swatch: ['#fbfbfd', '#3d6ff2', '#14161a', '#e9eaee', '#101114'],
+  },
+  {
     id: 'classic',
     name: '经典瑞士军刀',
-    desc: '米白纸面 + 瑞士红，默认主题',
+    desc: '米白纸面 + 瑞士红，可随时切回',
     swatch: ['#f4f3ef', '#e30613', '#161616', '#dddad2'],
   },
   {

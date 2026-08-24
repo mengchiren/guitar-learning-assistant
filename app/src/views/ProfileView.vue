@@ -9,6 +9,13 @@ import { downloadBackup, parseBackup, restoreBackup } from '../utils/backup.js'
 
 const settings = useSettingsStore()
 
+// 深色模式（v0.10.0）：仅「DeepSeek 极简」主题支持深色，其他主题忽略
+const DARK_MODES = [
+  { id: 'system', label: '跟随系统' },
+  { id: 'light', label: '浅色' },
+  { id: 'dark', label: '深色' },
+]
+
 function toggleDisplayMode() {
   settings.displayMode = settings.displayMode === 'beginner' ? 'full' : 'beginner'
 }
@@ -112,6 +119,21 @@ function onPickRestoreFile(e) {
           <div class="theme-name">{{ t.name }}</div>
           <div class="dim small">{{ t.desc }}</div>
         </button>
+      </div>
+      <div class="switch-row" style="margin-top: 12px">
+        <div>
+          <div class="small" style="font-weight: 600">深色模式</div>
+          <div class="dim small">仅「DeepSeek 极简」主题支持深色，其他主题保持浅色</div>
+        </div>
+        <div class="tag-row" style="flex: none; gap: 4px">
+          <span
+            v-for="m in DARK_MODES"
+            :key="m.id"
+            class="tag"
+            :class="{ on: settings.darkMode === m.id }"
+            @click="settings.darkMode = m.id"
+          >{{ m.label }}</span>
+        </div>
       </div>
       <div class="switch-row" style="margin-top: 12px">
         <div>
