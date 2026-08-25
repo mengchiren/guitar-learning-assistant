@@ -247,6 +247,12 @@ function onPickRestoreFile(e) {
         <p class="muted small" style="margin-bottom: 10px">
           打卡记录、歌单与歌曲分析、计划/课程进度、自录曲谱、聊天记录与设置偏好会上云；录音与音频不上云。
         </p>
+        <div class="switch-row" style="margin-bottom: 4px">
+          <div class="small" style="font-weight: 600">同步令牌</div>
+          <button class="btn" style="padding: 5px 12px; font-size: 13px" @click="sync.setToken('')">
+            更换令牌
+          </button>
+        </div>
         <div class="sync-rows">
           <div class="sync-row"><span class="dim small">本机</span><span class="small">设备 {{ deviceTag }}…</span></div>
           <div class="sync-row"><span class="dim small">上次同步</span><span class="small">{{ fmtWhen(sync.lastSyncAt) }}</span></div>
