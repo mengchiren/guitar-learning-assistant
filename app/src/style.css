@@ -426,6 +426,25 @@ label { font-size: 14px; color: var(--text-dim); display: block; margin: 10px 0 
 }
 .timer-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex: none; }
 
+/* 图表悬停气泡（v0.10.2，DeepSeek 开放平台式）：柱状图/热力格 hover（手机 tap）显示详细时长 */
+.chart-tip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 5px 11px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.14);
+  z-index: 20;
+  pointer-events: none;
+}
+
 /* 基础状态：桌面元素默认隐藏（须在 .topbar 等定义之后，保证同优先级下胜出） */
 .desktop-only { display: none; }
 

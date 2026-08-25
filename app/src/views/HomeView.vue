@@ -63,6 +63,16 @@ const fmt = (s) => {
 const todayText = computed(() => fmt(practice.todaySeconds))
 const max7 = computed(() => Math.max(...practice.last7Days.map((d) => d.seconds), 60))
 
+// v0.10.2：柱状图悬停气泡（桌面 hover / 手机 tap 切换），显示日期与详细时长
+const tipKey = ref('')
+function toggleTip(key) {
+  tipKey.value = tipKey.value === key ? '' : key
+}
+const tipText = (d) =>
+  d.seconds > 0
+    ? `${d.date.slice(5).replace('-', '/')} · ${fmt(d.seconds)}`
+    : `${d.date.slice(5).replace('-', '/')} · 未练琴`
+
 // 今日练习包：读规则引擎输出（上周练得少时显示 10 分钟档，否则 30 分钟档）
 const plan = computed(() => planStore.plan)
 const packItems = computed(() => (plan.value.mode === 'reduce' ? plan.value.packs[10] : plan.value.packs[30]))
@@ -97,7 +107,15 @@ const packItems = computed(() => (plan.value.mode === 'reduce' ? plan.value.pack
         <div class="card">
           <h2>最近 7 天</h2>
           <div class="week-bars">
-            <div v-for="(d, i) in practice.last7Days" :key="d.date" class="week-bar-wrap">
+            <div
+              v-for="(d, i) in practice.last7Days"
+              :key="d.date"
+              class="week-bar-wrap"
+              @mouseenter="tipKey = d.date"
+              @mouseleave="tipKey = ''"
+              @click="toggleTip(d.date)"
+            >
+              <div v-if="tipKey === d.date" class="chart-tip">{{ tipText(d) }}</div>
               <div
                 class="week-bar"
                 :class="{ today: i === practice.last7Days.length - 1 }"
@@ -162,7 +180,7 @@ const packItems = computed(() => (plan.value.mode === 'reduce' ? plan.value.pack
   border-left: 3px solid var(--accent);
 }
 .week-bars { display: flex; gap: 8px; height: 90px; align-items: flex-end; }
-.week-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; justify-content: flex-end; gap: 4px; }
+.week-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; justify-content: flex-end; gap: 4px; position: relative; }
 .week-bar { width: 100%; max-width: 34px; background: var(--bar); border-radius: 3px 3px 0 0; }
 .week-bar.today { background: var(--accent); }
 .week-label { font-size: 11px; }

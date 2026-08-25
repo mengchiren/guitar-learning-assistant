@@ -1,6 +1,6 @@
 # HANDOFF 交接文档
 
-> 给一个完全没有上下文的新对话看。工作目录：`F:\电吉他学习`（Windows 10，Git Bash）。项目名：**练琴搭子 · PickBuddy**。当前版本 **v0.10.1**。
+> 给一个完全没有上下文的新对话看。工作目录：`F:\电吉他学习`（Windows 10，Git Bash）。项目名：**练琴搭子 · PickBuddy**。当前版本 **v0.10.2**。
 
 ## 1. 我们在做什么任务
 
@@ -71,20 +71,21 @@
 - **看板娘迭代（v0.7.2，用户反馈：加启用开关 / 鲸鱼女仆用现成 / 唯的风格不行）**：①settings 加 `mascotEnabled`（persist key `mascot`，默认开）+「我的 → 外观主题」加「显示看板娘」开关，Mascot.vue 的 visible 判断；②**maid 看板娘换现成**——deep-whale-day-night-theme 仓库自带 Q 版透明 companion（day-companion-v1.webp 420×434 RGBA 62KB），与 maid 主题同源风格统一；③**yui 看板娘重制**——AI 生成 2 候选（官方动画风/Q 版厚涂贴纸风），视觉模型评分先选 Q 版厚涂（9.8 分），**用户验收后改选官方动画画风版（v0.7.3，京都动画 K-ON! 式半身像，抠图转 WebP 31KB）**；Q 版厚涂候选留 `gui-test-screenshots/review-20260819/yui-candidates/` 备选（想换随时换）。回归 6 组全过 + 构建通过。**等用户验收。**
 - **代码审查修复（v0.8.0，用户用 GLM 5.3 做了全量代码审查，逐条核实后按 A+B+C 三组全部实施）**：**A 组数据可靠性主线**——①**计时落盘 + 打卡草稿闭环**：timer store 加 persist（`timer-session`，running/startedAt/accumulated，now 不入库），启动 `init()` 恢复 tick；**恢复防护**：running 会话跨天或超 12 小时（如昨晚忘关）自动作废防误记；PracticeView 的 finished/tags/note 移入 practice store 的 `draft`（persist `practice-draft`）——进程被杀/误关后重开，计时和「已结束待保存」草稿都在；②**录音保存错误处理 + 原子化**：RecordPanel.saveRec 包 try/catch（失败提示 + 不重置表单 + 不再假「已保存」，<1 秒提示太短不保存）；recordingsDb 新增 `addRecording`/`deleteRecording` 单事务双 store（原来 blob/meta 两个独立事务，配额满会留孤儿 blob）；③**落盘失败全局告警**：storage.js 新增 `onStorageError` 通知（save 失败抛错同时通知），persist 插件 catch 落盘失败，App.vue 挂「存储空间不足」横幅（可关闭，兑现 storage.js「宁可暴露问题」的注释）；④**备份恢复修复**：restoreBackup 先等 250ms 冲刷挂起 persist 写入 → **清空全部 gla:v1: key 再写备份**（真「覆盖」语义，不再混合新旧状态）→ ProfileView 立即 reload（去掉 1.2s 窗口期，期间 store 变更会覆盖回旧内存态）；confirm 文案改「清除当前全部数据并恢复备份」。**B 组契约/视觉**——⑤**TEMPLATE_IDS 补 heavy + 护栏**：补「金属 Riff」→heavy；**护栏测试立刻抓到 GLM 也没发现的隐藏 bug**：classifyRules 输出「清音+合唱氛围」（无空格）与 templates.js name「清音 + 合唱氛围」（带空格）不一致 → 用户上传归为此套路的歌 findToneTemplate 匹配不到、详情页设备建议缺失（种子库 29 首恰好无此套路所以一直没暴露）——统一为 templates.js 权威名（classifyRules + TEMPLATE_IDS + 测试期望 3 处同步）；⑥**硬编码色收敛**：style.css 5 处（subhead/tabbar/topbar/timer-chip/btn:active）+ 3 个视图弹层（zoom-card/del-card/set-cur-btn）+ ChatView 气泡（含 `--line` 旧变量名）全部改语义变量，glass 覆盖列表补 timer-chip/zoom-card/del-card；⑦**调音器**：useTuner 自相关按有效窗长归一化（原来除以全长能量，lag 越大分数越低→强二次谐波吉他音色偏高八度误判），TunerView 指针 `50+cents/2`（±50 音分满程，原来 /0.5 是 ±25 打满，与文字 ±50 对不上）；⑧**PWA**：globPatterns 加 webp/jpg/png（11 个主题素材全部进 precache，断网可换肤），manifest 补 192/512 PNG 图标（`spike/make_icons.py` Pillow 重绘 icon.svg 图形生成，像素校验过）。**C 组小修**——系统通知落地（HomeView 到点且已授权时 new Notification，每天一条防重复，RemindersView 文案同步）、metronome `await ctx.resume()`、analyze.js 死分支清理 + 帧内缓冲复用、ToneAdvice 设备改 computed、package.json version 0.5.0→0.7.3、ChatView 消息 key 改 role+at。**踩到并修复一个自引 bug**：mag 缓冲复用后 `prevMag = mag` 变成自引用（同数组），谱通量恒 0，真实对拍 4/5 抓出（雑踏 184.6 vs 171 超 3% 阈值），基线对比确认后改 `prevMag.set(mag)`，对拍恢复 5/5——**教训：帧内缓冲复用必须检查跨帧引用的数组（见坑 39）**。回归全过：对拍 5/5、合成 3/3、规则 25/25、数据 767/767、冒烟 24/24（+timer 落盘/draft 落盘/失败通知/备份覆盖 4 项）、toneGuide 53/53（+套路名映射护栏 7 项）、面板 13/13、构建通过（precache 82 项 1215KB）。**待用户验收。**
 - **v0.9.0（性能优化 A 方案，用户提「切换界面卡」后按流程先分析再实施）**：①**tab 页面 KeepAlive 保活**（App.vue `KeepAlive :include` + 5 个 view `defineOptions({name})`，切回零重建；HomeView 定时器改 onActivated/onDeactivated）；②**tab 互切不强制回顶**（router scrollBehavior：to/from 都 meta.tab 时返回 undefined，保留各自滚动位置）；③**tab chunk 空闲预加载**（App.vue onMounted requestIdleCallback 预热 5 个 tab 路由）；④**移动端低分辨率背景图**（`spike/make_theme_mobile.py`：yui 257KB jpg→1170 宽 webp 109KB、maid 64KB→780 宽 32KB，style.css 媒体查询 <768px 切换）；⑤**毛玻璃移动降级**（<768px blur 14px→6px saturate 1.1，backdrop-filter 低端安卓 GPU 最贵）。回归 6 组全过 + 构建过；**KeepAlive 生效已用 DOM 同节点证明**（切走切回同一元素；注意 MutationObserver 对 Vue 整页切换只记 1 条（fragment 一次插入），毫秒测量不可信，见坑 44）。
+- **v0.10.2（图表悬停气泡，用户要求"像 DeepSeek 开放平台那样鼠标放柱状图上显示详细时长"，需求明确直接实施）**：①首页「最近 7 天」、统计页「近 4 周趋势」、月度热力图 hover 显示 `日期 · X 分钟 / X 小时 X 分（周内加天数）/ 未练琴`；②手机 tap 同柱/格切换显示（再点隐藏）；③全局 `.chart-tip` 样式（style.css，CSS 变量随深浅主题/毛玻璃）；④原热力图原生 `title` 移除；⑤顺手修桌面热力图格子过大（`.heat-grid { max-width: 500px }`，手机不变）。事件模型：`@mouseenter/@mouseleave`（桌面）+ `@click` toggle（移动 tap），`tipKey` ref 按天/周/日 key。验证：`gui-test-screenshots/hover-shot.mjs`（**headless CDP mouseMoved 不派生 mouseenter，脚本改为直接派发 mouseenter 事件**）。回归 6 组全过 + 构建过。**待用户验收。**
 - **v0.10.1（桌面布局自适应，用户反馈「页间位置不一致 + 导航栏两边空」，讨论后确认 A1 方案）**：①**顶栏全宽**——App.vue 模板把 `.topbar` 从 `.shell` 移出（App 根级 fragment 元素），内部新增 `.topbar-inner`（max-width 1280 居中 + padding 0 32px 与 `.page` 内容对齐），背景横贯全屏、导航项与内容区左右对齐；②**shell 1120→1280**；③**卡片自动列数**：工具页 `repeat(auto-fill, minmax(250px,1fr))`（1280 下 4 列，7 卡 4+3）、歌曲页 `minmax(320px)`（1280 下 3 列）、和弦库桌面 `minmax(120px)`（**手机保持 4 列，只改桌面**——注意 ChordLibraryView 底部 92 行曾有一处重复的 `repeat(6,1fr)` 老规则会覆盖新规则，已删）；④**首页 hero 卡三区统一**（今日分钟 + 连续打卡 + 开始练习按钮同一张卡；桌面侧栏独立连击大卡移除，`streak-big` 死样式删除）。手机端零变化（390 视口逐页核对）。回归 6 组全过 + 构建过。**待用户验收。**
 - **v0.10.0（界面风格落地：新默认主题「DeepSeek 极简」，用户从 3 款风格稿+临时预览页中选型，拍板参考 DeepSeek Harness）**：①`data/themes.js` 新增 dsh 主题并排第一（DEFAULT）——近白 #fbfbfd 大留白、白卡细边框大圆角 16px、克制深蓝 #3d6ff2、页顶淡蓝光晕（`--bg-image` 用径向渐变，无图片素材、不进 precache）、标题色块改蓝色小圆点（`[data-theme='dsh'] h1.page-title::before`）；②**深色模式**：settings 新增 `darkMode`（persist key `dark-mode`，system/light/dark 三档，我的→外观主题卡内选择，默认 system），App.vue 按 matchMedia + 设置同步 `html.dark`；深色变量块 `html.dark[data-theme='dsh']`（**仅 dsh 提供深色**，其他主题忽略该设置）；深色下毛玻璃变量用 `html.dark[data-theme='dsh'].glass` 覆盖（html.glass 的浅色半透明会穿帮）；③**默认值迁移**：settings 的 `loadThemeId()`——旧默认 classic 自动迁到 dsh（用户仍可手动切回）；④删除临时风格预览页（StylePreviewView.vue + /style-preview 路由，截图留档 `gui-test-screenshots/style-preview/`）。回归 6 组全过 + 构建过（precache 84 项 1362KB）。**待用户验收。**
 - 全程约 53 个提交，git 历史即详细变更记录；需求文档修订记录完整到 v0.8.0；README/验收指南/交接文档全同步。
 
 ## 4. 当前卡在哪
 
-**v0.10.1（桌面布局自适应：顶栏全宽 + 1280 内容 + 自动列数 + 首页 hero 三区）已提交**，等用户验收。验收重点：
+**v0.10.2（图表悬停气泡：7 天/4 周/热力图 hover + tap）已提交**，等用户验收。验收重点：
 
-1. **桌面布局**（重点）：顶栏横贯全屏、导航项与内容左右对齐；1280 视口下工具 4 列 / 歌曲 3 列 / 和弦库多列；1920 大屏顶栏仍全宽、内容居中 1280；首页 hero 卡一张卡内三区（分钟/连击/按钮）。
-2. **手机回归**：单列布局不变（工具/歌曲/首页/计划/我的），底部导航全宽不变，无任何滚动错位。
-3. **主题回归**：dsh/classic/yui/maid 四套随意切换正常、深色模式三档正常。
-4. **性能回归**：tab 切换即时、滚动保持（v0.9.0）不受本轮结构改动影响。
-5. **回归**：六组 CI 测试全过 + 构建过。
-6. **v0.10.0 待验收**（新默认主题 + 深色模式）、**v0.8.0 遗留验收**（计时落盘/录音保存提示/存储满横幅/备份覆盖/主题色收敛/调音器/PWA/系统通知 8 项）未验完的可顺带。
+1. **悬停气泡**（重点）：鼠标放首页「最近 7 天」柱上弹 `08/22 · 30 分钟`（没练显示未练琴）；统计页 4 周柱弹 `08/24 周 · 1 小时 5 分（4 天）`；热力图格弹 `08/24 · 30 分钟`；深色/毛玻璃下气泡跟随主题。
+2. **手机 tap**：点柱/格子显示，再点同位置隐藏；不影响滚动。
+3. **热力图桌面尺寸**：限制在 500px 内（原来格子巨大），手机不变。
+4. **桌面布局回归**（v0.10.1）：顶栏全宽、工具 4 列/歌曲 3 列、首页 hero 三区。
+5. **主题/深色/性能回归**（v0.10.0/v0.9.0）：四套主题切换、深色三档、tab 切换与滚动保持。
+6. **v0.8.0 遗留验收**（计时落盘/录音保存提示/存储满横幅/备份覆盖/主题色收敛/调音器/PWA/系统通知 8 项）未验完的可顺带。
 7. **v0.4.2/v0.6.x 遗留的待用户反馈**（功能层面，与本次无关）：
 1. **曲谱准确性（重点）**：19 首曲谱中多数标注了来源与置信度；单源/自动检测的（影色舞等）标注「请对照原曲校准」。用户弹到不对的，按他听出来的改数据（人工纠错永远优先）。
 2. **新歌 BPM/调性待校准**：22 首新歌的 BPM/调性多为引擎分析值（`dataFrom` 标「待人工校准」）；用户弹到速度不对的报过来改。已知悬案：天使にふれたよ!（社区谱 100~117 疑似半速）、青春コンプレックス（社区谱 155 vs 分析 185）、ソラノムジカ（分析 129 vs 半速记谱 98）。
@@ -96,7 +97,7 @@
 
 ## 5. 下一步计划（按路线图）
 
-1. **等用户验收 v0.10.0（DeepSeek 极简默认主题 + 深色模式 + 切换性能优化）** → 按反馈微调；v0.8.0 遗留验收顺带。
+1. **等用户验收 v0.10.2（图表悬停气泡 + v0.10.x 布局/主题/性能系列）** → 按反馈微调；v0.8.0 遗留验收顺带。
 2. **曲谱继续扩充**：用户练到哪首需要谱 → 按「宁缺毋滥、人工整理、标注来源与校准状态」补 `songSheets.js`（改后重跑 `spike/write_sheets.py` 或手改，然后 `node spike/test_sheets.mjs` 校验）；谱里出现新和弦同步补 `chords.js`（校验硬约束：谱中和弦必须在图库有定义）。
 3. **M4-3 剩余**（用户已按「架构/安全/成本」分析法选定前两项为录音、AI 答疑）：**微信推送（推送加）**——个人 token 不能存前端，需 CF Functions 代理 + 环境变量，免费版每日有限额；**Capacitor 安卓壳 + 桌面小组件**——签名/商店上架/双端构建，维护成本最高，等核心稳定再上。
 4. 云同步（Supabase）**已确认暂缓**，等手机/电脑双端都用起来再说；`storage.js` 的变更订阅 + 版本迁移 + persist 插件已把同步接入点铺好。

@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { usePracticeStore } from '../stores/practice.js'
 import { usePlanStore } from '../stores/plan.js'
 import { useSongsStore } from '../stores/songs.js'
@@ -11,6 +11,14 @@ const planStore = usePlanStore()
 const songsStore = useSongsStore()
 
 const today = computed(() => fmt(new Date()))
+
+// v0.10.2：图表悬停气泡（桌面 hover / 手机 tap 切换）
+const tipKey = ref('')
+function toggleTip(key) {
+  tipKey.value = tipKey.value === key ? '' : key
+}
+// 分钟 → 详细时长文案
+const durText = (min) => (min >= 60 ? `${Math.floor(min / 60)} 小时 ${min % 60} 分` : `${min} 分钟`)
 
 // 每日分钟聚合
 const minutesByDay = computed(() => {
@@ -111,7 +119,17 @@ const songsStatus = computed(() => {
     <div class="card">
       <h2>近 4 周趋势</h2>
       <div class="week-bars">
-        <div v-for="w in weeks4" :key="w.start" class="week-col">
+        <div
+          v-for="w in weeks4"
+          :key="w.start"
+          class="week-col"
+          @mouseenter="tipKey = w.start"
+          @mouseleave="tipKey = ''"
+          @click="toggleTip(w.start)"
+        >
+          <div v-if="tipKey === w.start" class="chart-tip">
+            {{ w.start.slice(5).replace('-', '/') }} 周 · {{ durText(w.minutes) }}（{{ w.days }} 天）
+          </div>
           <div
             class="week-bar"
             :class="{ today: w.start === weekSummary.cur.start }"
@@ -131,8 +149,13 @@ const songsStatus = computed(() => {
           :key="i"
           class="heat-cell"
           :class="c ? heatClass(c.minutes) : 'empty'"
-          :title="c ? `${c.date}：${c.minutes} 分钟` : ''"
+          @mouseenter="c && (tipKey = c.date)"
+          @mouseleave="c && (tipKey = '')"
+          @click="c && toggleTip(c.date)"
         >
+          <div v-if="c && tipKey === c.date" class="chart-tip">
+            {{ c.date.slice(5).replace('-', '/') }} · {{ c.minutes > 0 ? durText(c.minutes) : '未练琴' }}
+          </div>
           {{ c ? c.day : '' }}
         </div>
       </div>
@@ -179,15 +202,16 @@ const songsStatus = computed(() => {
 .stat-num { font-size: 26px; font-weight: 800; color: var(--accent); }
 
 .week-bars { display: flex; gap: 10px; height: 110px; align-items: flex-end; }
-.week-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 3px; }
+.week-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 3px; position: relative; }
 .week-bar { width: 100%; max-width: 40px; background: var(--bar); border-radius: 3px 3px 0 0; }
 .week-bar.today { background: var(--accent); }
 .week-val { font-weight: 700; }
 
-.heat-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.heat-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; max-width: 500px; }
 .heat-cell {
   aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
   border-radius: 4px; font-size: 12px; color: var(--text-dim); background: var(--bg-input);
+  position: relative;
 }
 .heat-cell.empty { background: transparent; }
 .heat-cell.h1 { background: var(--heat-1); }
