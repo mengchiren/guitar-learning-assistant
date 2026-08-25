@@ -70,6 +70,7 @@ const { useRecordingsStore } = await import('../app/src/stores/recordings.js')
 const { useChatStore } = await import('../app/src/stores/chat.js')
 const { useMetronomeStore } = await import('../app/src/stores/metronome.js')
 const { useTimerStore } = await import('../app/src/stores/timer.js')
+const { useSyncStore } = await import('../app/src/stores/sync.js')
 
 // 造一条打卡记录，让统计类 getter 走真实路径
 const practice = usePracticeStore()
@@ -153,6 +154,17 @@ touch('timer 状态', () => {
   useTimerStore().start()
   useTimerStore().pause()
   useTimerStore().reset()
+})
+
+touch('sync 状态 / setToken / clearMessage', () => {
+  const sync = useSyncStore()
+  sync.setToken('smoke-token')
+  if (sync.token !== 'smoke-token' || !sync.configured) throw new Error('setToken 无效')
+  sync.error = 'x'
+  sync.clearMessage()
+  if (sync.error || sync.notice) throw new Error('clearMessage 无效')
+  if (!sync.deviceId) throw new Error('deviceId 未生成')
+  sync.autoCheck = false
 })
 
 // ---- 自动持久化断言（persist 插件，防抖 150ms） ----

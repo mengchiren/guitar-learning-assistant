@@ -108,6 +108,9 @@ export function load(key, fallback) {
 export function save(key, value) {
   try {
     localStorage.setItem(PREFIX + key, JSON.stringify(value))
+    // v0.11.0 云同步：记录「本机最后写入时间」（全量快照同步的新旧判断依据）。
+    // 高频小字符串写入，成本可忽略；同步恢复写入也会刷新它（reload 后才是新数据）。
+    localStorage.setItem(PREFIX + 'sync-stamp', new Date().toISOString())
   } catch (err) {
     notifyStorageError(err)
     throw err

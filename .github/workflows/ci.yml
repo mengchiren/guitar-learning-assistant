@@ -42,6 +42,9 @@ jobs:
       - name: 分析引擎合成音频测试（半速加倍 / 慢歌不加倍）
         run: node spike/test_frontend_synthetic.mjs
 
+      - name: 云同步校验（13 项，v0.11.0：方向决策/白名单/快照/覆盖语义）
+        run: node spike/test_sync.mjs
+
       - name: 生产构建
         run: npm run build
         working-directory: app

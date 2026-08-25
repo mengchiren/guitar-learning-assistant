@@ -4,7 +4,9 @@ import { useRoute, useRouter } from 'vue-router'
 import Icon from './components/Icon.vue'
 import { useTimerStore } from './stores/timer.js'
 import { useSettingsStore } from './stores/settings.js'
+import { useSyncStore } from './stores/sync.js'
 import { onStorageError } from './utils/storage.js'
+import { fmtWhen } from './utils/sync.js'
 import { TABS, ROUTES } from './data/nav.js'
 import Mascot from './components/Mascot.vue'
 
@@ -12,6 +14,7 @@ const route = useRoute()
 const router = useRouter()
 const timer = useTimerStore()
 const settings = useSettingsStore()
+const sync = useSyncStore()
 
 // v0.9.0：tab 页面 KeepAlive 保活名单（组件名 = 文件名，见各 view 的 defineOptions）
 const KEEP_ALIVE = ['HomeView', 'PlanView', 'ToolsView', 'SongsView', 'ProfileView']
@@ -21,6 +24,8 @@ timer.init()
 
 // 存储失败横幅（v0.8.0）：localStorage 满等导致落盘失败时提示用户，不静默丢数据
 const storageError = ref('')
+// 云端更新横幅（v0.11.0）：自动检查发现远端比本机新时提示，点「去同步」跳我的页
+const syncNotice = ref(null)
 let offStorageError = null
 onMounted(() => {
   offStorageError = onStorageError(() => {
@@ -31,6 +36,11 @@ onMounted(() => {
   const warm = () => ROUTES.filter((r) => r.meta?.tab).forEach((r) => r.component())
   if ('requestIdleCallback' in window) requestIdleCallback(warm, { timeout: 2000 })
   else setTimeout(warm, 1200)
+  // v0.11.0：云同步自动检查（打开应用查一次远端，发现更新弹横幅提示，不自动覆盖）
+  setTimeout(async () => {
+    const r = await sync.autoCheckOnce().catch(() => null)
+    if (r) syncNotice.value = r
+  }, 3500)
 })
 onUnmounted(() => offStorageError && offStorageError())
 
@@ -155,6 +165,13 @@ function goBack() {
     <div v-if="storageError" class="storage-banner" role="alert">
       <span>{{ storageError }}</span>
       <button class="storage-banner-close" aria-label="关闭提示" @click="storageError = ''">×</button>
+    </div>
+
+    <!-- 云端更新横幅（v0.11.0）：自动检查发现远端比本机新，提示去同步（不自动覆盖） -->
+    <div v-if="syncNotice" class="storage-banner sync-banner" role="alert">
+      <span>云端有更新的练琴数据（{{ fmtWhen(syncNotice.updatedAt) }}）。</span>
+      <router-link to="/profile" class="sync-banner-link" @click="syncNotice = null">去同步</router-link>
+      <button class="storage-banner-close" aria-label="关闭提示" @click="syncNotice = null">×</button>
     </div>
 
     <!-- 主题看板娘（v0.7.0）：仅当前主题配置了 mascot 时显示 -->

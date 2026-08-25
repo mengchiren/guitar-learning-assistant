@@ -1,13 +1,58 @@
 <script setup>
 // v0.9.0：KeepAlive 保活名单用组件名匹配（App.vue KEEP_ALIVE）
 defineOptions({ name: 'ProfileView' })
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import Icon from '../components/Icon.vue'
 import { useSettingsStore } from '../stores/settings.js'
+import { useSyncStore } from '../stores/sync.js'
 import { THEMES } from '../data/themes.js'
 import { downloadBackup, parseBackup, restoreBackup } from '../utils/backup.js'
+import { chooseDirection, localStamp, fmtWhen } from '../utils/sync.js'
 
 const settings = useSettingsStore()
+const sync = useSyncStore()
+
+// ---- 数据同步（v0.11.0）：全量快照 + 最后写入胜出 + 方向提示 ----
+const tokenInput = ref('')
+const deviceTag = computed(() => (sync.deviceId ? sync.deviceId.slice(0, 8) : '—'))
+
+function onSaveToken() {
+  sync.setToken(tokenInput.value)
+  tokenInput.value = ''
+}
+
+async function onUpload() {
+  sync.clearMessage()
+  const r = await sync.checkRemote()
+  if (!r) return
+  if (!r.empty && r.updatedAt) {
+    const dir = chooseDirection(localStamp(), r.updatedAt)
+    if (dir === 'download' || dir === 'unknown') {
+      const ok = confirm(
+        `云端数据更新于 ${fmtWhen(r.updatedAt)}，比本机新。\n\n` +
+          '点「确定」= 用本机数据覆盖云端（云端现有版本将被覆盖）；\n' +
+          '点「取消」= 改用「立即下载」取回云端版本。',
+      )
+      if (!ok) return
+    }
+  }
+  await sync.uploadNow()
+}
+
+async function onDownload() {
+  sync.clearMessage()
+  const r = await sync.checkRemote()
+  if (!r) return
+  if (r.empty) {
+    sync.error = '云端还没有数据：先在本机点「立即上传」，另一台设备再点下载即可互通。'
+    return
+  }
+  const ok = confirm(
+    `将本机数据覆盖为云端版本（更新于 ${fmtWhen(r.updatedAt)}）？\n\n点「确定」立即同步并刷新页面。`,
+  )
+  if (!ok) return
+  await sync.downloadNow()
+}
 
 // 深色模式（v0.10.0）：仅「DeepSeek 极简」主题支持深色，其他主题忽略
 const DARK_MODES = [
@@ -181,6 +226,58 @@ function onPickRestoreFile(e) {
       <p class="muted small" style="margin-top: 8px">影响歌曲详情页与音色套路库的参数展示。</p>
     </div>
     <div class="card">
+      <h2>数据同步（云）</h2>
+      <!-- 首次：填入同步令牌（Cloudflare 环境变量 SYNC_TOKEN，与 AI 答疑令牌不通用） -->
+      <template v-if="!sync.configured">
+        <p class="muted small" style="margin-bottom: 10px">
+          让电脑和手机的数据保持一致。首次使用：先在 Cloudflare 控制台给站点配置同步令牌（SYNC_TOKEN，见验收指南），再把令牌填在下面。
+        </p>
+        <div style="display: flex; gap: 10px">
+          <input
+            v-model="tokenInput"
+            type="password"
+            placeholder="同步令牌（与 AI 答疑令牌不通用）"
+            aria-label="同步令牌"
+          />
+          <button class="btn btn-primary" style="flex: none" @click="onSaveToken">保存</button>
+        </div>
+      </template>
+      <!-- 已配置：状态 + 操作 -->
+      <template v-else>
+        <p class="muted small" style="margin-bottom: 10px">
+          打卡记录、歌单与歌曲分析、计划/课程进度、自录曲谱、聊天记录与设置偏好会上云；录音与音频不上云。
+        </p>
+        <div class="sync-rows">
+          <div class="sync-row"><span class="dim small">本机</span><span class="small">设备 {{ deviceTag }}…</span></div>
+          <div class="sync-row"><span class="dim small">上次同步</span><span class="small">{{ fmtWhen(sync.lastSyncAt) }}</span></div>
+          <div class="sync-row">
+            <span class="dim small">云端</span>
+            <span class="small">{{ sync.remoteEmpty ? '暂无数据' : fmtWhen(sync.remoteAt) }}</span>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" :disabled="sync.busy" @click="onUpload">立即上传</button>
+          <button class="btn" :disabled="sync.busy" @click="onDownload">立即下载</button>
+        </div>
+        <div class="switch-row" style="margin-top: 12px">
+          <div>
+            <div class="small" style="font-weight: 600">打开应用时自动检查</div>
+            <div class="dim small">发现云端更新时在顶部提示，不会自动覆盖，需你确认方向</div>
+          </div>
+          <button
+            class="switch"
+            :class="{ on: sync.autoCheck }"
+            :aria-label="sync.autoCheck ? '关闭自动检查' : '开启自动检查'"
+            @click="sync.autoCheck = !sync.autoCheck"
+          >
+            <span class="knob"></span>
+          </button>
+        </div>
+        <p v-if="sync.error" class="small" style="color: var(--danger); margin-top: 8px">{{ sync.error }}</p>
+        <p v-if="sync.notice" class="small" style="color: var(--ok); margin-top: 8px">{{ sync.notice }}</p>
+      </template>
+    </div>
+    <div class="card">
       <h2>数据备份</h2>
       <p class="muted small" style="margin-bottom: 10px">
         打卡记录、歌单、曲谱、课程进度、聊天记录都存在本机浏览器，清理缓存会全部丢失。建议定期导出备份文件。
@@ -196,8 +293,8 @@ function onPickRestoreFile(e) {
     <div class="card">
       <h2>关于</h2>
       <p class="muted small">
-        练琴搭子 M1~M3：设备档案、音色套路、节拍器、调音器、练琴打卡与提醒、歌曲分析与设备建议、学习计划、曲谱与和弦图库。
-        数据目前保存在本机浏览器；多端云同步在后续版本接入。
+        练琴搭子 M1~M3：设备档案、音色套路、节拍器、调音器、练琴打卡与提醒、歌曲分析与设备建议、学习计划、曲谱与和弦图库；M4：录音回听 + AI 答疑 + 云同步。
+        数据平时保存在本机浏览器；多端云同步已上线（见上方「数据同步」卡）。
       </p>
     </div>
   </div>
@@ -207,6 +304,10 @@ function onPickRestoreFile(e) {
 .profile-grid { display: grid; }
 .row-card { display: flex; gap: 12px; align-items: center; text-decoration: none; color: var(--text); font-weight: 600; }
 .row-icon { display: flex; color: var(--text-dim); }
+
+/* 数据同步卡（v0.11.0） */
+.sync-rows { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.sync-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
 
 /* 外观主题选择卡（v0.7.0） */
 .theme-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
