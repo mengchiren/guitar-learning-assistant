@@ -375,5 +375,18 @@
     "chords": "主歌 A-B-G#m-C#m；副歌 E-B-C#m-G#m-A-E-F#m7-B",
     "note": "主歌 45364561 走向；副歌卡农变体",
     "dataFrom": "编曲分析文章 + 吉他谱交叉验证"
+  },
+  {
+    "id": "meng-de-chukou",
+    "title": "梦的出口",
+    "artist": "成田工作室",
+    "source": "成田电吉他中级进阶课 第 70 课（毕业曲）",
+    "bpm": 75,
+    "key": "G 大调",
+    "template": "失真主音 Solo",
+    "difficulty": "中高级（毕业曲，含滑音/击勾弦/推弦）",
+    "chords": "前奏与清音段 Cmaj7-Bm7-Am7-G（IV-iii-ii-I）；失真段 9-12 小节闷音 Riff，13-40 主旋律",
+    "note": "课件六线谱 PDF 标注 ♩=75、4/4、Standard tuning；引擎对拍伴奏 78.3（低置信），以 PDF 75 为准。分段音色：1-4 小节清音垫底 → 5-8 清音分解旋律 → 9 起失真（闷音 Riff + 主旋律）",
+    "dataFrom": "课件 PDF 权威速度/调性 + 引擎对拍（待人工校准）"
   }
 ]

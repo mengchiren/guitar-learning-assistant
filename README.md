@@ -15,8 +15,8 @@
 - 🎵 **歌曲分析**（纯前端，音频不出设备）：上传 mp3/flac/wav/m4a，本地分析出 BPM、调性 Top3、粗略和弦、音色套路归类，每项带置信度徽章；酷狗 kgg 等加密格式会引导换源或手动录入。
 - 🎸 **设备设置建议**：把套路模板（**6 套**：清音伴奏/清音+合唱氛围/轻过载节奏/失真节奏 Riff/**金属 Riff**/失真主音 Solo）映射到具体设备参数；两种显示模式——「新手模式」是大白话分步操作流程（**面板示意图：要动的旋钮红圈高亮 + 指针指向目标值** + 参数速览 + 照做步骤 + 可先不动的旋钮），「完整模式」是全部参数表。
 - 📖 **音箱入门**（v0.6.2）：工具页入口，JAM BUDDY 2 面板全景点按图解——每个旋钮/脚钉点一下看说明（含 Bass/Save 这类多功能按压提示）+ 6 套音色套路对照表。
-- 📚 **歌曲库**：种子曲库 **29 首**（人工校准数据 + 引擎分析标注「待人工校准」）+ 你自己的歌单；搜索、详情、人工纠错（纠错值优先展示）。
-- 📖 **曲谱（和弦谱）**：**19 首种子曲谱**（分段和弦进行 + 节奏提示 + 来源与校准状态标注，宁缺毋滥）+ 用户自录曲谱（存本机）；谱中和弦自动配指法图。
+- 📚 **歌曲库**：种子曲库 **30 首**（人工校准数据 + 引擎分析标注「待人工校准」）+ 你自己的歌单；搜索、详情、人工纠错（纠错值优先展示）。
+- 📖 **曲谱（和弦谱/课件式谱面）**：**20 首种子曲谱**（分段和弦进行 + 节奏提示 + 来源与校准状态标注，宁缺毋滥）+ 用户自录曲谱（存本机）；v0.12.0 起支持**课件式谱面**——谱头卡（速度/拍号/调弦/调性 + 和弦指法图一排）、按小节网格对齐的和弦与节奏符号（↓↑×〜）、段落音色标签（清音/失真）、技巧徽章（P.M.、let ring、滑音、击勾弦、推弦）；**原谱 PDF** 关联后在页面内查看（pdfjs 逐页渲染、缩放翻页，文件只存本机 IndexedDB，不进部署包，换设备需重新上传）；谱中和弦自动配指法图。
 - 🎼 **和弦图库**：**82 个常用和弦**指法图（6 组展示，点开放大，横按/转位标注）。
 - 📅 **学习计划（M3）**：规则引擎生成弹性练习包（10/30/60 分钟三档，每项带「为什么」解释）；基本功清单与达标标记；歌曲「练习中/已掌握」与同套路推荐；统计报表（周报/热力图）；成田课程进度跟踪（194 课）。
 - ⏱ **练琴打卡**：计时切页不断、补卡、连续天数、最近 7 天统计；练琴时切去别的页面有「练习中」胶囊一键回来。
@@ -47,19 +47,21 @@
 │   ├── functions/        # CF Pages Functions：api/ask.js（AI 答疑代理，访问令牌防刷）
 │   └── src/
 │       ├── components/   # Icon、ToneAdvice、ChordChart、FretboardMap、RecordPanel、
-│       │                 # AmpPanel（音箱面板 SVG）、GuitarPanel（吉他示意 SVG）
+│       │                 # AmpPanel（音箱面板 SVG）、GuitarPanel（吉他示意 SVG）、
+│       │                 # SheetScore（课件式谱面）、SheetPdfViewer（原谱 PDF 查看）
 │       ├── composables/  # useMediaQuery、useTuner
 │       ├── data/         # nav（路由/tab/工具入口清单）、devices（含能力描述与面板布局）、templates、
-│       │                 # classifyRules（套路归类规则）、seedSongs（29 首）、chords（82 个）、
-│       │                 # songSheets（19 首曲谱）、fundamentals、courseCatalog
+│       │                 # classifyRules（套路归类规则）、seedSongs（30 首）、chords（82 个）、
+│       │                 # songSheets（20 首曲谱）、fundamentals、courseCatalog
 │       ├── plugins/      # persist.js（Pinia 自动持久化插件）
 │       ├── stores/       # Pinia：practice/timer/metronome/songs/settings/plan/course/sheets/recordings/chat
 │       ├── utils/        # analyze.js（分析引擎）、planEngine.js（规则引擎）、
-│       │                 # recordingsDb.js（IndexedDB）、recordAnalyze.js、toneGuide.js、storage.js、
+│       │                 # recordingsDb.js（IndexedDB 录音）、sheetPdfDb.js（IndexedDB 原谱 PDF）、
+│       │                 # recordAnalyze.js、toneGuide.js、storage.js、
 │       │                 # analyzeWorker.js（Worker 封装）、audio.js（解码）、date.js、music.js、backup.js、id.js
 │       ├── workers/      # analyze.worker.js（分析引擎后台线程）
 │       └── views/        # 页面
-├── .github/workflows/    # CI：合成音频引擎 + 规则 25 项 + 数据 767 项 + 冒烟 24 项 + 设备建议 53 项 + 面板 13 项 + 构建
+├── .github/workflows/    # CI：合成音频引擎 + 规则 25 项 + 数据 828 项 + 冒烟 25 项 + 设备建议 53 项 + 面板 13 项 + 谱面渲染 19 项 + 构建
 ├── spike/                # M0 可行性验证（Python librosa 版）+ 各引擎对拍单测
 ├── 需求文档.md           # 需求规格（唯一权威来源，含修订记录）
 ├── 验收指南.md           # 手机验收清单 + 常见问题
@@ -97,12 +99,13 @@ FFMPEG=$(spike/.venv/Scripts/python.exe -c "import imageio_ffmpeg; print(imageio
 node spike/test_frontend_analyze.mjs "$FFMPEG"   # 分析引擎 5 首对拍（需本地版权音频，CI 不跑）
 node spike/test_frontend_synthetic.mjs           # 分析引擎合成音频测试（CI 跑：快/中/慢三档 + 慢歌不加倍）
 node spike/test_plan_engine.mjs                  # 规则引擎 25 项
-node spike/test_sheets.mjs                       # 曲谱/和弦数据 767 项
-node spike/test_stores_smoke.mjs                 # Store 冒烟测试 20 项（CI 跑，防运行时引用错误/漏持久化）
-node spike/test_tone_guide.mjs                   # 套路归类规则 + 设备建议回归 14 项（CI 跑）
+node spike/test_sheets.mjs                       # 曲谱/和弦数据 828 项（含课件式谱面格式与词表校验）
+node spike/test_stores_smoke.mjs                 # Store 冒烟测试 25 项（CI 跑，防运行时引用错误/漏持久化）
+node spike/test_tone_guide.mjs                   # 套路归类规则 + 设备建议回归 53 项（CI 跑）
+node spike/test_sheet_view.mjs                   # 课件式谱面 SSR 渲染 19 项（CI 跑）
 ```
 
-**CI**（`.github/workflows/ci.yml`）：push/PR 自动跑合成音频引擎测试 + 规则引擎对拍 + 数据校验 + store 冒烟测试 + 设备建议回归 + 生产构建，全过才允许合并；真实歌曲对拍因版权音频不入库，只在本地跑。
+**CI**（`.github/workflows/ci.yml`）：push/PR 自动跑合成音频引擎测试 + 规则引擎对拍 + 数据校验 + store 冒烟测试 + 设备建议回归 + 面板/谱面渲染 + 云同步校验 + 生产构建，全过才允许合并；真实歌曲对拍因版权音频不入库，只在本地跑。
 
 ## 部署
 

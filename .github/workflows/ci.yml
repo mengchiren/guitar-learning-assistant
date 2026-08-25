@@ -36,8 +36,11 @@ jobs:
       - name: 面板组件渲染冒烟（13 项，v0.6.2）
         run: node spike/test_panels_render.mjs
 
-      - name: 数据完整性校验（767 项）
+      - name: 数据完整性校验（828 项，v0.12.0 增课件式谱面格式/词表/毕业曲专项）
         run: node spike/test_sheets.mjs
+
+      - name: 课件式谱面渲染冒烟（19 项，v0.12.0）
+        run: node spike/test_sheet_view.mjs
 
       - name: 分析引擎合成音频测试（半速加倍 / 慢歌不加倍）
         run: node spike/test_frontend_synthetic.mjs

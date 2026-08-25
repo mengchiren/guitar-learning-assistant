@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useSongsStore } from '../stores/songs.js'
 import { findToneTemplate, TONE_TEMPLATES } from '../data/templates.js'
@@ -8,8 +8,10 @@ import { usePlanStore } from '../stores/plan.js'
 import { useSheetsStore } from '../stores/sheets.js'
 import { stashAskContext } from '../stores/chat.js'
 import { KEYS, CONF_LABELS } from '../utils/music.js'
+import { getSheetPdfMeta, putSheetPdf, deleteSheetPdf } from '../utils/sheetPdfDb.js'
 import ToneAdvice from '../components/ToneAdvice.vue'
-import ChordChart from '../components/ChordChart.vue'
+import SheetScore from '../components/SheetScore.vue'
+import SheetPdfViewer from '../components/SheetPdfViewer.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -112,15 +114,55 @@ function removeSheet() {
   sheetsStore.removeSheet(song.value.id)
   editingSheet.value = false
 }
-// 谱里出现的和弦（去重）→ 渲染指法图
-const sheetChords = computed(() => {
-  const set = []
-  for (const s of sheetInfo.value?.sheet.sections || []) {
-    for (const c of (s.chords || '').split(/\s+/)) {
-      if (c && !set.includes(c)) set.push(c)
-    }
+
+// —— 原谱 PDF（v0.12.0）：只存本机 IndexedDB，不进 git/部署包 ——
+const pdfMeta = ref(null) // { fileName, size, addedAt }
+const pdfInput = ref(null)
+const viewingPdf = ref(false)
+onMounted(async () => {
+  const id = song.value?.id
+  if (!id) return
+  try {
+    pdfMeta.value = await getSheetPdfMeta(id)
+  } catch { /* IndexedDB 不可用时静默，PDF 区显示上传失败 */ }
+})
+function pickPdf() {
+  pdfInput.value?.click()
+}
+async function onPdfPick(e) {
+  const f = e.target.files?.[0]
+  e.target.value = '' // 允许再次选同一个文件
+  if (!f || !song.value) return
+  if (f.type !== 'application/pdf' && !f.name.toLowerCase().endsWith('.pdf')) {
+    window.alert('请选择 PDF 文件')
+    return
   }
-  return set
+  if (f.size > 20 * 1024 * 1024) {
+    window.alert('PDF 超过 20MB 上限（课件原谱一般 < 5MB）')
+    return
+  }
+  try {
+    await putSheetPdf(song.value.id, { fileName: f.name, size: f.size, addedAt: Date.now() }, f)
+    pdfMeta.value = await getSheetPdfMeta(song.value.id)
+  } catch (err) {
+    window.alert('PDF 保存失败：' + (err?.message || err))
+    console.error('sheet pdf save:', err)
+  }
+}
+async function removePdf() {
+  if (!song.value || !pdfMeta.value) return
+  if (!window.confirm('移除关联的 PDF 文件？（只删本机存储，原文件不受影响）')) return
+  try {
+    await deleteSheetPdf(song.value.id)
+    pdfMeta.value = null
+  } catch (err) {
+    window.alert('移除失败：' + (err?.message || err))
+  }
+}
+const pdfSizeLabel = computed(() => {
+  if (!pdfMeta.value?.size) return ''
+  const mb = pdfMeta.value.size / 1024 / 1024
+  return mb >= 1 ? mb.toFixed(1) + ' MB' : Math.max(1, Math.round(pdfMeta.value.size / 1024)) + ' KB'
 })
 </script>
 
@@ -212,16 +254,23 @@ const sheetChords = computed(() => {
         <p class="dim small">
           {{ sheetInfo.isUser ? '我的曲谱（本机保存）' : `种子曲谱 · ${sheetInfo.sheet.source}` }}
         </p>
-        <div v-for="(s, i) in sheetInfo.sheet.sections" :key="i" class="sheet-section">
-          <div class="sheet-head">
-            <span class="tag">{{ s.name }}</span>
-            <span v-if="s.pattern" class="dim small">{{ s.pattern }}</span>
-          </div>
-          <div class="sheet-chords">{{ s.chords }}</div>
-          <p v-if="s.note" class="muted small">{{ s.note }}</p>
-        </div>
-        <div v-if="sheetChords.length" class="chord-row">
-          <ChordChart v-for="c in sheetChords" :key="c" :name="c" />
+        <SheetScore :sheet="sheetInfo.sheet" />
+        <div class="sheet-pdf">
+          <template v-if="pdfMeta">
+            <div class="sheet-pdf-head">
+              <span class="dim small">原谱 PDF：{{ pdfMeta.fileName }}（{{ pdfSizeLabel }}）· 仅存本机</span>
+              <div class="btn-row sheet-pdf-btns">
+                <button class="btn" @click="viewingPdf = true">查看原谱</button>
+                <button class="btn" @click="pickPdf">更换</button>
+                <button class="btn btn-danger-sm" @click="removePdf">移除</button>
+              </div>
+            </div>
+          </template>
+          <template v-else-if="!editingSheet">
+            <p class="muted small">有课件原谱 PDF（六线谱）？点下面关联，页面内直接查看——文件只存本机浏览器，不会上传。</p>
+            <button class="btn" @click="pickPdf">关联原谱 PDF</button>
+          </template>
+          <input ref="pdfInput" type="file" accept="application/pdf,.pdf" hidden @change="onPdfPick" />
         </div>
         <div class="btn-row" style="margin-top: 12px">
           <button v-if="sheetInfo.isUser" class="btn" @click="startSheetEdit">编辑曲谱</button>
@@ -302,6 +351,13 @@ const sheetChords = computed(() => {
     <h1 class="page-title">歌曲不存在</h1>
     <router-link to="/songs" class="btn btn-block">回歌曲库</router-link>
   </div>
+
+  <SheetPdfViewer
+    v-if="viewingPdf && song"
+    :song-id="song.id"
+    :name="pdfMeta?.fileName"
+    @close="viewingPdf = false"
+  />
 </template>
 
 <style scoped>
@@ -332,15 +388,13 @@ const sheetChords = computed(() => {
 .tpl-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
 .tpl-name { font-size: 18px; font-weight: 700; }
 
-.sheet-section { margin-bottom: 14px; }
-.sheet-section:last-of-type { margin-bottom: 6px; }
-.sheet-head { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
-.sheet-chords {
-  font-size: 19px; font-weight: 700; letter-spacing: 1px;
-  color: var(--accent-dark); font-variant-numeric: tabular-nums;
-}
 .chord-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; justify-content: center; }
 .sheet-edit { border: 1px dashed var(--border); border-radius: 8px; padding: 12px; margin-bottom: 10px; }
+.sheet-pdf { margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--border); }
+.sheet-pdf-head {
+  display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.sheet-pdf-btns { margin: 0; }
 .sheet-edit-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
 .sheet-edit label { display: block; margin: 8px 0 4px; }
 .sheet-edit input { margin-bottom: 0; }

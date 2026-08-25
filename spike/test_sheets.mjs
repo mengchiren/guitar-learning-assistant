@@ -46,24 +46,76 @@ function check(name, cond, detail = '') {
   }
 }
 
-// 2. 种子曲谱
+// 2. 种子曲谱（v0.12.0：兼容旧 chords 字符串与新 bars[] 小节网格格式）
 {
   const seedIds = new Set(seedSongs.map((s) => s.id))
+  const PATTERN_CHARS = /^[↓↑×〜｜\s]+$/ // 节奏符号词表（SheetScore 图例同源）
+  const TECH_VOCAB = new Set(['P.M.', 'let ring', '滑音', '击弦', '勾弦', '推弦', '半推', '全推', '揉弦', '泛音'])
+  const chordTok = (s) => (s || '').split(/\s+/).filter(Boolean)
+  const checkChords = (prefix, chords) => {
+    for (const ch of chords) {
+      check(
+        `${prefix} 和弦 ${ch} 在图库有定义`,
+        Boolean(findChord(ch)),
+        `请在 chords.js 补充 ${ch}`,
+      )
+    }
+  }
+  const checkPattern = (prefix, pattern) => {
+    check(
+      `${prefix} 节奏符号合法（↓↑×〜｜）`,
+      PATTERN_CHARS.test(pattern || ''),
+      JSON.stringify(pattern),
+    )
+  }
+  const checkTechniques = (prefix, techs) => {
+    for (const t of techs || []) {
+      check(`${prefix} 技巧「${t}」在词表内`, TECH_VOCAB.has(t), t)
+    }
+  }
+
   for (const [songId, sheet] of Object.entries(SEED_SHEETS)) {
     check(`曲谱 ${songId} 对应种子歌存在`, seedIds.has(songId))
     check(`曲谱 ${songId} 有分段`, (sheet.sections || []).length > 0)
+    // 谱头卡 meta（可选）
+    if (sheet.meta) {
+      check(`曲谱 ${songId} meta.bpm 合法`, typeof sheet.meta.bpm === 'number' && sheet.meta.bpm >= 20 && sheet.meta.bpm <= 300, JSON.stringify(sheet.meta.bpm))
+      check(`曲谱 ${songId} meta.timeSig 合法`, typeof sheet.meta.timeSig === 'string' && /^\d\/\d$/.test(sheet.meta.timeSig), sheet.meta.timeSig)
+      check(`曲谱 ${songId} meta.tuning 合法`, typeof sheet.meta.tuning === 'string' && sheet.meta.tuning.length > 0)
+      check(`曲谱 ${songId} meta.key 合法`, typeof sheet.meta.key === 'string' && sheet.meta.key.length > 0)
+    }
     for (const sec of sheet.sections) {
-      check(`曲谱 ${songId} 段「${sec.name}」有和弦`, Boolean(sec.chords && sec.chords.trim()))
-      const chords = (sec.chords || '').split(/\s+/).filter(Boolean)
-      for (const ch of chords) {
-        check(
-          `曲谱 ${songId} 和弦 ${ch} 在图库有定义`,
-          Boolean(findChord(ch)),
-          `请在 chords.js 补充 ${ch}`,
-        )
+      const hasBars = Array.isArray(sec.bars)
+      check(
+        `曲谱 ${songId} 段「${sec.name}」有内容（和弦或小节网格）`,
+        hasBars ? sec.bars.length > 0 : Boolean(sec.chords && sec.chords.trim()),
+      )
+      if (hasBars) {
+        sec.bars.forEach((b, i) => {
+          checkChords(`曲谱 ${songId} ${sec.name} 第 ${i + 1} 小节`, chordTok(b.chords))
+          checkPattern(`曲谱 ${songId} ${sec.name} 第 ${i + 1} 小节`, b.pattern)
+          checkTechniques(`曲谱 ${songId} ${sec.name} 第 ${i + 1} 小节`, b.techniques)
+        })
+      } else {
+        checkChords(`曲谱 ${songId} ${sec.name}`, chordTok(sec.chords))
+      }
+      if (sec.fx) {
+        check(`曲谱 ${songId} 段「${sec.name}」fx 非空`, typeof sec.fx === 'string' && sec.fx.length > 0 && sec.fx.length <= 8, sec.fx)
       }
     }
   }
+
+  // 毕业曲（v0.12.0）专项：种子歌条目 + 谱头与 PDF 权威值一致
+  const grad = seedSongs.find((s) => s.id === 'meng-de-chukou')
+  check('种子歌「梦的出口」存在', Boolean(grad))
+  if (grad) {
+    check('梦的出口 BPM = 75（课件 PDF 权威值）', grad.bpm === 75, String(grad.bpm))
+    check('梦的出口 调性 = G 大调', grad.key === 'G 大调', grad.key)
+    check('梦的出口 套路 = 失真主音 Solo', grad.template === '失真主音 Solo', grad.template)
+  }
+  const gradSheet = SEED_SHEETS['meng-de-chukou']
+  check('毕业曲谱存在且带 meta', Boolean(gradSheet?.meta?.bpm === 75 && gradSheet?.meta?.key === 'G 大调'))
+  check('毕业曲谱 4 段齐全', (gradSheet?.sections || []).length === 4, String(gradSheet?.sections?.length))
 }
 
 // 3. 基本功清单

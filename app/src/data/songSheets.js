@@ -538,5 +538,60 @@ export const SEED_SHEETS = {
         'note': '卡农变体 + add9/m7 色彩，请对照原曲校准'
       }
     ]
+  },
+  // —— v0.12.0 课件式谱面（Guitar Pro 导出 PDF 同款风格）——
+  // meta：谱头卡（速度/拍号/调弦/调性）；段内 fx = 段落音色标签；
+  // bars[] = 按小节网格渲染（可选，缺失时回退旧 chords 字符串渲染）。
+  // 节奏符号词表：↓ ↑ ↓↑ ↓↓↑ ↓↑↓↑ ×(闷音) 〜(分解/琶音) ｜(小节分隔)
+  // 技巧词表：P.M. let ring 滑音 击弦 勾弦 推弦 半推 全推 揉弦 泛音
+  'meng-de-chukou': {
+    'source': '中级课 70 课课件六线谱（成田工作室）整理，具体指法看原谱 PDF',
+    'meta': { 'bpm': 75, 'timeSig': '4/4', 'tuning': 'Standard', 'key': 'G 大调' },
+    'sections': [
+      {
+        'name': '前奏',
+        'fx': '清音',
+        'bars': [
+          { 'chords': 'Cmaj7', 'pattern': '↓', 'techniques': [] },
+          { 'chords': 'Bm7', 'pattern': '↓', 'techniques': [] },
+          { 'chords': 'Am7', 'pattern': '↓', 'techniques': [] },
+          { 'chords': 'G', 'pattern': '↓', 'techniques': [] }
+        ],
+        'note': '第 1-4 小节，每小节一个和弦整音符垫底，Guitar Pro 原谱标注 ♩=75 慢速起手'
+      },
+      {
+        'name': '清音旋律',
+        'fx': '清音',
+        'bars': [
+          { 'chords': 'Cmaj7', 'pattern': '〜', 'techniques': ['let ring'] },
+          { 'chords': 'Bm7', 'pattern': '〜', 'techniques': ['let ring'] },
+          { 'chords': 'Am7', 'pattern': '〜', 'techniques': ['let ring'] },
+          { 'chords': 'G', 'pattern': '〜', 'techniques': ['let ring'] }
+        ],
+        'note': '第 5-8 小节，Clean Strat 分解旋律，音符要弹出来并让音延住（let ring）'
+      },
+      {
+        'name': '失真 Riff',
+        'fx': '失真',
+        'bars': [
+          { 'chords': '', 'pattern': '× × × ×', 'techniques': ['P.M.'] },
+          { 'chords': '', 'pattern': '× × × ×', 'techniques': ['P.M.'] },
+          { 'chords': '', 'pattern': '× × × ×', 'techniques': ['P.M.'] },
+          { 'chords': '', 'pattern': '× × × ×', 'techniques': ['P.M.'] }
+        ],
+        'note': '第 9-12 小节，切失真闷音下拨（原谱低音弦 X-X-7-5 音型），手掌闷住琴弦弹'
+      },
+      {
+        'name': '主旋律',
+        'fx': '失真',
+        'bars': [
+          { 'chords': '', 'pattern': '↓ ↑↓', 'techniques': ['滑音', '击弦', '勾弦'] },
+          { 'chords': '', 'pattern': '↓ ↑↓', 'techniques': ['推弦'] },
+          { 'chords': '', 'pattern': '↓ ↑↓', 'techniques': ['推弦', '半推'] },
+          { 'chords': '', 'pattern': '↓ ↑↓', 'techniques': ['滑音', '击弦', '勾弦'] }
+        ],
+        'note': '第 13-40 小节主旋律（六线谱 5-8 页），滑音/击勾弦/推弦 full·½ 密集，先慢练到 60% 速度；每小节精确音品以原谱 PDF 为准'
+      }
+    ]
   }
 }
