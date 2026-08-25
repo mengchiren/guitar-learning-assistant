@@ -95,6 +95,13 @@ function check(name, cond, detail = '') {
           checkChords(`曲谱 ${songId} ${sec.name} 第 ${i + 1} 小节`, chordTok(b.chords))
           checkPattern(`曲谱 ${songId} ${sec.name} 第 ${i + 1} 小节`, b.pattern)
           checkTechniques(`曲谱 ${songId} ${sec.name} 第 ${i + 1} 小节`, b.techniques)
+          if (b.label !== undefined) {
+            check(
+              `曲谱 ${songId} ${sec.name} 第 ${i + 1} 小节 label 合法`,
+              typeof b.label === 'string' && b.label.length > 0 && b.label.length <= 6,
+              JSON.stringify(b.label),
+            )
+          }
         })
       } else {
         checkChords(`曲谱 ${songId} ${sec.name}`, chordTok(sec.chords))

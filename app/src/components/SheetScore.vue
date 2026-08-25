@@ -58,7 +58,7 @@ const patternTooltip = '节奏符号：↓ 下拨 ｜ ↑ 上拨 ｜ × 闷音 �
             <template v-if="b.chords">
               <span v-for="c in b.chords.split(/\s+/)" :key="c" class="bar-chord">{{ c }}</span>
             </template>
-            <span v-else class="bar-chord bar-riff">×</span>
+            <span v-else class="bar-label">{{ b.label || '—' }}</span>
           </div>
           <div v-if="b.pattern" class="sheet-bar-pattern" :title="patternTooltip">{{ b.pattern }}</div>
           <div v-if="b.note" class="sheet-bar-note">{{ b.note }}</div>
@@ -82,17 +82,22 @@ const patternTooltip = '节奏符号：↓ 下拨 ｜ ↑ 上拨 ｜ × 闷音 �
 </template>
 
 <style scoped>
+/* 谱头卡：标签行 flex 换行 + 每个标签不折行（避免「G 大调」断成两行） */
 .sheet-meta {
-  margin-bottom: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
 }
 .sheet-meta .tag {
-  margin-right: 6px;
+  white-space: nowrap;
 }
 .sheet-diagrams {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 10px;
+  gap: 14px;
+  margin-top: 12px;
 }
 .sheet-fx {
   background: var(--ok-soft);
@@ -102,31 +107,48 @@ const patternTooltip = '节奏符号：↓ 下拨 ｜ ↑ 上拨 ｜ × 闷音 �
   background: var(--warn-soft);
   color: var(--warn-text);
 }
+/* 分段：段与段之间留呼吸，标题行与网格对齐 */
+.sheet-section {
+  margin-bottom: 18px;
+}
+.sheet-section:last-of-type {
+  margin-bottom: 8px;
+}
+.sheet-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.sheet-head .tag {
+  white-space: nowrap;
+}
 .sheet-bars {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
-  gap: 8px;
-  margin: 6px 0 8px;
+  grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+  gap: 10px;
+  margin: 4px 0 10px;
 }
 .sheet-bar {
   border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 6px 8px;
-  min-height: 58px;
+  border-radius: 10px;
+  padding: 9px 11px;
+  min-height: 64px;
   background: var(--bg-card);
 }
 .sheet-bar.riff {
-  background: var(--warn-soft);
+  background: var(--bg-input);
 }
 .sheet-tech {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
-  margin-bottom: 4px;
+  gap: 5px;
+  margin-bottom: 6px;
 }
 .tech-tag {
   font-size: 11px;
-  padding: 1px 6px;
+  padding: 2px 7px;
   border-radius: 10px;
   background: var(--accent-soft);
   color: var(--accent);
@@ -134,31 +156,48 @@ const patternTooltip = '节奏符号：↓ 下拨 ｜ ↑ 上拨 ｜ × 闷音 �
 }
 .sheet-bar-chords {
   font-weight: 600;
-  font-size: 14px;
-  line-height: 1.2;
+  font-size: 15px;
+  line-height: 1.25;
   display: flex;
   flex-wrap: wrap;
-  gap: 2px 8px;
+  gap: 2px 10px;
 }
-.bar-riff {
-  color: var(--warn-text);
-  font-size: 16px;
+.bar-label {
+  color: var(--accent-dark);
+  font-weight: 600;
+  font-size: 14px;
 }
 .sheet-bar-pattern {
-  margin-top: 4px;
+  margin-top: 7px;
   font-size: 14px;
-  letter-spacing: 2px;
+  letter-spacing: 3px;
   color: var(--text-2);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .sheet-bar-note {
-  margin-top: 2px;
+  margin-top: 3px;
   font-size: 11px;
   color: var(--text-2);
 }
 .sheet-legend {
-  margin: 4px 0 0;
+  margin: 10px 0 0;
+}
+/* 旧格式（chords 字符串）：大字排开的和弦进行 + 指法图行 */
+.sheet-chords {
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--accent-dark);
+  font-variant-numeric: tabular-nums;
+  margin: 2px 0 4px;
+}
+.chord-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 14px;
+  justify-content: center;
 }
 </style>
