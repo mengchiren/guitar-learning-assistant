@@ -21,7 +21,7 @@
 | `HANDOFF.md` | 本交接文档 |
 | `验收指南.md` | 手把手手机验收清单（L 录音 / M AI 答疑含 Key 与 **ASK_TOKEN 令牌**配置步骤 / N 数据备份）+ 反馈模板 + 常见问题 |
 | `README.md` | GitHub 项目主页（功能/目录/测试/CI/部署/隐私/路线图，已同步到 v0.6.0） |
-| `.github/workflows/ci.yml` | **CI**：push/PR 自动跑合成音频引擎测试 + 规则引擎 25 项 + 数据 **828 项** + **Store 冒烟 25 项** + **设备建议回归 53 项** + 面板渲染 13 项 + **谱面渲染 19 项** + 生产构建；真实歌曲对拍因版权音频不入库，只在本地跑 |
+| `.github/workflows/ci.yml` | **CI**：push/PR 自动跑合成音频引擎测试 + 规则引擎 25 项 + 数据 **836 项** + **Store 冒烟 25 项** + **设备建议回归 53 项** + 面板渲染 13 项 + **谱面渲染 19 项** + **壁纸模块测试 26 项**（v0.13.1）+ 生产构建；真实歌曲对拍因版权音频不入库，只在本地跑 |
 | `spike/` | 验证与测试：Python librosa 版 `analyze.py`、`make_synthetic.py`、**前端引擎对拍 `test_frontend_analyze.mjs`**（本地跑）、**合成音频引擎测试 `test_frontend_synthetic.mjs`（CI 跑）**、**Store 冒烟测试 `test_stores_smoke.mjs`（25 项，CI 跑）**、**套路规则+设备建议回归 `test_tone_guide.mjs`（53 项，CI 跑）**、**谱面 SSR 渲染 `test_sheet_view.mjs`（19 项，CI 跑）**、**壁纸模块测试 `test_wallpapers.mjs`（26 项，CI 跑：纯逻辑/存储层 fake-indexeddb/落盘/壁纸包提取）**、**规则引擎对拍 `test_plan_engine.mjs`（25 项）**、**数据校验 `test_sheets.mjs`（836 项，含课件式谱面格式/词表/毕业曲专项）**、`gen_course_catalog.py`、单文件分析 `analyze_one.mjs`、**批量分析 `batch_analyze_songs.mjs`（结果 `batch_analyze_result.json`）**、**曲谱生成 `write_sheets.py`** |
 | `spike/.venv/` | Python 3.13 虚拟环境（librosa + imageio-ffmpeg），git 忽略 |
 | `spike/songs/`、`歌曲文件/`、`视频教程/` | 用户音频/视频，**git 忽略**，勿提交（版权内容）。`歌曲文件/` 已重命名为「歌手 - 歌名」 |
@@ -30,7 +30,7 @@
 | `app/functions/api/sync.js` | **云同步代理（CF Pages Functions，POST /api/sync）**：KV 绑定 `SYNC_KV` 单 key 全量快照 `sync:snapshot`，`SYNC_TOKEN` 环境变量 + `X-Sync-Token` 头（未配置 503 fail-closed，模式同 ASK_TOKEN）；action：upload/download/check |
 | `app/src/data/` | **`nav.js`（路由/tab/工具页统一清单）**、`devices.js`（**含 params 能力描述 + panel 面板布局坐标/量程/说明**）、`templates.js`（**6 套套路**）、**`classifyRules.js`（套路归类规则表）**、**`seedSongs.json`（30 首种子歌）**、`fundamentals.js`（5 项基本功）、**`chords.js`（82 个和弦指法图 + 分组，`findChord`/`CHORD_GROUPS`）**、**`songSheets.js`（20 首种子曲谱；v0.12.0 新格式：谱级 `meta`（bpm/timeSig/tuning/key）+ 段级 `fx`（音色标签）+ `bars[]`（小节网格：chords/pattern/techniques），旧 `chords` 字符串格式仍兼容，由 `write_sheets.py` 生成）**、`courseCatalog.js`（194 课，脚本生成勿手改）、**`themes.js`（v0.7.0 外观主题清单：id/名称/色板/素材）** |
 | `app/src/stores/` | Pinia（**全部用 persist 插件自动落盘，store 里不再有 save 调用**）：`practice.js`（打卡 + **v0.8.0 打卡草稿 draft**）、`settings.js`（提醒/设备/新手模式）、`timer.js`（**v0.8.0 起会话落盘 `timer-session`：running/startedAt/accumulated + 跨天脏会话作废 + 启动 init() 恢复 tick**）、`metronome.js`（节拍器全局，含 currentBeat）、`songs.js`（用户歌单，**getter 叫 allSongs、字段叫 title、bpm/key/template 已归一化有效值**）、`plan.js`（达标/歌曲状态）、`course.js`、`sheets.js`（用户自录曲谱）、`recordings.js`（录音元数据，`RECORD_CATEGORIES`）、`chat.js`（AI 聊天，`AI_PROVIDERS`、`token`/`setToken`、`stashAskContext`/`takeAskContext`）、**`sync.js`（v0.11.0 云同步：token/deviceId/lastSyncAt/autoCheck + check/upload/download/autoCheckOnce）** |
-| `app/src/composables/` | `useMediaQuery.js`（768px 断点）、`useTuner.js`（麦克风 ACF 调音）、**`useWallpaperBg.js`（v0.13.0 壁纸背景：settings.wallpaper → IndexedDB blob → object URL，含请求序号丢弃过期结果 + onUnmounted revoke）** |
+| `app/src/composables/` | `useMediaQuery.js`（768px 断点）、`useTuner.js`（麦克风 ACF 调音）、**`useWallpaperBg.js`（v0.13.0 壁纸背景：settings.wallpaper → IndexedDB blob → object URL；**只监听 mode/ID**（拖模糊/亮度/遮罩不重载 blob——v0.13.1 审查修复，曾因监听整个 wallpaper 对象导致滑条拖动时视频重载）、请求序号丢弃过期结果 + onUnmounted revoke + 文件缺失自动回退主题）** |
 | `app/src/utils/` | `analyze.js`（**自研音频分析引擎，改后必须重跑对拍**；v0.8.0 帧内缓冲复用 + TEMPLATE_IDS 补 heavy；套路归类走 data/classifyRules.js）、`analyzeWorker.js`（Worker 封装）、`audio.js`（统一解码管线 `decodeToMono`）、`date.js`（本地时区日期，全工程唯一实现）、`music.js`（音名/调性/徽章常量）、`backup.js`（**v0.8.0 恢复 = 先清空全部 gla:v1: key 再写入，真「覆盖」语义**）、`id.js`（UUID 生成）、`toneGuide.js`（**按设备 params 渲染新手建议**）、`storage.js`（**schema 版本 + 迁移注册表 + 变更订阅 + v0.8.0 存储失败通知 `onStorageError`**，key 前缀 `gla:v1:`）、`planEngine.js`（**规则引擎纯函数，改后必须重跑对拍**）、`recordingsDb.js`（**IndexedDB：meta/blob 分 store，v0.8.0 增删改单事务原子化**）、**`sheetPdfDb.js`（v0.12.0 IndexedDB 存原谱 PDF：meta/blob 分 store + 单事务写删，DB 名 `gla-sheet-pdfs`，key = songId）**、`recordAnalyze.js`（录音→BPM，只分析前 3 分钟，走 Worker）、**`wallpaperDb.js`（v0.13.0 IndexedDB 存壁纸：meta/blob 分 store + 单事务写删，DB 名 `gla-wallpapers`，key = 壁纸 id；红线：只存本机，不进 git/部署包）**、**`wallpaper.js`（v0.13.0 壁纸纯逻辑：类型判定/图片≤5MB·视频≤100MB 校验/默认态/滑条钳制，无浏览器依赖可单测）**、**`mpkgCarve.js`（v0.13.1 Wallpaper Engine 壁纸包纯逻辑提取：PKGM 容器扫描，ftyp→moov 盒子遍历定 mp4 边界，JPEG/PNG 提取，preview.jpg 做缩略图；只削媒体字节不解析 scene 引擎——网页/场景壁纸拆不出会报错）** |
 | `app/src/plugins/` | `persist.js`（**Pinia 自动持久化插件，防抖 150ms，v0.8.0 落盘失败 catch + 通知全局横幅**） |
 | `app/src/workers/` | `analyze.worker.js`（分析引擎后台线程，纯函数无 DOM 依赖） |
@@ -80,7 +80,7 @@
 - **v0.10.0（界面风格落地：新默认主题「DeepSeek 极简」，用户从 3 款风格稿+临时预览页中选型，拍板参考 DeepSeek Harness）**：①`data/themes.js` 新增 dsh 主题并排第一（DEFAULT）——近白 #fbfbfd 大留白、白卡细边框大圆角 16px、克制深蓝 #3d6ff2、页顶淡蓝光晕（`--bg-image` 用径向渐变，无图片素材、不进 precache）、标题色块改蓝色小圆点（`[data-theme='dsh'] h1.page-title::before`）；②**深色模式**：settings 新增 `darkMode`（persist key `dark-mode`，system/light/dark 三档，我的→外观主题卡内选择，默认 system），App.vue 按 matchMedia + 设置同步 `html.dark`；深色变量块 `html.dark[data-theme='dsh']`（**仅 dsh 提供深色**，其他主题忽略该设置）；深色下毛玻璃变量用 `html.dark[data-theme='dsh'].glass` 覆盖（html.glass 的浅色半透明会穿帮）；③**默认值迁移**：settings 的 `loadThemeId()`——旧默认 classic 自动迁到 dsh（用户仍可手动切回）；④删除临时风格预览页（StylePreviewView.vue + /style-preview 路由，截图留档 `gui-test-screenshots/style-preview/`）。回归 6 组全过 + 构建过（precache 84 项 1362KB）。**待用户验收。**
 - **v0.13.0（背景壁纸/皮肤，用户需求：像 Wallpaper Engine 那样给网站换壁纸皮肤，参考 DeepSeek Harness 换皮肤插件 + WE 壁纸；融合进外观主题）**：①**壁纸独立层**——settings 新增 `wallpaper`（`{mode:'theme'|'image'|'video', wallpaperId, blur, brightness, veil}`，persist 自动落盘），与主题只管配色/看板娘解耦；②**存储**——`utils/wallpaperDb.js`（IndexedDB `gla-wallpapers`，meta/blob 分 store + 单事务写删，key=壁纸 id；**红线：只存本机，不进 git/部署包/SW precache**——WE 壁纸多为用户自制/版权，站点公开 URL）+ `utils/wallpaper.js` 纯逻辑（类型判定 / 图片≤5MB·视频≤100MB 校验 / 默认态 / 滑条钳制）；③**渲染**——`composables/useWallpaperBg.js`（settings.wallpaper → IndexedDB blob → object URL，请求序号丢弃过期结果 + onUnmounted revoke），App.vue 全屏 `<video>`(视频)/`<img>`(图片) 背景层 + 遮罩；style.css 增 `--wallpaper-blur/-brightness` 滤镜与 `--wallpaper-veil` 遮罩，`html.wallpaper-custom` 关 body 主题背景，移动端降级压低模糊上限（`--wallpaper-blur-cap` 4px）；分层已用 headless 截图验证（壁纸层在内容之下可见）；④**UI**——`components/WallpaperPanel.vue` 融合进「我的→外观主题」下新增「背景壁纸」卡（当前壁纸预览缩略图·视频抽首帧 / 上传图片·视频 / 恢复主题默认 / 三滑条实时生效 / 「只存本机、换设备重传」提示）；Icon 库新增 `image`；⑥**测试**——`spike/test_wallpapers.mjs`（20 项入 CI；`fake-indexeddb` 新增 dev 依赖）；回归 9 组全过 + 构建过（precache 86 项 2958KB）。
 - **v0.13.1（壁纸包直接导入，用户反馈「想直接导入 wallpaper 的文件格式」并给了 3549356917.mpkg 样本）**：①`utils/mpkgCarve.js` 纯逻辑——实测解析 WE 包（PKGM 头 + 文件名表 + 逐文件拼接）：动态壁纸的 `wallpaper.mp4`（ftyp→uuid→mdat→moov 盒子遍历，**盒子结束正好到文件尾** → 28,628,336 字节完整可播 mp4）；静态壁纸取最大嵌入图（JPEG/PNG，fix：findPng IEND 扫描 `i<=n-8` 边界）；`preview.jpg`（555,453 字节封面）做缩略图；**只削媒体字节，不解析 scene 引擎**——网页/场景互动壁纸拆不出时明确报错（回退建议用预览图）；②WallpaperPanel 增「导入壁纸包」按钮（accept .mpkg/.pkg ≤100MB），拆包在浏览器内存完成 → 复用 wallpaperDb/视频图片渲染/三滑条；③`test_wallpapers.mjs` 20→26 项（+扩展名识别/合成视频包/合成图片包/未知盒子提前收尾/无内容报错/空输入）；④`壁纸文件/` 加入 .gitignore（用户给的版权壁纸包不入库）；真实文件 Node 终验通过。**待应用户验收：真机导入 .mpkg 看动态背景。**
-- 全程约 53 个提交，git 历史即详细变更记录；需求文档修订记录完整到 v0.8.0；README/验收指南/交接文档全同步。
+- 全程约 55 个提交，git 历史即详细变更记录；需求文档修订记录完整到 v0.13.1；README/验收指南/交接文档全同步。
 
 ## 4. 当前卡在哪
 
@@ -105,10 +105,11 @@
 
 1. **等用户验收 v0.10.2（图表悬停气泡 + v0.10.x 布局/主题/性能系列）** → 按反馈微调；v0.8.0 遗留验收顺带。
 2. **曲谱继续扩充**：用户练到哪首需要谱 → 按「宁缺毋滥、人工整理、标注来源与校准状态」补 `songSheets.js`（改后重跑 `spike/test_sheets.mjs` 校验）；v0.12.0 起新谱可带 `meta`/`fx`/`bars[]` 课件式格式（节奏符号与技巧词表被校验护住），如歌曲本身有课件 PDF 可同时挂原谱（PDF 只存本机，需用户在设备上传）；谱里出现新和弦同步补 `chords.js`（校验硬约束：谱中和弦必须在图库有定义）。
-3. **M4-3 剩余**（用户已按「架构/安全/成本」分析法选定前两项为录音、AI 答疑）：**微信推送（推送加）**——个人 token 不能存前端，需 CF Functions 代理 + 环境变量，免费版每日有限额；**Capacitor 安卓壳 + 桌面小组件**——签名/商店上架/双端构建，维护成本最高，等核心稳定再上。
-4. 云同步（Supabase）**已确认暂缓**，等手机/电脑双端都用起来再说；`storage.js` 的变更订阅 + 版本迁移 + persist 插件已把同步接入点铺好。
-5. pages.dev 免费域名国内访问不稳定，后续可选自定义域名（换域名记得更新 ask.js 的 Origin 白名单 + 可补按 IP 限流）。
-6. P2 成就徽章/等级（统计页做了一部分，徽章未做）。
+3. **壁纸/皮肤后续（v0.13.x 可选）**：①**桌面 Chrome 目录选择器**——用户电脑上可直接选中 Steam 创意工坊文件夹（File System Access API，仅桌面 Chromium，手机不支持）批量浏览 WE 库，作为「上传壁纸包」的增强；②**WebM 壁纸包**——若用户遇到 WE 的 webm 视频壁纸，`mpkgCarve.js` 补 EBML 提取；③多壁纸轮播/多时段切换（数据驱动，架构已铺好）；④视频编码不支持的兜底（h265 等）——可考虑提取失败时回退封面预览图并提示。
+4. **M4-3 剩余**（用户已按「架构/安全/成本」分析法选定前两项为录音、AI 答疑）：**微信推送（推送加）**——个人 token 不能存前端，需 CF Functions 代理 + 环境变量，免费版每日有限额；**Capacitor 安卓壳 + 桌面小组件**——签名/商店上架/双端构建，维护成本最高，等核心稳定再上。
+5. 云同步（Supabase）**已确认暂缓**，等手机/电脑双端都用起来再说；`storage.js` 的变更订阅 + 版本迁移 + persist 插件已把同步接入点铺好。
+6. pages.dev 免费域名国内访问不稳定，后续可选自定义域名（换域名记得更新 ask.js 的 Origin 白名单 + 可补按 IP 限流）。
+7. P2 成就徽章/等级（统计页做了一部分，徽章未做）。
 
 ## 6. 踩过的坑（绝对不要踩）
 

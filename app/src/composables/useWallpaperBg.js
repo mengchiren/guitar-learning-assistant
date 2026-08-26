@@ -50,7 +50,14 @@ export function useWallpaperBg() {
     ready.value = true
   }
 
-  watch(() => settings.wallpaper, load, { immediate: true })
+  // 只监听「壁纸切换」（mode/ID），不要监听整个对象——
+  // 面板拖模糊/亮度/遮罩也会整体替换 settings.wallpaper，若监听整个对象，
+  // 每次滑块 input 都会重新从 IndexedDB 取 blob、重建 object URL（视频还会重载）。
+  watch(
+    [() => settings.wallpaper.mode, () => settings.wallpaper.wallpaperId],
+    load,
+    { immediate: true },
+  )
   onUnmounted(revoke)
 
   const bg = computed(() => {

@@ -367,6 +367,11 @@ label { font-size: 14px; color: var(--text-dim); display: block; margin: 10px 0 
 }
 .wallpaper-thumb--empty { display: flex; align-items: center; justify-content: center; color: var(--text-dim); }
 .wallpaper-current-meta { min-width: 0; flex: 1; }
+.wallpaper-current-meta .small:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .wallpaper-actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
 .wallpaper-upload {
   display: inline-flex;

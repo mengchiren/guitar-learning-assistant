@@ -64,7 +64,7 @@
 │       │                 # analyzeWorker.js（Worker 封装）、audio.js（解码）、date.js、music.js、backup.js、id.js
 │       ├── workers/      # analyze.worker.js（分析引擎后台线程）
 │       └── views/        # 页面
-├── .github/workflows/    # CI：合成音频引擎 + 规则 25 项 + 数据 836 项 + 冒烟 25 项 + 设备建议 53 项 + 面板 13 项 + 谱面渲染 19 项 + 壁纸 20 项 + 构建
+├── .github/workflows/    # CI：合成音频引擎 + 规则 25 项 + 数据 836 项 + 冒烟 25 项 + 设备建议 53 项 + 面板 13 项 + 谱面渲染 19 项 + 壁纸 26 项 + 构建
 ├── spike/                # M0 可行性验证（Python librosa 版）+ 各引擎对拍单测
 ├── 需求文档.md           # 需求规格（唯一权威来源，含修订记录）
 ├── 验收指南.md           # 手机验收清单 + 常见问题
@@ -102,7 +102,7 @@ FFMPEG=$(spike/.venv/Scripts/python.exe -c "import imageio_ffmpeg; print(imageio
 node spike/test_frontend_analyze.mjs "$FFMPEG"   # 分析引擎 5 首对拍（需本地版权音频，CI 不跑）
 node spike/test_frontend_synthetic.mjs           # 分析引擎合成音频测试（CI 跑：快/中/慢三档 + 慢歌不加倍）
 node spike/test_plan_engine.mjs                  # 规则引擎 25 项
-node spike/test_sheets.mjs                       # 曲谱/和弦数据 828 项（含课件式谱面格式与词表校验）
+node spike/test_sheets.mjs                       # 曲谱/和弦数据 836 项（含课件式谱面格式与词表校验）
 node spike/test_stores_smoke.mjs                 # Store 冒烟测试 25 项（CI 跑，防运行时引用错误/漏持久化）
 node spike/test_tone_guide.mjs                   # 套路归类规则 + 设备建议回归 53 项（CI 跑）
 node spike/test_sheet_view.mjs                   # 课件式谱面 SSR 渲染 19 项（CI 跑）
