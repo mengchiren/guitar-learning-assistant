@@ -6,6 +6,7 @@ import Icon from '../components/Icon.vue'
 import { useSettingsStore } from '../stores/settings.js'
 import { useSyncStore } from '../stores/sync.js'
 import { THEMES } from '../data/themes.js'
+import WallpaperPanel from '../components/WallpaperPanel.vue'
 import { downloadBackup, parseBackup, restoreBackup } from '../utils/backup.js'
 import { chooseDirection, localStamp, fmtWhen } from '../utils/sync.js'
 
@@ -208,6 +209,11 @@ function onPickRestoreFile(e) {
           <span class="knob"></span>
         </button>
       </div>
+    </div>
+    <div class="card">
+      <h2>背景壁纸</h2>
+      <p class="muted small" style="margin-bottom: 8px">用自定义图片/视频做整站背景，可导入 Wallpaper Engine 的壁纸文件；模糊/亮度/遮罩让内容更清晰。</p>
+      <WallpaperPanel />
     </div>
     <div class="card">
       <div class="switch-row">

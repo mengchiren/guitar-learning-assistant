@@ -1,6 +1,6 @@
 {
   "name": "guitar-learning-assistant",
-  "version": "0.12.0",
+  "version": "0.13.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -17,8 +17,8 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.8",
+    "fake-indexeddb": "^6.2.5",
     "vite": "^8.2.1",
     "vite-plugin-pwa": "^1.3.0"
   }
 }
-

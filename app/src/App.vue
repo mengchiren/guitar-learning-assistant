@@ -9,12 +9,14 @@ import { onStorageError } from './utils/storage.js'
 import { fmtWhen } from './utils/sync.js'
 import { TABS, ROUTES } from './data/nav.js'
 import Mascot from './components/Mascot.vue'
+import { useWallpaperBg } from './composables/useWallpaperBg.js'
 
 const route = useRoute()
 const router = useRouter()
 const timer = useTimerStore()
 const settings = useSettingsStore()
 const sync = useSyncStore()
+const { bg } = useWallpaperBg()
 
 // v0.9.0：tab 页面 KeepAlive 保活名单（组件名 = 文件名，见各 view 的 defineOptions）
 const KEEP_ALIVE = ['HomeView', 'PlanView', 'ToolsView', 'SongsView', 'ProfileView']
@@ -73,6 +75,14 @@ watch(
   },
   { immediate: true },
 )
+// 自定义壁纸（v0.13.0）：确有壁纸文件时，关闭 body 的主题背景图/遮罩，改由壁纸层自绘
+watch(
+  () => bg.hasItem,
+  (has) => {
+    document.documentElement.classList.toggle('wallpaper-custom', Boolean(has))
+  },
+  { immediate: true },
+)
 let offSysDark = null
 onMounted(() => {
   const mq = window.matchMedia('(prefers-color-scheme: dark)')
@@ -100,6 +110,28 @@ function goBack() {
 </script>
 
 <template>
+  <!-- 自定义背景壁纸层（v0.13.0）：位于内容之下，选「主题默认背景」时隐藏。
+       含模糊/亮度滤镜与可调遮罩（--wallpaper-veil），保证花哨壁纸下文字可读。 -->
+  <div
+    v-if="bg.hasItem"
+    class="wallpaper-bg"
+    :data-mode="bg.mode"
+    :style="{ '--wallpaper-blur': bg.blur + 'px', '--wallpaper-brightness': bg.brightness }"
+  >
+    <video
+      v-if="bg.mode === 'video' && bg.ready"
+      :src="bg.url"
+      autoplay
+      loop
+      muted
+      playsinline
+      preload="auto"
+      aria-hidden="true"
+    ></video>
+    <img v-else-if="bg.ready" :src="bg.url" alt="" aria-hidden="true" />
+    <div class="wallpaper-overlay" :style="{ opacity: bg.veil }"></div>
+  </div>
+
   <!-- 桌面端：顶部导航栏（v0.10.1 起全宽铺满，内部 topbar-inner 与内容区对齐） -->
   <header class="topbar desktop-only">
     <div class="topbar-inner">

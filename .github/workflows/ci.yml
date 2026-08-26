@@ -42,6 +42,9 @@ jobs:
       - name: 课件式谱面渲染冒烟（19 项，v0.12.0）
         run: node spike/test_sheet_view.mjs
 
+      - name: 壁纸模块测试（20 项，v0.13.0：纯逻辑/存储层/落盘）
+        run: node spike/test_wallpapers.mjs
+
       - name: 分析引擎合成音频测试（半速加倍 / 慢歌不加倍）
         run: node spike/test_frontend_synthetic.mjs
 

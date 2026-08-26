@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { load, save } from '../utils/storage.js'
+import { DEFAULT_WALLPAPER, normalizeWallpaper } from '../utils/wallpaper.js'
 
 // v0.10.0：DeepSeek 极简成为默认主题。旧「经典瑞士军刀」选择迁移到新默认
 // （用户明确选过 classic 的概率极低——它就是旧默认；仍可在主题卡里手动切回）
@@ -22,6 +23,7 @@ export const useSettingsStore = defineStore('settings', {
     { key: 'glass', paths: ['glass'] },
     { key: 'mascot', paths: ['mascotEnabled'] },
     { key: 'dark-mode', paths: ['darkMode'] },
+    { key: 'wallpaper', paths: ['wallpaper'] },
   ],
   state: () => ({
     reminders: load('reminders', { enabled: false, time: '20:00' }),
@@ -40,5 +42,9 @@ export const useSettingsStore = defineStore('settings', {
     // 深色模式（v0.10.0）：system = 跟随系统；light/dark = 强制浅/深
     // 仅「DeepSeek 极简」主题实现了深色变量，其他主题忽略此设置
     darkMode: load('dark-mode', 'system'),
+    // 背景壁纸（v0.13.0）：mode = theme（主题默认背景）/ image / video；
+    // 自定义时含 wallpaperId（指 gla-wallpapers 里的 id）+ 模糊/亮度/遮罩浓度。
+    // 壁纸文件只存本机 IndexedDB，不入 SYNC_KEYS（与录音同级），不随云同步跨设备。
+    wallpaper: normalizeWallpaper(load('wallpaper', DEFAULT_WALLPAPER)),
   }),
 })

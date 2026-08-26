@@ -182,6 +182,44 @@ body::before {
 }
 #app { height: 100%; }
 
+/* 自定义背景壁纸层（v0.13.0）：盖在内容之下、画布之上。
+   自定义壁纸时关闭 body 的主题背景图/遮罩，避免叠加；壁纸层自带可调遮罩保证文字可读。 */
+html.wallpaper-custom body {
+  background: transparent;
+  background-image: none;
+}
+html.wallpaper-custom body::before { opacity: 0; }
+.wallpaper-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+.wallpaper-bg img,
+.wallpaper-bg video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* 模糊/亮度由 settings 驱动；移动端把模糊上限压低（--wallpaper-blur-cap）省 GPU */
+  filter: blur(min(var(--wallpaper-blur, 0px), var(--wallpaper-blur-cap, 12px)))
+    brightness(var(--wallpaper-brightness, 1));
+  transform: scale(1.06); /* 抵消模糊带来的边缘白边 */
+}
+.wallpaper-overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--bg);
+  /* opacity 由 settings.wallpaper.veil 内联驱动（0~1） */
+}
+@media (max-width: 768px) {
+  .wallpaper-bg { --wallpaper-blur-cap: 4px; }
+  .wallpaper-bg img,
+  .wallpaper-bg video { transform: scale(1.04); }
+}
+
 .shell {
   max-width: 560px;
   margin: 0 auto;
@@ -306,6 +344,57 @@ label { font-size: 14px; color: var(--text-dim); display: block; margin: 10px 0 
   user-select: none;
 }
 .tag.on { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-dark); }
+
+/* 背景壁纸面板（v0.13.0） */
+.wallpaper-panel { margin-top: 12px; }
+.wallpaper-current {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+}
+.wallpaper-current--theme { justify-content: center; }
+.wallpaper-thumb {
+  width: 64px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 4px;
+  flex: none;
+  background: var(--bg-input);
+}
+.wallpaper-thumb--empty { display: flex; align-items: center; justify-content: center; color: var(--text-dim); }
+.wallpaper-current-meta { min-width: 0; flex: 1; }
+.wallpaper-actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.wallpaper-upload {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: var(--radius);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent);
+  color: var(--accent-dark);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.wallpaper-upload.busy { opacity: 0.5; pointer-events: none; }
+.wallpaper-remove {
+  padding: 8px 14px;
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  font-size: 14px;
+  color: var(--text-dim);
+  cursor: pointer;
+}
+.wallpaper-sliders { margin-top: 12px; display: grid; gap: 8px; }
+.wallpaper-slider { display: grid; gap: 4px; }
+.wallpaper-slider span { font-size: 13px; color: var(--text-dim); }
+.wallpaper-slider input[type='range'] { width: 100%; accent-color: var(--accent); }
 
 .tabbar {
   position: fixed;
