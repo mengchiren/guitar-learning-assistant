@@ -26,7 +26,7 @@
 - 🎚 **调音器**：麦克风收音 + 参考音（EADGBE）。
 - ⏰ **练琴提醒**：应用内定时提醒；到点且今天未练时，已授权系统通知的话会弹系统通知（每天一条）。
 - 🎨 **外观主题**（v0.10.0）：主题切换系统——**「DeepSeek 极简」默认款**（近白大留白 + 深蓝强调 + 大圆角轻边卡片，参考 DeepSeek Harness）+ 「经典瑞士军刀」+ 「呆唯 · 轻音海洋」（奶油暖粉 + 珊瑚粉 + Q 版平泽唯看板娘）+ 「鲸鱼女仆 · 深海茶会」（柔雾蓝 + 水彩鲸鱼云团 + 女仆看板娘）；**深色模式**（跟随系统/浅色/深色三档，DeepSeek 极简主题支持）；可选的**透明毛玻璃模式**（卡片半透明 + 背景模糊，背景插画更透）；「我的」页一键切换，全站 CSS 变量换肤，新增主题只加数据。
-- 🖼 **背景壁纸**（v0.13.0）：用自定义图片/视频做整站背景，可导入 **Wallpaper Engine** 的壁纸文件，融合进「外观主题」——当前壁纸预览、上传图片（≤5MB）/视频（≤100MB）、恢复主题默认、**模糊/亮度/遮罩**三滑条实时生效，移动端视频自动压低模糊降级；**壁纸只存本机浏览器**（IndexedDB），换设备需重新上传，不随云同步。
+- 🖼 **背景壁纸**（v0.13.0，v0.13.1 支持壁纸包直接导入）：用自定义图片/视频做整站背景，可导入 **Wallpaper Engine** 的壁纸文件，**更可**直接上传 **`.mpkg`/`.pkg` 壁纸包**（自动从包里提取视频/图片当背景，用包内预览图做缩略图；拆包全在本机浏览器完成）；融合进「外观主题」——当前壁纸预览、上传图片（≤5MB）/视频（≤100MB）、恢复主题默认、**模糊/亮度/遮罩**三滑条实时生效，移动端视频自动压低模糊降级；**壁纸只存本机浏览器**（IndexedDB），换设备需重新上传，不随云同步。
 - 💾 **数据同步（云，v0.11.0）**：「我的」页一键上传/下载，把打卡、歌单与分析结果、计划/课程进度、自录曲谱、聊天记录、设置偏好在两台设备间保持一致（Cloudflare KV + Functions 代理 + 令牌防刷；打开应用自动检查云端更新并提示；录音与音频永不上云）。
 - 💾 **数据备份**：「我的」页一键导出/恢复全部数据（JSON 文件，录音除外）。
 - 🎨 **视觉**：简约瑞士军刀风——米白底、细线卡片、瑞士红点缀、线性图标；桌面端为 B 站式顶栏 + 仪表盘多栏，手机端为底部导航单栏。
@@ -59,7 +59,7 @@
 │       ├── stores/       # Pinia：practice/timer/metronome/songs/settings/plan/course/sheets/recordings/chat
 │       ├── utils/        # analyze.js（分析引擎）、planEngine.js（规则引擎）、
 │       │                 # recordingsDb.js（IndexedDB 录音）、sheetPdfDb.js（IndexedDB 原谱 PDF）、
-│       │                 # wallpaperDb.js（IndexedDB 壁纸）、wallpaper.js（壁纸纯逻辑）、
+│       │                 # wallpaperDb.js（IndexedDB 壁纸）、wallpaper.js（壁纸纯逻辑）、mpkgCarve.js（壁纸包提取）、
 │       │                 # recordAnalyze.js、toneGuide.js、storage.js、
 │       │                 # analyzeWorker.js（Worker 封装）、audio.js（解码）、date.js、music.js、backup.js、id.js
 │       ├── workers/      # analyze.worker.js（分析引擎后台线程）
@@ -106,7 +106,7 @@ node spike/test_sheets.mjs                       # 曲谱/和弦数据 828 项�
 node spike/test_stores_smoke.mjs                 # Store 冒烟测试 25 项（CI 跑，防运行时引用错误/漏持久化）
 node spike/test_tone_guide.mjs                   # 套路归类规则 + 设备建议回归 53 项（CI 跑）
 node spike/test_sheet_view.mjs                   # 课件式谱面 SSR 渲染 19 项（CI 跑）
-node spike/test_wallpapers.mjs                   # 壁纸模块：纯逻辑/存储层(persist) 20 项（CI 跑）
+node spike/test_wallpapers.mjs                   # 壁纸模块：纯逻辑/存储层/壁纸包提取 26 项（CI 跑）
 ```
 
 **CI**（`.github/workflows/ci.yml`）：push/PR 自动跑合成音频引擎测试 + 规则引擎对拍 + 数据校验 + store 冒烟测试 + 设备建议回归 + 面板/谱面渲染 + 壁纸模块测试 + 云同步校验 + 生产构建，全过才允许合并；真实歌曲对拍因版权音频不入库，只在本地跑。

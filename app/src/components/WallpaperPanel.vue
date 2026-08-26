@@ -5,7 +5,8 @@
 import { ref, computed, onMounted } from 'vue'
 import { useSettingsStore } from '../stores/settings.js'
 import { putWallpaper, deleteWallpaper, getWallpaperMeta } from '../utils/wallpaperDb.js'
-import { validateWallpaperFile, normalizeWallpaper, WALLPAPER_CLAMP } from '../utils/wallpaper.js'
+import { validateWallpaperFile, normalizeWallpaper, WALLPAPER_CLAMP, WALLPAPER_LIMITS } from '../utils/wallpaper.js'
+import { isWePackageFile, analyzeWePackage } from '../utils/mpkgCarve.js'
 import { newId } from '../utils/id.js'
 
 const settings = useSettingsStore()
@@ -48,6 +49,10 @@ function sizeLabel(b) {
 
 async function onUpload(file) {
   err.value = ''
+  if (isWePackageFile(file.name)) {
+    await uploadPackage(file)
+    return
+  }
   const v = validateWallpaperFile(file)
   if (!v.ok) {
     err.value = v.error
@@ -55,36 +60,87 @@ async function onUpload(file) {
   }
   uploading.value = true
   try {
-    const id = newId()
-    const meta = {
-      id,
-      type: v.type,
-      mime: file.type || '',
-      size: file.size,
-      name: file.name,
-      createdAt: new Date().toISOString(),
-    }
+    let thumb = ''
     try {
-      meta.thumb = await makeThumb(file, v.type)
+      thumb = await makeThumb(file, v.type)
     } catch {
-      meta.thumb = ''
+      thumb = ''
     }
-    await putWallpaper(id, meta, file)
-    const oldId = settings.wallpaper.wallpaperId
-    if (oldId && oldId !== id) deleteWallpaper(oldId).catch(() => {})
-    settings.wallpaper = normalizeWallpaper({
-      mode: v.type,
-      wallpaperId: id,
-      blur: v.type === 'video' ? 4 : 0,
-      brightness: 1,
-      veil: 0.55,
-    })
-    await loadCurrent()
+    await storeWallpaper(file, { type: v.type, mime: file.type || '', name: file.name, thumb })
   } catch (e) {
     err.value = '保存失败：' + (e?.message || '未知错误')
   } finally {
     uploading.value = false
   }
+}
+
+// Wallpaper Engine 壁纸包（.mpkg/.pkg）：从包里削出视频/图片当背景，预览用包内 preview.jpg。
+async function uploadPackage(file) {
+  if (file.size > WALLPAPER_LIMITS.videoMaxBytes) {
+    err.value = '壁纸包超过 100MB 上限，请换一个'
+    return
+  }
+  uploading.value = true
+  try {
+    const r = analyzeWePackage(new Uint8Array(await file.arrayBuffer()))
+    if (!r.ok) {
+      err.value = r.error
+      return
+    }
+    const mediaMime = r.kind === 'video' ? 'video/mp4' : r.mediaMime
+    const mediaBlob = new Blob([r.media], { type: mediaMime })
+    let thumb = ''
+    if (r.preview) {
+      try {
+        thumb = await makeThumb(new Blob([r.preview], { type: 'image/jpeg' }), 'image')
+      } catch {
+        thumb = ''
+      }
+    }
+    if (!thumb && r.kind === 'image') {
+      try {
+        thumb = await makeThumb(mediaBlob, 'image')
+      } catch {
+        thumb = ''
+      }
+    }
+    const base = String(file.name).replace(/\.(mpkg|pkg)$/i, '')
+    await storeWallpaper(mediaBlob, {
+      type: r.kind,
+      mime: mediaMime,
+      name: base + (r.kind === 'video' ? '（壁纸包视频）' : '（壁纸包图片）'),
+      thumb,
+    })
+  } catch (e) {
+    err.value = '导入壁纸包失败：' + (e?.message || '读取文件失败')
+  } finally {
+    uploading.value = false
+  }
+}
+
+// 共用：写入 IndexedDB + 释放旧壁纸 + 切换 settings.wallpaper
+async function storeWallpaper(blob, { type, mime, name, thumb }) {
+  const id = newId()
+  const meta = {
+    id,
+    type,
+    mime,
+    size: blob.size,
+    name,
+    thumb,
+    createdAt: new Date().toISOString(),
+  }
+  await putWallpaper(id, meta, blob)
+  const oldId = settings.wallpaper.wallpaperId
+  if (oldId && oldId !== id) deleteWallpaper(oldId).catch(() => {})
+  settings.wallpaper = normalizeWallpaper({
+    mode: type,
+    wallpaperId: id,
+    blur: type === 'video' ? 4 : 0,
+    brightness: 1,
+    veil: 0.55,
+  })
+  await loadCurrent()
 }
 
 async function onUseTheme() {
@@ -204,7 +260,7 @@ function makeThumb(file, type, maxDim = 360) {
       <span class="small" style="font-weight: 600">当前：主题默认背景</span>
     </div>
 
-    <!-- 上传 + 恢复 -->
+    <!-- 上传 + 导入壁纸包 + 恢复 -->
     <div class="wallpaper-actions">
       <label class="wallpaper-upload" :class="{ busy: uploading }">
         <span>上传图片</span>
@@ -214,9 +270,13 @@ function makeThumb(file, type, maxDim = 360) {
         <span>上传视频</span>
         <input type="file" accept="video/*" hidden @change="pick" />
       </label>
+      <label class="wallpaper-upload wallpaper-upload--pkg" :class="{ busy: uploading }">
+        <span>导入壁纸包</span>
+        <input type="file" accept=".mpkg,.pkg" hidden @change="pick" />
+      </label>
       <button v-if="isCustom" class="wallpaper-remove" @click="onUseTheme">恢复主题默认</button>
     </div>
-    <p class="dim small" style="margin-top: 6px">图片 ≤5MB · 视频 ≤100MB（mp4/webm）</p>
+    <p class="dim small" style="margin-top: 6px">图片 ≤5MB · 视频/壁纸包 ≤100MB（.mpkg/.pkg 自动取出视频或图片，本机处理）</p>
 
     <!-- 三个滑条：自定义时生效 -->
     <div v-if="isCustom" class="wallpaper-sliders">

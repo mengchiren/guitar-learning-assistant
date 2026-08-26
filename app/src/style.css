@@ -382,6 +382,11 @@ label { font-size: 14px; color: var(--text-dim); display: block; margin: 10px 0 
   cursor: pointer;
 }
 .wallpaper-upload.busy { opacity: 0.5; pointer-events: none; }
+.wallpaper-upload--pkg {
+  background: var(--bg-card);
+  border-color: var(--border);
+  color: var(--text-dim);
+}
 .wallpaper-remove {
   padding: 8px 14px;
   border-radius: var(--radius);
