@@ -127,7 +127,7 @@
     "difficulty": "中",
     "chords": "前奏 Bb-Dm-C；主歌 Bb-C-Dm-F；副歌 Bb-C-Dm7",
     "note": "BPM 待校准（社区谱有 98 半速记法）",
-    "dataFrom": "前端引擎自动分析（v0.4.2 入库，待人工校准）"
+    "dataFrom": "前端引擎自动分析（v0.4.2 入库，待人工校准）；2026-08-27 双引擎裁决一致（前端+librosa 中位/拍点三口径同值 129、调性 F 大调同判），悬案解除"
   },
   {
     "id": "kao",
@@ -205,7 +205,7 @@
     "difficulty": "中（慢歌，注意节拍稳定）",
     "chords": "前奏 G-D-Em-C；副歌 G-D-Em-C-B7-Em",
     "note": "BPM 待校准（社区谱记 100~117，疑似半速）；夹 3 品按 G 指法",
-    "dataFrom": "UG 和弦谱（22 票）+ 虫虫钢琴交叉验证"
+    "dataFrom": "UG 和弦谱（22 票）+ 虫虫钢琴交叉验证；2026-08-27 三方三角定位一致（外部谱源 155 ≈ 前端半速 78.3×2 ≈ librosa 117.5×4/3），悬案解除（坑 8 慢歌类型新实证）"
   },
   {
     "id": "u-and-i",
@@ -361,7 +361,7 @@
     "difficulty": "中",
     "chords": "前奏 Bbmaj7-A7-Dm；副歌 Bb7-A7-Dm-Gm7",
     "note": "BPM 待校准（社区谱有 155 记法）；失真 8 分下拨",
-    "dataFrom": "Songsterr + Hooktheory + Chordify 交叉验证"
+    "dataFrom": "Songsterr + Hooktheory + Chordify 交叉验证；2026-08-27 前端复核 184.6 命中多源人工值；librosa 该曲两口径自相矛盾不采信，悬案解除"
   },
   {
     "id": "wasurete-yaranai",
