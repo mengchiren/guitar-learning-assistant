@@ -14,6 +14,17 @@ export const useMetronomeStore = defineStore('metronome', {
     beats: 4,
     running: false,
     currentBeat: 0, // 当前正在响的第几拍（1 起），供圆点高亮
+
+    // ---- v0.14.0 渐进提速训练器（参考 Chordance 的 speed trainer）----
+    // 会话态、不持久化：训练配置随停止即失效，符合练琴习惯；本 store 无 persist 配置。
+    // 只在小节边界升速——前瞻调度下 tempo 变化发生在下一个调度拍上，不撕裂当前小节。
+    rampEnabled: false,
+    rampStartBpm: 100, // 开启训练那一刻的 BPM（供「回到起始」按钮）
+    rampTargetBpm: 140,
+    rampStepBpm: 5, // 每组提升量
+    rampBarsPerStep: 4, // 每多少小节提升一次
+    barCount: 0, // 本组已完成的小节数
+    rampGroup: 0, // 已完成的提速组数（给用户正反馈）
   }),
   actions: {
     click(time, accented) {
@@ -28,9 +39,24 @@ export const useMetronomeStore = defineStore('metronome', {
       osc.start(time)
       osc.stop(time + 0.06)
     },
+    // 小节边界回调：第一拍被调度且不是曲首时触发
+    _onBarBoundary() {
+      if (!this.rampEnabled || !this.running) return
+      this.barCount += 1
+      if (this.barCount < this.rampBarsPerStep) return
+      this.barCount = 0
+      const ceiling = Math.max(this.bpm, Math.min(220, this.rampTargetBpm))
+      const next = Math.min(this.bpm + this.rampStepBpm, ceiling)
+      if (next > this.bpm) {
+        this.bpm = next
+        this.rampGroup += 1
+      }
+      // 已到目标则保持原速继续响，不打断练习
+    },
     schedule() {
       while (nextTime < ctx.currentTime + 0.12) {
         const beatNo = (beatIndex % this.beats) + 1
+        if (beatNo === 1 && beatIndex > 0) this._onBarBoundary()
         this.click(nextTime, beatNo === 1)
         // 声音按 Web Audio 时钟排拍，视觉高亮也用同一时刻，圆点与实际响声对齐
         const delayMs = Math.max(0, (nextTime - ctx.currentTime) * 1000)
@@ -48,6 +74,8 @@ export const useMetronomeStore = defineStore('metronome', {
       await ctx.resume()
       nextTime = ctx.currentTime + 0.05
       beatIndex = 0
+      this.barCount = 0
+      this.rampGroup = 0
       this.schedule()
       timer = setInterval(() => this.schedule(), 25)
       this.running = true
@@ -57,10 +85,17 @@ export const useMetronomeStore = defineStore('metronome', {
       timer = null
       this.running = false
       this.currentBeat = 0
+      this.barCount = 0
+      this.rampGroup = 0
     },
     toggle() {
       if (this.running) this.stop()
       else this.start()
+    },
+    /** 开启训练时把当前 BPM 记为起点；关闭只关开关不动速度 */
+    toggleRamp(on) {
+      if (on && !this.rampEnabled) this.rampStartBpm = this.bpm
+      this.rampEnabled = !!on
     },
     tap() {
       const now = performance.now()
