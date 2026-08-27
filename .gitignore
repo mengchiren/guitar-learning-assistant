@@ -36,3 +36,6 @@ app/public/test-audio.mp3
 
 # 验收截图（本地证据，不进仓库）
 gui-test-screenshots/
+
+# 设备外观参考图（网页抓取的实物参考，仅作绘制对照，不进仓库）
+.tmp-ref/

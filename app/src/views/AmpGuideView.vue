@@ -1,5 +1,5 @@
 <script setup>
-// 音箱入门（v0.6.2）：JAM BUDDY 2 面板全景图解——点任意旋钮/脚钉看它是干嘛的。
+// 音箱入门（v0.6.2）：JAM BUDDY 2 面板全景图解——点任意旋钮/开关/踏板/指示灯/接口看它是干嘛的。
 // 解决零基础「找不到旋钮、看不懂英文标签、不知道多功能按压」的问题。
 // 数据全部来自 devices.js 的 panel（坐标/说明），新设备只改数据。
 import { ref, computed } from 'vue'
@@ -11,29 +11,40 @@ import GuitarPanel from '../components/GuitarPanel.vue'
 const amp = AMPS[0]
 const guitar = GUITARS[0]
 
-// 套路通道 → 脚钉操作文案（与 toneGuide 的 channelMap 一致）
+// 套路通道 → 踏板操作文案（与 toneGuide 的 channelMap 一致）
 function channelLabel(v) {
   const step = amp.channelMap?.[v]
   if (!step) return v
   return step.driveMode ? `${step.channel} → ${step.driveMode}` : step.channel
 }
 
-// 点按选中的旋钮/脚钉说明
-const selected = ref(null)
-function onSelect(field) {
-  const knob = amp.panel.knobs.find((k) => k.field === field)
-  const foot = amp.panel.foots.find((f) => f.id === field)
-  if (knob) {
-    selected.value = { title: knob.label, note: knob.note, isFoot: false }
-  } else if (foot) {
-    selected.value = { title: foot.label, note: foot.note, isFoot: true }
-  }
+// 可图解项的标签类型（旋钮/拨杆/踏板/指示灯/屏幕/接口）
+const TYPE_LABEL = {
+  knob: '旋钮',
+  switch: '拨杆',
+  pedal: '踏板',
+  label: '功能区',
+  led: '指示灯',
+  screen: '屏幕',
+  port: '接口',
 }
 
-// 所有可图解项（入门页列表用）
+// 点按选中的旋钮/开关/踏板说明
+const selected = ref(null)
+function onSelect(field) {
+  const all = items.value
+  const hit = all.find((i) => i.field === field)
+  if (hit) selected.value = hit
+}
+
+// 所有可图解项（面板图 + 列表共用）
 const items = computed(() => [
-  ...amp.panel.knobs.map((k) => ({ field: k.field, title: k.label, note: k.note, isFoot: false })),
-  ...amp.panel.foots.map((f) => ({ field: f.id, title: f.label, note: f.note, isFoot: true })),
+  ...amp.panel.knobs.map((k) => ({ field: k.field, title: k.label, note: k.note, type: 'knob' })),
+  ...(amp.panel.switches || []).map((s) => ({ field: s.id, title: s.label, note: s.note, type: 'switch' })),
+  ...(amp.panel.pedals || []).map((p) => ({ field: p.id, title: p.label, note: p.note, type: p.type === 'label' ? 'label' : 'pedal' })),
+  ...(amp.panel.leds || []).map((l) => ({ field: l.id, title: `${l.label}（${l.group}）`, note: l.note, type: 'led' })),
+  ...(amp.panel.screen ? [{ field: 'screen', title: 'LCD 显示屏', note: amp.panel.screen.note, type: 'screen' }] : []),
+  ...(amp.panel.ports || []).map((p) => ({ field: p.id, title: p.label, note: p.note, type: 'port' })),
 ])
 </script>
 
@@ -44,7 +55,7 @@ const items = computed(() => [
     <div class="card">
       <h2>{{ amp.name }} · 面板图解</h2>
       <p class="muted small" style="margin-bottom: 8px">
-        点下面面板上的任意旋钮/脚钉，看它是干什么的。红点 = 按下去有第二个功能（新手最容易漏）。
+        点下面面板上的任意旋钮/开关/踏板/指示灯，看它是干什么的。金色旋钮 = 转动，拨杆 = 上下拨，踏板 = 踩。
       </p>
       <div class="panel-scroll">
         <div class="panel-wrap">
@@ -53,7 +64,7 @@ const items = computed(() => [
       </div>
       <div v-if="selected" class="guide-box">
         <div class="guide-title">
-          <span class="tag" :class="{ on: !selected.isFoot }">{{ selected.isFoot ? '脚钉' : '旋钮' }}</span>
+          <span class="tag">{{ TYPE_LABEL[selected.type] || '部件' }}</span>
           <b>{{ selected.title }}</b>
         </div>
         <p class="small" style="margin-top: 6px">{{ selected.note }}</p>
@@ -62,9 +73,9 @@ const items = computed(() => [
     </div>
 
     <div class="card">
-      <h2>每个旋钮/脚钉是干嘛的</h2>
+      <h2>每个部件是干嘛的</h2>
       <div v-for="it in items" :key="it.field" class="list-row">
-        <span class="tag" :class="{ on: !it.isFoot }">{{ it.isFoot ? '脚钉' : '旋钮' }}</span>
+        <span class="tag">{{ TYPE_LABEL[it.type] || '部件' }}</span>
         <div>
           <div class="small" style="font-weight: 600">{{ it.title }}</div>
           <div class="dim small">{{ it.note }}</div>
@@ -77,7 +88,7 @@ const items = computed(() => [
       <p class="muted small" style="margin-bottom: 8px">练歌时先在歌曲详情页看套路名，再照这一行调。</p>
       <div class="tpl-table">
         <div class="tpl-row tpl-head">
-          <span>套路</span><span>通道（脚钉）</span><span>箱模</span><span>Gain</span>
+          <span>套路</span><span>通道（踏板）</span><span>箱模</span><span>Gain</span>
         </div>
         <div v-for="t in TONE_TEMPLATES" :key="t.id" class="tpl-row">
           <span class="tpl-name">{{ t.name }}</span>
@@ -87,7 +98,7 @@ const items = computed(() => [
         </div>
       </div>
       <p class="muted small" style="margin-top: 8px">
-        <b>通道怎么按？</b>CHANNEL 脚钉先选 CLEAN（清音）或 DRIVE（失真）；选了 DRIVE 的话，再用 DRIVE MODE 脚钉选 RHYTHM（节奏）或 LEAD（主音）。
+        <b>通道怎么按？</b>右踏板 CHANNEL 先选 CLEAN（清音）或 DRIVE（失真）；选了 DRIVE 的话，再用左踏板 DRIVE MODE 选 RHYTHM（节奏）或 LEAD（主音）。
         <b>Gain 旋钮是哪个？</b>标着 <b>Gain / Quit</b> 的旋钮；箱模是标着 <b>Amp / Ch.Volume</b> 的旋钮（转动循环选 14 种）。
       </p>
     </div>
@@ -115,7 +126,7 @@ const items = computed(() => [
 
 <style scoped>
 .panel-scroll { overflow-x: auto; padding-bottom: 4px; }
-.panel-wrap { min-width: 540px; }
+.panel-wrap { min-width: 760px; }
 
 .guide-box {
   margin-top: 10px;

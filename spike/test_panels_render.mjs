@@ -1,5 +1,5 @@
-// 面板组件渲染冒烟（v0.6.2）：用 Vue SSR 把 AmpPanel/GuitarPanel 渲染成字符串，
-// 验证 SVG 输出无运行时错误、高亮/指针/值标签确实渲染。
+// 面板组件渲染冒烟（v0.6.2，v0.17.0 按写实面板重写断言）：用 Vue SSR 把 AmpPanel/GuitarPanel 渲染成字符串，
+// 验证 SVG 输出无运行时错误、高亮/指针/值标签/LED 状态确实渲染。
 // 用法: node spike/test_panels_render.mjs
 import { readFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
@@ -50,32 +50,36 @@ function check(name, cond) {
 const amp = AMPS[0]
 const guitar = GUITARS[0]
 
-// 用「失真节奏 Riff」套路的值渲染（v0.6.3：双脚钉通道 + 实物箱模名）
+// 用「失真节奏 Riff」套路的值渲染（v0.6.3：双脚钉通道 + 实物箱模名；v0.17.0 双踏板 + LED 状态）
 const tpl = { guitar: { pickup: '档位 5（琴桥双线圈）', tone: '6~7' }, amp: { channel: 'Rhythm 节奏', model: 'J800 Lo', gain: 6, eq: { b: 5, m: 5, t: 6 }, mod: '关', delay: '关', reverb: 'Hall 轻' } }
 const step = amp.channelMap[tpl.amp.channel]
 const ampValues = { channel: step.channel, driveMode: step.driveMode, model: tpl.amp.model, gain: tpl.amp.gain, 'eq.b': tpl.amp.eq.b, 'eq.m': tpl.amp.eq.m, 'eq.t': tpl.amp.eq.t, mod: tpl.amp.mod, delay: tpl.amp.delay, reverb: tpl.amp.reverb }
 
 const ampHtml = await renderToString(createSSRApp({ components: { AmpPanel }, template: '<AmpPanel :panel="p" :values="v" :highlight="[\'channel\',\'model\',\'gain\',\'driveMode\']" />', data: () => ({ p: amp.panel, v: ampValues }) }))
-check('AmpPanel 渲染出面板底', ampHtml.includes('panel-body'))
-check('AmpPanel 渲染 10 个旋钮', (ampHtml.match(/knob-ring/g) || []).length === 10)
-check('AmpPanel 渲染 3 个脚钉', (ampHtml.match(/foot-body/g) || []).length === 3)
-check('AmpPanel gain 高亮（红圈 + 值标签）', ampHtml.includes('val-chip') && ampHtml.includes('>6<'))
-check('AmpPanel model 值标签 J800 Lo', ampHtml.includes('>J800 Lo<'))
-check('AmpPanel CHANNEL 脚钉值标签 DRIVE', ampHtml.includes('>DRIVE<'))
-check('AmpPanel DRIVE MODE 脚钉值标签 RHYTHM', ampHtml.includes('>RHYTHM<'))
-check('AmpPanel 指针端点存在', (ampHtml.match(/knob-pointer/g) || []).length === 4) // eq.b/m/t + gain
+check('AmpPanel 渲染出写实面板', ampHtml.includes('amp-panel'))
+check('AmpPanel 渲染 10 个旋钮', (ampHtml.match(/class="knob( on)?"/g) || []).length === 10)
+check('AmpPanel 渲染 2 个实体踏板', (ampHtml.match(/class="pedal( on)?"/g) || []).length === 2)
+check('AmpPanel 渲染 LOOPER 功能区 + 2 个拨杆开关', (ampHtml.match(/class="pedal-func"/g) || []).length === 1 && (ampHtml.match(/class="sw"/g) || []).length === 2)
+check('AmpPanel gain 高亮（值标签 6）', ampHtml.includes('val-chip') && /class="val-text">6<\/text>/.test(ampHtml))
+check('AmpPanel model 值标签 J800 Lo', /class="val-text">J800 Lo<\/text>/.test(ampHtml))
+check('AmpPanel CHANNEL 踏板值标签 DRIVE', /class="val-text">DRIVE<\/text>/.test(ampHtml))
+check('AmpPanel DRIVE MODE 踏板值标签 RHYTHM', /class="val-text">RHYTHM<\/text>/.test(ampHtml))
+check('AmpPanel 数值旋钮指示刻线 4 个（eq.b/m/t + gain）', (ampHtml.match(/knob-tick/g) || []).length === 4)
+check('AmpPanel LED 随通道点亮 2 枚（DRIVE + RHYTHM）', (ampHtml.match(/led-lit/g) || []).length === 2)
+check('AmpPanel LED 全灭态（无 channel 值）', !(await renderToString(createSSRApp({ components: { AmpPanel }, template: '<AmpPanel :panel="p" />', data: () => ({ p: amp.panel }) }))).includes('led-lit'))
+check('AmpPanel interactive 可点（点击区 class）', (await renderToString(createSSRApp({ components: { AmpPanel }, template: '<AmpPanel :panel="p" interactive />', data: () => ({ p: amp.panel }) }))).includes('clickable'))
 
 const guitarHtml = await renderToString(createSSRApp({ components: { GuitarPanel }, template: '<GuitarPanel :panel="p" :values="v" :highlight="[\'pickup\']" />', data: () => ({ p: guitar.panel, v: { pickup: '档位 5（琴桥双线圈）' } }) }))
 check('GuitarPanel 渲染琴身', guitarHtml.includes('body-wood'))
-check('GuitarPanel 档位高亮点 1 个（档位 5）', (guitarHtml.match(/switch-dot/g) || []).length === 1)
+check('GuitarPanel 档位高亮点 1 个（档位 5）', (guitarHtml.match(/sw-on/g) || []).length === 1)
 
 // 范围档位（清音伴奏 1~3）
 const guitarHtml2 = await renderToString(createSSRApp({ components: { GuitarPanel }, template: '<GuitarPanel :panel="p" :values="v" :highlight="[\'pickup\']" />', data: () => ({ p: guitar.panel, v: { pickup: '档位 1~3（琴颈/中间）' } }) }))
-check('GuitarPanel 范围档位高亮 3 个（1~3）', (guitarHtml2.match(/switch-dot/g) || []).length === 3)
+check('GuitarPanel 范围档位高亮 3 个（1~3）', (guitarHtml2.match(/sw-on/g) || []).length === 3)
 
 // 音量旋钮也高亮（v0.6.4：琴两个旋钮 VOLUME/TONE，音量进 keyParams）
 const guitarHtml4 = await renderToString(createSSRApp({ components: { GuitarPanel }, template: '<GuitarPanel :panel="p" :values="v" :highlight="[\'pickup\',\'volume\']" />', data: () => ({ p: guitar.panel, v: { pickup: '档位 5（琴桥双线圈）', volume: '8~9', tone: '6~7' } }) }))
-check('GuitarPanel 音量旋钮红圈 1 个（volume 高亮）', (guitarHtml4.match(/hl-ring/g) || []).length === 2) // 档位红圈 + 音量红圈
+check('GuitarPanel 音量旋钮红圈 1 个 + 档位红圈（volume 高亮）', (guitarHtml4.match(/hl-ring/g) || []).length === 2)
 
 // 不高亮时不应有红圈
 const guitarHtml3 = await renderToString(createSSRApp({ components: { GuitarPanel }, template: '<GuitarPanel :panel="p" :values="v" />', data: () => ({ p: guitar.panel, v: { pickup: '档位 5（琴桥双线圈）' } }) }))

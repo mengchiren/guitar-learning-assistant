@@ -59,7 +59,7 @@ const guitarHighlight = computed(() => guitar.value?.keyParams || [])
         </div>
       </div>
     </div>
-    <p class="muted small" style="margin-top: 6px">上图红色圈出的就是要动的：照着数值拧/按，其余先别碰。</p>
+    <p class="muted small" style="margin-top: 6px">上图高亮圈出的就是要动的：照着数值拧/按，其余先别碰。</p>
 
     <div class="quick-params">
       <span v-for="p in beginner.params" :key="p.label" class="quick-chip">
@@ -97,8 +97,8 @@ const guitarHighlight = computed(() => guitar.value?.keyParams || [])
 /* 面板区：手机横向滚动（音箱图保持可读宽度），桌面并排 */
 .panel-scroll { overflow-x: auto; padding-bottom: 4px; }
 .panel-wrap { display: flex; gap: 10px; align-items: flex-start; }
-.guitar-wrap { flex: none; width: 92px; }
-.amp-wrap { flex: none; width: 520px; }
+.guitar-wrap { flex: none; width: 150px; }
+.amp-wrap { flex: none; width: 760px; }
 
 .quick-params { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
 .quick-chip {
