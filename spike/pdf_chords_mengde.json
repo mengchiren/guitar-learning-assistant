@@ -1,0 +1,121 @@
+{
+ "sourcePdf": "梦的出口（中级课毕业曲）.pdf",
+ "pages": 4,
+ "title": {
+  "raw": "梦的出口",
+  "fixed": "梦的出口"
+ },
+ "meta": {
+  "bpm": 75,
+  "tuning": "Standard",
+  "timeSig": "4/4"
+ },
+ "headChordRow": [
+  "Cmaj7",
+  "Bm7",
+  "Am7",
+  "G",
+  "Cmaj7",
+  "G"
+ ],
+ "chordStreamRaw": [
+  {
+   "p": 0,
+   "t": "Cmaj7"
+  },
+  {
+   "p": 0,
+   "t": "Bm7"
+  },
+  {
+   "p": 0,
+   "t": "Am7"
+  },
+  {
+   "p": 0,
+   "t": "G"
+  },
+  {
+   "p": 0,
+   "t": "Cmaj7"
+  },
+  {
+   "p": 0,
+   "t": "Bm7"
+  },
+  {
+   "p": 0,
+   "t": "Am7"
+  },
+  {
+   "p": 0,
+   "t": "G"
+  }
+ ],
+ "chordStream": [
+  {
+   "p": 0,
+   "y": 330.2,
+   "t": "Cmaj7"
+  },
+  {
+   "p": 0,
+   "y": 330.2,
+   "t": "Bm7"
+  },
+  {
+   "p": 0,
+   "y": 330.2,
+   "t": "Am7"
+  },
+  {
+   "p": 0,
+   "y": 330.2,
+   "t": "G"
+  },
+  {
+   "p": 0,
+   "y": 500.5,
+   "t": "Cmaj7"
+  },
+  {
+   "p": 0,
+   "y": 500.5,
+   "t": "Bm7"
+  },
+  {
+   "p": 0,
+   "y": 689.9,
+   "t": "Am7"
+  },
+  {
+   "p": 0,
+   "y": 689.9,
+   "t": "G"
+  }
+ ],
+ "techStream": [
+  {
+   "p": 0,
+   "y": 588.7,
+   "t": "let ring"
+  },
+  {
+   "p": 0,
+   "y": 977.0,
+   "t": "P.M."
+  }
+ ],
+ "fxTokenFreq": {
+  "let ring": 2,
+  "P.M.": 9
+ },
+ "markerSequenceCollapsed": [
+  "Clean",
+  "Distortion"
+ ],
+ "markerOccurrences": [
+  "Clean",
+  "Distortion"
+ ]
+}
