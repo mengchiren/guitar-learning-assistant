@@ -37,6 +37,8 @@ jobs:
         run: node spike/test_sync.mjs
       - name: 录音节奏稳定度校验（v0.15.0：稳定/抖动/八分音符/边界 null）
         run: node spike/test_rhythm_stability.mjs
+      - name: 听力训练逻辑校验（v0.16.0：确定性生成/选项范围/判分边界/统计护栏）
+        run: node spike/test_ear_training.mjs
 
   # 引擎与渲染层：合成音频对拍 / 套路与设备建议回归 / SSR 渲染冒烟
   tests-engine-render:

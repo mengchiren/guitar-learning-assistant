@@ -31,6 +31,7 @@
 - 💾 **数据备份**：「我的」页一键导出/恢复全部数据（JSON 文件，录音除外）。
 - 🛡 **健壮性底座（v0.13.2）**：持久化在页面隐藏/关闭时强制刷盘（计时与草稿不怕秒关进程）、音频解码内存护栏前移 + 分析 Worker 崩溃自愈重试、全局异常捕获进本机错误横幅（点开可复制，不出设备不上云）、云同步快照前后端双大小上限 + 坏数据逐项清洗。
 - 🎸 **跟练四件套（v0.14.0）**：歌曲详情页 **AB 循环变速跟练播放器**（本地临时播放、循环点存本机、按引擎 BPM 换算当前速度提示）、节拍器**渐进提速训练**（每 N 小节自动升速到目标）、调音器**锁定去抖指示**、原谱 PDF 支持**蓝牙脚踏翻页器免设置使用**。
+- 🎧 **听力训练（v0.16.0）**：三关生成式题库——空弦音名 / 和弦性质（大·小·强力）/ 常见音程；每轮 10 题、即时反馈、本机最佳纪录。练耳直接服务调音与音色套路选择。
 - 🎨 **视觉**：简约瑞士军刀风——米白底、细线卡片、瑞士红点缀、线性图标；桌面端为 B 站式顶栏 + 仪表盘多栏，手机端为底部导航单栏。
 
 ## 技术栈
@@ -110,10 +111,11 @@ node spike/test_tone_guide.mjs                   # 套路归类规则 + 设备�
 node spike/test_sheet_view.mjs                   # 课件式谱面 SSR 渲染 19 项（CI 跑）
 node spike/test_wallpapers.mjs                   # 壁纸模块：纯逻辑/存储层/壁纸包提取 26 项（CI 跑）
 node spike/test_rhythm_stability.mjs             # 录音节奏稳定度校验（稳/抖动/八分音符/null 边界，CI 跑）
+node spike/test_ear_training.mjs                 # 听力训练逻辑校验（确定性生成/判分/统计护栏，CI 跑）
 node spike/check_dist_assets.mjs app/dist        # 构建产物守卫：dist 禁 .mjs/.wasm 等预缓存外后缀 + 入口文件检查（CI 构建后自动跑）
 ```
 
-**CI**（`.github/workflows/ci.yml`，v0.13.2 起**三组并行 job** + 同 ref 连推自动取消旧跑次）：tests-logic（规则引擎对拍 / store 冒烟 / 数据校验 / 云同步决策含坏时间戳防御与快照清洗）、tests-engine-render（合成音频引擎测试 / 设备建议回归 / 面板与课件式谱面 SSR 渲染 / 壁纸模块）、build-and-guard（生产构建 + dist 产物守卫脚本【globPatterns 外后缀直接 fail】+ 上传 dist artifact）；全过才允许合并。真实歌曲对拍因版权音频不入库，只在本地跑。
+**CI**（`.github/workflows/ci.yml`，v0.13.2 起**三组并行 job** + 同 ref 连推自动取消旧跑次）：tests-logic（规则引擎对拍 / store 冒烟 / 数据校验 / 云同步决策含坏时间戳防御与快照清洗 / 录音节奏稳定度 / 听力训练逻辑）、tests-engine-render（合成音频引擎测试 / 设备建议回归 / 面板与课件式谱面 SSR 渲染 / 壁纸模块）、build-and-guard（生产构建 + dist 产物守卫脚本【globPatterns 外后缀直接 fail】+ 上传 dist artifact）；全过才允许合并。真实歌曲对拍因版权音频不入库，只在本地跑。
 
 ## 部署
 

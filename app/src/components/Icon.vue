@@ -108,9 +108,13 @@ defineProps({
       <path d="M9 21h6" />
     </template>
     <template v-else-if="name === 'image'">
-      <rect x="3.5" y="4.5" width="17" height="15" rx="2" />
-      <circle cx="9" cy="9.8" r="1.6" />
-      <path d="M20 16.5l-4.4-4.4-7.1 7.1" />
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <circle cx="8.5" cy="10" r="1.6" />
+      <path d="M21 16l-4.5-4.5L9 19" />
+    </template>
+    <template v-else-if="name === 'ear'">
+      <path d="M6 9.5a6 6 0 0 1 12 0c0 3.2-2.7 4.4-2.7 7a3 3 0 0 1-6 0" />
+      <path d="M12 6.8a3.6 3.6 0 0 1 3.6 3.6c0 1.6-.9 2.3-1.6 3" />
     </template>
   </svg>
 </template>
