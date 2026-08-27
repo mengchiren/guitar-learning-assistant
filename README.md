@@ -30,6 +30,7 @@
 - 💾 **数据同步（云，v0.11.0）**：「我的」页一键上传/下载，把打卡、歌单与分析结果、计划/课程进度、自录曲谱、聊天记录、设置偏好在两台设备间保持一致（Cloudflare KV + Functions 代理 + 令牌防刷；打开应用自动检查云端更新并提示；录音与音频永不上云）。
 - 💾 **数据备份**：「我的」页一键导出/恢复全部数据（JSON 文件，录音除外）。
 - 🛡 **健壮性底座（v0.13.2）**：持久化在页面隐藏/关闭时强制刷盘（计时与草稿不怕秒关进程）、音频解码内存护栏前移 + 分析 Worker 崩溃自愈重试、全局异常捕获进本机错误横幅（点开可复制，不出设备不上云）、云同步快照前后端双大小上限 + 坏数据逐项清洗。
+- 🎸 **跟练四件套（v0.14.0）**：歌曲详情页 **AB 循环变速跟练播放器**（本地临时播放、循环点存本机、按引擎 BPM 换算当前速度提示）、节拍器**渐进提速训练**（每 N 小节自动升速到目标）、调音器**锁定去抖指示**、原谱 PDF 支持**蓝牙脚踏翻页器免设置使用**。
 - 🎨 **视觉**：简约瑞士军刀风——米白底、细线卡片、瑞士红点缀、线性图标；桌面端为 B 站式顶栏 + 仪表盘多栏，手机端为底部导航单栏。
 
 ## 技术栈
@@ -51,7 +52,7 @@
 │       ├── components/   # Icon、ToneAdvice、ChordChart、FretboardMap、RecordPanel、
 │       │                 # AmpPanel（音箱面板 SVG）、GuitarPanel（吉他示意 SVG）、
 │       │                 # SheetScore（课件式谱面）、SheetPdfViewer（原谱 PDF 查看）、
-│       │                 # WallpaperPanel（背景壁纸设置）
+│       │                 # WallpaperPanel（背景壁纸设置）、PracticePlayerCard（AB 循环变速跟练播放器）
 │       ├── composables/  # useMediaQuery、useTuner、useWallpaperBg（壁纸 blob → object URL）
 │       ├── data/         # nav（路由/tab/工具入口清单）、devices（含能力描述与面板布局）、templates、
 │       │                 # classifyRules（套路归类规则）、seedSongs（30 首）、chords（82 个）、
