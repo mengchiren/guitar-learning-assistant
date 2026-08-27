@@ -12,6 +12,7 @@ import { getSheetPdfMeta, putSheetPdf, deleteSheetPdf } from '../utils/sheetPdfD
 import ToneAdvice from '../components/ToneAdvice.vue'
 import SheetScore from '../components/SheetScore.vue'
 import SheetPdfViewer from '../components/SheetPdfViewer.vue'
+import PracticePlayerCard from '../components/PracticePlayerCard.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -306,6 +307,9 @@ const pdfSizeLabel = computed(() => {
         </div>
       </template>
     </div>
+
+    <!-- v0.14.0 跟练播放器：AB 循环 + 变速（音频仅会话内存态，循环点存本机） -->
+    <PracticePlayerCard :song-id="song.id" :bpm="Number(song.bpm) || 0" />
 
     <div v-if="tpl" class="card">
       <h2>设备设置建议（按当前设备标注）</h2>
