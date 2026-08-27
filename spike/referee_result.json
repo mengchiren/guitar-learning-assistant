@@ -1,0 +1,611 @@
+[
+ {
+  "file": "Ave Mujica - Ave Mujica.mp3",
+  "durationSec": 256.0,
+  "tempoMedian": 112.3,
+  "tempoBeatTrack": 112.3,
+  "keyTop3": [
+   {
+    "key": "G 小调",
+    "corr": 0.663
+   },
+   {
+    "key": "D 大调",
+    "corr": 0.361
+   },
+   {
+    "key": "A# 大调",
+    "corr": 0.333
+   }
+  ],
+  "keyConf": "高"
+ },
+ {
+  "file": "Ave Mujica - KiLLKiSS.flac",
+  "durationSec": 208.8,
+  "tempoMedian": 136.0,
+  "tempoBeatTrack": 136.0,
+  "keyTop3": [
+   {
+    "key": "E 小调",
+    "corr": 0.815
+   },
+   {
+    "key": "E 大调",
+    "corr": 0.551
+   },
+   {
+    "key": "B 大调",
+    "corr": 0.348
+   }
+  ],
+  "keyConf": "高"
+ },
+ {
+  "file": "Ave Mujica - 黒のバースデイ.mp3",
+  "durationSec": 225.7,
+  "tempoMedian": 99.4,
+  "tempoBeatTrack": 99.4,
+  "keyTop3": [
+   {
+    "key": "D# 小调",
+    "corr": 0.626
+   },
+   {
+    "key": "D# 大调",
+    "corr": 0.443
+   },
+   {
+    "key": "A# 大调",
+    "corr": 0.296
+   }
+  ],
+  "keyConf": "中"
+ },
+ {
+  "file": "MyGO!!!!! - Deathly Loneliness Attacks (Cover).mp3",
+  "durationSec": 254.3,
+  "tempoMedian": 152.0,
+  "tempoBeatTrack": 152.0,
+  "keyTop3": [
+   {
+    "key": "B 大调",
+    "corr": 0.485
+   },
+   {
+    "key": "D# 小调",
+    "corr": 0.421
+   },
+   {
+    "key": "E 大调",
+    "corr": 0.387
+   }
+  ],
+  "keyConf": "中"
+ },
+ {
+  "file": "MyGO!!!!! - タネビ.mp3",
+  "durationSec": 244.2,
+  "tempoMedian": 129.2,
+  "tempoBeatTrack": 129.2,
+  "keyTop3": [
+   {
+    "key": "A 大调",
+    "corr": 0.719
+   },
+   {
+    "key": "E 大调",
+    "corr": 0.696
+   },
+   {
+    "key": "C# 小调",
+    "corr": 0.671
+   }
+  ],
+  "keyConf": "低"
+ },
+ {
+  "file": "MyGO!!!!! - 壱雫空.mp3",
+  "durationSec": 189.6,
+  "tempoMedian": 103.4,
+  "tempoBeatTrack": 103.4,
+  "keyTop3": [
+   {
+    "key": "C# 大调",
+    "corr": 0.578
+   },
+   {
+    "key": "C# 小调",
+    "corr": 0.522
+   },
+   {
+    "key": "F# 大调",
+    "corr": 0.512
+   }
+  ],
+  "keyConf": "中"
+ },
+ {
+  "file": "MyGO!!!!! - 影色舞.mp3",
+  "durationSec": 209.5,
+  "tempoMedian": 112.3,
+  "tempoBeatTrack": 112.3,
+  "keyTop3": [
+   {
+    "key": "A# 小调",
+    "corr": 0.589
+   },
+   {
+    "key": "F 小调",
+    "corr": 0.479
+   },
+   {
+    "key": "C# 大调",
+    "corr": 0.457
+   }
+  ],
+  "keyConf": "中"
+ },
+ {
+  "file": "MyGO!!!!! - 春日影.mp3",
+  "durationSec": 256.6,
+  "tempoMedian": 99.4,
+  "tempoBeatTrack": 99.4,
+  "keyTop3": [
+   {
+    "key": "B 大调",
+    "corr": 0.832
+   },
+   {
+    "key": "E 大调",
+    "corr": 0.637
+   },
+   {
+    "key": "F# 大调",
+    "corr": 0.446
+   }
+  ],
+  "keyConf": "中"
+ },
+ {
+  "file": "MyGO!!!!! - 詩超絆.mp3",
+  "durationSec": 237.2,
+  "tempoMedian": 129.2,
+  "tempoBeatTrack": 112.3,
+  "keyTop3": [
+   {
+    "key": "C 大调",
+    "corr": 0.835
+   },
+   {
+    "key": "F 大调",
+    "corr": 0.701
+   },
+   {
+    "key": "F 小调",
+    "corr": 0.448
+   }
+  ],
+  "keyConf": "中"
+ },
+ {
+  "file": "MyGO!!!!! - 迷星叫.mp3",
+  "durationSec": 211.4,
+  "tempoMedian": 129.2,
+  "tempoBeatTrack": 129.2,
+  "keyTop3": [
+   {
+    "key": "G# 大调",
+    "corr": 0.747
+   },
+   {
+    "key": "C# 大调",
+    "corr": 0.597
+   },
+   {
+    "key": "C 小调",
+    "corr": 0.53
+   }
+  ],
+  "keyConf": "中"
+ },
+ {
+  "file": "アヴェ ムジカ - カオ.mp3",
+  "durationSec": 242.6,
+  "tempoMedian": 143.6,
+  "tempoBeatTrack": 143.6,
+  "keyTop3": [
+   {
+    "key": "F# 小调",
+    "corr": 0.443
+   },
+   {
+    "key": "E 小调",
+    "corr": 0.383
+   },
+   {
+    "key": "B 大调",
+    "corr": 0.331
+   }
+  ],
+  "keyConf": "中"
+ },
+ {
+  "file": "アヴェ ムジカ - ソラノムジカ.mp3",
+  "durationSec": 279.5,
+  "tempoMedian": 129.2,
+  "tempoBeatTrack": 129.2,
+  "keyTop3": [
+   {
+    "key": "F 大调",
+    "corr": 0.708
+   },
+   {
+    "key": "C 大调",
+    "corr": 0.485
+   },
+   {
+    "key": "A# 大调",
+    "corr": 0.467
+   }
+  ],
+  "keyConf": "高"
+ },
+ {
+  "file": "トゲナシトゲアリ - 声なき魚.mp3",
+  "durationSec": 180.9,
+  "tempoMedian": 129.2,
+  "tempoBeatTrack": 129.2,
+  "keyTop3": [
+   {
+    "key": "G 小调",
+    "corr": 0.661
+   },
+   {
+    "key": "A# 大调",
+    "corr": 0.56
+   },
+   {
+    "key": "D 小调",
+    "corr": 0.45
+   }
+  ],
+  "keyConf": "中"
+ },
+ {
+  "file": "トゲナシトゲアリ - 爆ぜて咲く.mp3",
+  "durationSec": 221.4,
+  "tempoMedian": 99.4,
+  "tempoBeatTrack": 99.4,
+  "keyTop3": [
+   {
+    "key": "G 大调",
+    "corr": 0.709
+   },
+   {
+    "key": "D 大调",
+    "corr": 0.642
+   },
+   {
+    "key": "C 大调",
+    "corr": 0.536
+   }
+  ],
+  "keyConf": "中"
+ },
+ {
+  "file": "トゲナシトゲアリ - 誰にもなれない私だから.mp3",
+  "durationSec": 189.8,
+  "tempoMedian": 152.0,
+  "tempoBeatTrack": 152.0,
+  "keyTop3": [
+   {
+    "key": "F 大调",
+    "corr": 0.88
+   },
+   {
+    "key": "C 大调",
+    "corr": 0.791
+   },
+   {
+    "key": "A 小调",
+    "corr": 0.61
+   }
+  ],
+  "keyConf": "中"
+ },
+ {
+  "file": "トゲナシトゲアリ - 雑踏、僕らの街 (熙熙攘攘、我们的城市).flac",
+  "durationSec": 184.2,
+  "tempoMedian": 112.3,
+  "tempoBeatTrack": 112.3,
+  "keyTop3": [
+   {
+    "key": "E 小调",
+    "corr": 0.752
+   },
+   {
+    "key": "E 大调",
+    "corr": 0.511
+   },
+   {
+    "key": "B 大调",
+    "corr": 0.505
+   }
+  ],
+  "keyConf": "高"
+ },
+ {
+  "file": "放課後ティータイム - U&I.mp3",
+  "durationSec": 275.8,
+  "tempoMedian": 103.4,
+  "tempoBeatTrack": 103.4,
+  "keyTop3": [
+   {
+    "key": "A 大调",
+    "corr": 0.88
+   },
+   {
+    "key": "E 大调",
+    "corr": 0.705
+   },
+   {
+    "key": "F# 小调",
+    "corr": 0.626
+   }
+  ],
+  "keyConf": "中"
+ },
+ {
+  "file": "放課後ティータイム - ふわふわ時間.mp3",
+  "durationSec": 236.1,
+  "tempoMedian": 89.1,
+  "tempoBeatTrack": 89.1,
+  "keyTop3": [
+   {
+    "key": "E 大调",
+    "corr": 0.951
+   },
+   {
+    "key": "B 大调",
+    "corr": 0.694
+   },
+   {
+    "key": "A 大调",
+    "corr": 0.572
+   }
+  ],
+  "keyConf": "高"
+ },
+ {
+  "file": "放課後ティータイム - 天使にふれたよ!.mp3",
+  "durationSec": 281.9,
+  "tempoMedian": 117.5,
+  "tempoBeatTrack": 117.5,
+  "keyTop3": [
+   {
+    "key": "F 大调",
+    "corr": 0.839
+   },
+   {
+    "key": "A# 大调",
+    "corr": 0.774
+   },
+   {
+    "key": "D 小调",
+    "corr": 0.655
+   }
+  ],
+  "keyConf": "中"
+ },
+ {
+  "file": "春日影-《MyGo》.flac",
+  "durationSec": 256.6,
+  "tempoMedian": 99.4,
+  "tempoBeatTrack": 99.4,
+  "keyTop3": [
+   {
+    "key": "B 大调",
+    "corr": 0.832
+   },
+   {
+    "key": "E 大调",
+    "corr": 0.637
+   },
+   {
+    "key": "F# 大调",
+    "corr": 0.446
+   }
+  ],
+  "keyConf": "中"
+ },
+ {
+  "file": "結束バンド - Distortion!!.mp3",
+  "durationSec": 203.5,
+  "tempoMedian": 117.5,
+  "tempoBeatTrack": 117.5,
+  "keyTop3": [
+   {
+    "key": "B 大调",
+    "corr": 0.662
+   },
+   {
+    "key": "F# 大调",
+    "corr": 0.575
+   },
+   {
+    "key": "E 大调",
+    "corr": 0.518
+   }
+  ],
+  "keyConf": "中"
+ },
+ {
+  "file": "結束バンド - なにが悪い.mp3",
+  "durationSec": 227.4,
+  "tempoMedian": 123.0,
+  "tempoBeatTrack": 123.0,
+  "keyTop3": [
+   {
+    "key": "C 大调",
+    "corr": 0.736
+   },
+   {
+    "key": "G 大调",
+    "corr": 0.704
+   },
+   {
+    "key": "E 小调",
+    "corr": 0.65
+   }
+  ],
+  "keyConf": "低"
+ },
+ {
+  "file": "結束バンド - カラカラ.mp3",
+  "durationSec": 265.1,
+  "tempoMedian": 95.7,
+  "tempoBeatTrack": 95.7,
+  "keyTop3": [
+   {
+    "key": "E 大调",
+    "corr": 0.749
+   },
+   {
+    "key": "A 大调",
+    "corr": 0.56
+   },
+   {
+    "key": "B 大调",
+    "corr": 0.485
+   }
+  ],
+  "keyConf": "中"
+ },
+ {
+  "file": "結束バンド - ギターと孤独と蒼い惑星.mp3",
+  "durationSec": 229.0,
+  "tempoMedian": 95.7,
+  "tempoBeatTrack": 95.7,
+  "keyTop3": [
+   {
+    "key": "A 大调",
+    "corr": 0.656
+   },
+   {
+    "key": "E 大调",
+    "corr": 0.526
+   },
+   {
+    "key": "F# 小调",
+    "corr": 0.51
+   }
+  ],
+  "keyConf": "中"
+ },
+ {
+  "file": "結束バンド - 忘れてやらない.mp3",
+  "durationSec": 223.4,
+  "tempoMedian": 92.3,
+  "tempoBeatTrack": 92.3,
+  "keyTop3": [
+   {
+    "key": "E 大调",
+    "corr": 0.788
+   },
+   {
+    "key": "B 大调",
+    "corr": 0.653
+   },
+   {
+    "key": "G# 小调",
+    "corr": 0.613
+   }
+  ],
+  "keyConf": "中"
+ },
+ {
+  "file": "結束バンド - 星座になれたら (若能化作星座).flac",
+  "durationSec": 258.2,
+  "tempoMedian": 123.0,
+  "tempoBeatTrack": 123.0,
+  "keyTop3": [
+   {
+    "key": "G# 大调",
+    "corr": 0.811
+   },
+   {
+    "key": "D# 大调",
+    "corr": 0.783
+   },
+   {
+    "key": "F 小调",
+    "corr": 0.55
+   }
+  ],
+  "keyConf": "低"
+ },
+ {
+  "file": "結束バンド - 青春コンプレックス.mp3",
+  "durationSec": 205.1,
+  "tempoMedian": 129.2,
+  "tempoBeatTrack": 95.7,
+  "keyTop3": [
+   {
+    "key": "G 小调",
+    "corr": 0.415
+   },
+   {
+    "key": "G 大调",
+    "corr": 0.39
+   },
+   {
+    "key": "D 大调",
+    "corr": 0.365
+   }
+  ],
+  "keyConf": "低"
+ },
+ {
+  "file": "トゲナシトゲアリ - 空の箱 (空箱)(井芹仁菜、河原木桃香).mp3",
+  "durationSec": 184.5,
+  "tempoMedian": 143.6,
+  "tempoBeatTrack": 143.6,
+  "keyTop3": [
+   {
+    "key": "F# 小调",
+    "corr": 0.581
+   },
+   {
+    "key": "C# 小调",
+    "corr": 0.417
+   },
+   {
+    "key": "C# 大调",
+    "corr": 0.373
+   }
+  ],
+  "keyConf": "中"
+ },
+ {
+  "file": "放課後ティータイム - NO, Thank You!.mp3",
+  "durationSec": 257.5,
+  "tempoMedian": 123.0,
+  "tempoBeatTrack": 123.0,
+  "keyTop3": [
+   {
+    "key": "E 小调",
+    "corr": 0.881
+   },
+   {
+    "key": "E 大调",
+    "corr": 0.627
+   },
+   {
+    "key": "G 大调",
+    "corr": 0.608
+   }
+  ],
+  "keyConf": "高"
+ }
+]
