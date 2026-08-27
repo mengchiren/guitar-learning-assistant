@@ -119,6 +119,12 @@ onUnmounted(stopPlay)
         <span v-if="r.bpmManual" class="dim">（手动）</span>
         <span v-else-if="r.bpmConf" class="dim">（置信度 {{ r.bpmConf }}）</span>
         <span v-else class="dim">（自动对拍）</span>
+        <span
+          v-if="r.rhythmStability"
+          class="tag"
+          style="margin-left: 8px"
+          :title="'间隔相对拍格平均偏 ±' + r.rhythmStability.medianDevMs + 'ms，' + r.rhythmStability.hitRatePct + '% 间隔贴合'"
+        >节奏稳定 {{ r.rhythmStability.score }}</span>
       </p>
       <p v-if="r.note" class="small dim" style="margin-top: 4px">{{ r.note }}</p>
     </div>

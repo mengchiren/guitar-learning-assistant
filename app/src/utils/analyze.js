@@ -136,8 +136,7 @@ function estimateTempo(env, frameRate) {
 
 // K-S 模板相关取 Top3（与 spike/analyze.py 的 estimate_key 一致）
 // 注意：spike 用 np.roll(MAJ, i)，即 key i 的模板峰值落在音级 i；手写实现要同方向
-function estimateKey(chroma) {
-  const scores = []
+function estimateKey(chroma) {  const scores = []
   for (let i = 0; i < 12; i++) {
     const maj = new Float32Array(12)
     const min = new Float32Array(12)
@@ -219,6 +218,81 @@ export function classify({ bpm, rmsDb, centroidHz }) {
     }
   }
   return { template: '清音伴奏', confidence: '中' }
+}
+
+/**
+ * 节奏稳定度（v0.15.0 录音陪练反馈）。
+ * 度量：相邻起音的间隔与「拍格整数倍」的贴合程度——不是把全曲锁死到一条绝对相位线上。
+ * 为什么这样设计：①传入的 BPM 本身是参考值（±几个百分点常见、半速判定可能偏一格），
+ * 绝对相位拟合会把 BPM 的小误差放大成"越弹越歪"；②漏弹/休止不该记为节奏错误，
+ * 但间隔忽长忽短必须被抓出来——整数倍容忍正好表达这两点；③自动尝试半拍/一拍/
+ * 两拍细分与 ±4% 速度扫描：均匀八分音符按其自身细分记高分，不强求踩正拍。
+ * 返回 null 表示无法评估（音频太短/起音太少/无 BPM）。
+ */
+function evaluateRhythmStability(envS, frameRate, bpm, durationSec) {
+  if (!bpm || bpm <= 0 || durationSec < 8 || envS.length < Math.round(8 * frameRate)) return null
+
+  // 自适应阈值寻峰：全局峰值 15% 以上、严格高于两侧邻居、彼此间隔 ≥120ms（同一
+  // 起音被相邻多帧命中的话只留最强帧——拨弦瞬态的谱通量会拖出几十毫秒的回声小峰）
+  let gmax = 0
+  for (let t = 0; t < envS.length; t++) if (envS[t] > gmax) gmax = envS[t]
+  if (gmax <= 0) return null
+  const minGap = Math.max(1, Math.round(frameRate * 0.12))
+  const peaks = []
+  for (let t = 1; t < envS.length - 1; t++) {
+    if (envS[t] < gmax * 0.15) continue
+    if (envS[t] <= envS[t - 1] || envS[t] < envS[t + 1]) continue
+    const last = peaks[peaks.length - 1]
+    if (peaks.length && t - last < minGap) {
+      if (envS[t] > envS[last]) peaks[peaks.length - 1] = t
+      continue
+    }
+    peaks.push(t)
+  }
+  if (peaks.length < 5) return null
+
+  // 包络第 i 格对应第 (i+1) 帧与上一帧交界 ≈ (i+1)*HOP；时间分辨率约 ±11.6ms（HOP/sr/2）
+  const times = peaks.map((p) => ((p + 1) * HOP) / TARGET_SR)
+  const gaps = []
+  for (let j = 1; j < times.length; j++) {
+    const g = times[j] - times[j - 1]
+    if (g >= 0.12) gaps.push(g)
+  }
+  if (gaps.length < 4) return null
+
+  let best = null
+  for (const speedMul of [0.96, 0.98, 1, 1.02, 1.04]) {
+    for (const subdiv of [0.5, 1, 2]) {
+      const P = ((60 / bpm) * subdiv * speedMul)
+      if (P < 0.15 || P > 3) continue
+      // 每个间隔与最近整倍数拍的差值：漏掉一拍会落到 2P，同样是合法节拍层级
+      const errs = []
+      for (const g of gaps) {
+        const mul = Math.max(1, Math.round(g / P))
+        errs.push(Math.abs(g - mul * P))
+      }
+      errs.sort((a, b) => a - b)
+      const med = errs[Math.floor(errs.length / 2)]
+      if (!best || med < best.med) best = { med, P }
+    }
+  }
+  if (!best) return null
+
+  // 命中率：用选出的拍格重算，间隔偏差 ≤ max(90ms, 18% 拍长) 记为贴合
+  const tol = Math.min(0.09, 0.18 * best.P)
+  let hits = 0
+  for (const g of gaps) {
+    const mul = Math.max(1, Math.round(g / best.P))
+    if (Math.abs(g - mul * best.P) <= tol) hits++
+  }
+
+  const devMs = Math.round(best.med * 1000)
+  const hitRatePct = Math.round((hits / gaps.length) * 100)
+  // 计分透明化：机器级稳定（≈±12ms 内）可得满分；分数 = 满分 − 超出 12ms 的间隔偏差，
+  // 再按贴合率加权（0.35 底权保证偶有杂起音不摧毁总分）
+  const base = Math.max(0, 100 - Math.max(0, devMs - 12))
+  const score = Math.min(100, Math.round(base * (0.35 + 0.65 * (hitRatePct / 100))))
+  return { score, medianDevMs: devMs, hitRatePct }
 }
 
 /**
@@ -419,6 +493,9 @@ export function analyzeAudio({ samples, sampleRate, debug = false }) {
   const chordsRough = roughChords(chordCols, windowIdx)
   const { template, confidence: templateConf } = classify({ bpm: tempoUseBpm, rmsDb, centroidHz })
 
+  // v0.15.0 节奏稳定度：录音陪练反馈用（歌曲分析顺带产出，成本可忽略——包络已就绪）
+  const rhythmStability = evaluateRhythmStability(envS, frameRate, tempoUseBpm, durationSec)
+
   // 置信度
   // BPM：前后半段测速一致性（八度折叠后对比）。节奏密集的摇滚 lag 谱近乎平坦，
   // 峰比区分不了置信度；两半段一致才是节奏清晰的可靠信号。
@@ -446,6 +523,7 @@ export function analyzeAudio({ samples, sampleRate, debug = false }) {
   if (durationSec < 30) notes.push('音频不足 30 秒，BPM/调性估计不稳定。')
   if (keyConf === '低') notes.push('调性判据不强（Top2 差距小），建议以种子库或人工确认为准。')
   if (bpmConf === '低') notes.push('前后半段测速不一致或节奏复杂，BPM 仅供参考。')
+  if (rhythmStability && rhythmStability.score < 40) notes.push('节奏起伏较大（清音单音/慢练/环境噪音都常见），稳定度分数仅供参考。')
   notes.push('和弦为粗略估计，准确率有限，仅供练习参考。')
 
   return {
@@ -459,6 +537,7 @@ export function analyzeAudio({ samples, sampleRate, debug = false }) {
     chordsRough,
     template,
     templateId: TEMPLATE_IDS[template] || null,
+    rhythmStability,
     confidence: { bpm: bpmConf, key: keyConf, template: templateConf, chords: '低' },
     notes,
     ...(debug

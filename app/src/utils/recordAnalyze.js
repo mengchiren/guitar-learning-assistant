@@ -16,6 +16,8 @@ export async function analyzeRecordingBlob(blob) {
       confidence: res.confidence.bpm,
       durationSec: res.durationSec,
       notes: res.notes,
+      // v0.15.0 节奏稳定度（陪练反馈）：与 BPM 同一趟 Worker 计算顺带产出
+      rhythmStability: res.rhythmStability || null,
     }
   } catch {
     // 解码失败（罕见格式）或音频太短：返回 null，不阻塞保存，BPM 留空让用户手填
