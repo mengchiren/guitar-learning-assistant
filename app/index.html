@@ -3,7 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#f4f3ef" />
+    <!-- 深浅两套浏览器框配色（v0.13.2：原来只有一套 #f4f3ef，深色模式下状态栏穿帮） -->
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#fbfbfd" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#101114" />
+    <!-- iOS 加桌面图标（v0.13.2：缺失时 iOS 会用页面截图退化当图标） -->
+    <link rel="apple-touch-icon" href="/icon-192.png" />
     <title>练琴搭子</title>
   </head>
   <body>

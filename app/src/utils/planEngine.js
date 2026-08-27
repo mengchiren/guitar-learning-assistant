@@ -3,6 +3,8 @@
 // 规则全部内置且可解释：每项带 why 文案，包级带 tier 说明。改任何规则后必须重跑
 // spike/test_plan_engine.mjs 对拍测试。
 import { FUNDAMENTALS } from '../data/fundamentals.js'
+// v0.13.2：fmt 改为复用 utils/date.js 的本地时区实现（date.js 注释「勿再各自实现」被自己违反过）
+import { localDateStr } from './date.js'
 
 // ---- 日期工具（本地时区，YYYY-MM-DD） ----
 export function weekStartOf(dateStr) {
@@ -13,12 +15,8 @@ export function weekStartOf(dateStr) {
   return fmt(d)
 }
 
-export function fmt(d) {
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${y}-${m}-${day}`
-}
+/** 旧导出名保留兼容（对拍测试在用）；实现收敛到 utils/date.js */
+export const fmt = localDateStr
 
 export function shiftDays(dateStr, delta) {
   const d = new Date(`${dateStr}T00:00:00`)

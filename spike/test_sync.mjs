@@ -1,7 +1,7 @@
-// 云同步核心校验（v0.11.0，CI 跑）：
-//  ①chooseDirection 方向决策边界；②SYNC_KEYS 白名单规范（拼写+无瞬态 key 混入）；
-//  ③collectSnapshot 只收集白名单数据（瞬态/令牌/本地态被排除）；
-//  ④applySnapshot 覆盖语义（远端没有的 key 会清掉）；⑤fmtWhen 格式化。
+// 云同步核心校验（v0.11.0，CI 跑；v0.13.2 增收紧项）：
+// ①chooseDirection 方向决策边界（含坏时间戳防御）；②SYNC_KEYS 白名单规范；
+// ③collectSnapshot 只收集白名单数据；④applySnapshot 覆盖语义 + 远端数据清洗；
+// ⑤sync-stamp 只对白名单 key 刷新的门控；⑥fmtWhen 格式化。
 // 纯 Node + localStorage 内存 shim（与 test_stores_smoke.mjs 同款）。
 // 用法: node spike/test_sync.mjs
 
@@ -114,6 +114,54 @@ touch('applySnapshot：写入远端数据 + 清掉远端没有的 key', () => {
   if (storage.load('course-progress', null) === null) throw new Error('course-progress 未写入')
   const raw = localStorage.getItem('gla:v1:plan-basics-done')
   if (raw !== null) throw new Error('远端没有的 key 未被清除')
+})
+
+// ---- ④v0.13.2 applySnapshot 数据清洗（防坏快照整包灌进 store）----
+resetMem()
+storage.save('songs', [{ title: '旧歌' }])
+touch('applySnapshot：未知 key / 非法类型被跳过并返回 skipped 说明', () => {
+  const skipped = sync.applySnapshot({
+    songs: [{ title: '新歌', bpm: 110 }],
+    evil: { a: 1 }, // 不在白名单
+    'course-progress': 'not-an-object-value-is-ok-string', // 原始值合法，应写入
+    timerSession: 123, // 命名不在白名单
+  })
+  if (!Array.isArray(skipped) || !skipped.includes('evil:不在白名单')) throw new Error(`skipped=${skipped}`)
+  if (localStorage.getItem('gla:v1:evil') !== null) throw new Error('非白名单 key 竟被落库')
+  if (storage.load('songs', [])[0].title !== '新歌') throw new Error('正常数据未写入')
+})
+touch('sanitizeRemoteData：整个 data 不是对象 → 全部跳过不抛错', () => {
+  const r1 = sync.sanitizeRemoteData(null)
+  if (Object.keys(r1.clean).length !== 0 || r1.skipped.length === 0) throw new Error('null 处理不对')
+  const r2 = sync.sanitizeRemoteData([1, 2])
+  if (Object.keys(r2.clean).length !== 0) throw new Error('数组处理不对')
+})
+touch('sanitizeRemoteData：函数类型 / 过大条目被拒', () => {
+  const r = sync.sanitizeRemoteData({ songs: () => {}, 'ai-history': [{ role: 'user', content: 'x'.repeat(600 * 1024) }] })
+  if ('songs' in r.clean || 'ai-history' in r.clean) throw new Error(`应全部拒绝: ${r.skipped}`)
+})
+
+// ---- ④b v0.13.2 chooseDirection 坏时间戳防御 ----
+touch('chooseDirection：本机时间戳非法 → unknown（不再恒 download）', () => {
+  if (sync.chooseDirection('not-a-date', '2026-08-24T10:00:00.000Z') !== 'unknown') throw new Error('fail')
+})
+touch('chooseDirection：云端时间戳非法 → unknown', () => {
+  if (sync.chooseDirection('2026-08-24T10:00:00.000Z', 'garbage') !== 'unknown') throw new Error('fail')
+})
+touch('chooseDirection：两端都非法 → unknown', () => {
+  if (sync.chooseDirection('x', 'y') !== 'unknown') throw new Error('fail')
+})
+
+// ---- ④c v0.13.2 sync-stamp 门控 ----
+resetMem()
+touch('stamp 门控：只写本机态 key（计时会话/草稿）不刷新 sync-stamp', () => {
+  storage.save('timer-session', { running: true })
+  storage.save('practice-draft', { note: 'x' })
+  if (localStorage.getItem('gla:v1:sync-stamp') !== null) throw new Error('本机态写入不应刷新 stamp')
+})
+touch('stamp 门控：白名单 key 写入才刷新 sync-stamp', () => {
+  storage.save('songs', [{ title: 'A' }])
+  if (!localStorage.getItem('gla:v1:sync-stamp')) throw new Error('同步数据写入应刷新 stamp')
 })
 
 // ---- ⑤ fmtWhen ----

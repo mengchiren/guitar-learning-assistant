@@ -2,6 +2,7 @@
 import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRecordingsStore } from '../stores/recordings.js'
 import RecordPanel from '../components/RecordPanel.vue'
+import { fmtDuration } from '../utils/date.js'
 
 const recordings = useRecordingsStore()
 
@@ -20,12 +21,6 @@ function setAudioEl(el) {
 onMounted(() => {
   recordings.load()
 })
-
-function fmtSec(total) {
-  const m = Math.floor(total / 60)
-  const s = Math.round(total % 60)
-  return m > 0 ? `${m} 分 ${s} 秒` : `${s} 秒`
-}
 
 async function togglePlay(r) {
   if (playingId.value === r.id) {
@@ -98,7 +93,7 @@ onUnmounted(stopPlay)
       <div class="rec-head">
         <div>
           <strong>{{ r.date }}</strong>
-          <span class="dim small" style="margin-left: 8px">{{ fmtSec(r.seconds) }}</span>
+          <span class="dim small" style="margin-left: 8px">{{ fmtDuration(r.seconds) }}</span>
           <span class="tag" style="margin-left: 8px">{{ r.category }}</span>
           <span v-if="r.songName" class="dim small" style="margin-left: 8px">{{ r.songName }}</span>
         </div>
@@ -133,7 +128,7 @@ onUnmounted(stopPlay)
       <div class="del-card">
         <p style="margin-bottom: 4px"><b>删除这条录音？</b></p>
         <p class="small dim" style="margin-bottom: 12px">
-          {{ pendingDelete.date }} · {{ fmtSec(pendingDelete.seconds) }}，删除后不能恢复。
+          {{ pendingDelete.date }} · {{ fmtDuration(pendingDelete.seconds) }}，删除后不能恢复。
         </p>
         <p v-if="deleteError" class="small" style="color: var(--danger); margin-bottom: 8px">{{ deleteError }}</p>
         <div class="btn-row">

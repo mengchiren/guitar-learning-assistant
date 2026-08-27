@@ -42,7 +42,8 @@ function onFileChange(e) {
 
 // 解码 + 分析：解码统一走 utils/audio.js，分析在 Web Worker 里跑（不卡 UI）
 async function decodeFile(f) {
-  return decodeToMono(await f.arrayBuffer())
+  // fileName 用于按格式估算 PCM 体积上限（v0.13.2 内存护栏前移）
+  return decodeToMono(await f.arrayBuffer(), { fileName: f.name })
 }
 
 async function runAnalyze() {
@@ -120,7 +121,7 @@ async function loadDevTest() {
       error.value = `文件超过 100MB（实际 ${(arrayBuf.byteLength / 1024 / 1024).toFixed(1)}MB）。`
       return
     }
-    const { samples, sampleRate } = await decodeToMono(arrayBuf)
+    const { samples, sampleRate } = await decodeToMono(arrayBuf, { fileName: 'test-audio.mp3' })
     title.value = title.value || '开发测试音频'
     result.value = await analyzeInWorker({ samples, sampleRate })
   } catch (err) {

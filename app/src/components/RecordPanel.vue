@@ -2,7 +2,7 @@
 import { ref, onUnmounted, computed } from 'vue'
 import { useRecordingsStore, RECORD_CATEGORIES } from '../stores/recordings.js'
 import { analyzeRecordingBlob } from '../utils/recordAnalyze.js'
-import { localDateStr } from '../utils/date.js'
+import { localDateStr, fmtClock, fmtDuration } from '../utils/date.js'
 import { useSongsStore } from '../stores/songs.js'
 
 const recordings = useRecordingsStore()
@@ -30,11 +30,7 @@ let chunks = []
 let stream = null
 let recTimer = null
 
-const clock = computed(() => {
-  const m = String(Math.floor(secs.value / 60)).padStart(2, '0')
-  const s = String(secs.value % 60).padStart(2, '0')
-  return `${m}:${s}`
-})
+const clock = computed(() => fmtClock(secs.value))
 
 function pickMime() {
   const candidates = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4']
@@ -42,12 +38,6 @@ function pickMime() {
     if (typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported(m)) return m
   }
   return ''
-}
-
-function fmtSec(total) {
-  const m = Math.floor(total / 60)
-  const s = Math.round(total % 60)
-  return m > 0 ? `${m} 分 ${s} 秒` : `${s} 秒`
 }
 
 async function startRec() {
@@ -214,7 +204,7 @@ onUnmounted(() => {
     <div v-else-if="status === 'saving'">
       <div class="rec-row">
         <span class="rec-dot stopped"></span>
-        <span>已录 {{ fmtSec(secs) }}</span>
+        <span>已录 {{ fmtDuration(secs) }}</span>
       </div>
 
       <div v-if="analyzing" class="small dim" style="margin: 8px 0">正在测 BPM…</div>

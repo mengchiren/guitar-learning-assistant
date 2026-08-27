@@ -15,6 +15,9 @@ export function useTuner() {
   let analyser = null
   let buf = null
   let raf = 0
+  // v0.13.2：start 期间的重入锁——原来 active 要等 getUserMedia 返回后才置位，
+  // 快速双击会起两条 stream/两个 AudioContext，先者被覆盖后永不释放（泄麦克风）
+  let starting = false
 
   function noteName(midi) {
     const n = ((midi % 12) + 12) % 12
@@ -22,24 +25,30 @@ export function useTuner() {
   }
 
   async function start() {
+    if (active.value || starting) return
+    starting = true
     error.value = ''
     try {
-      stream = await navigator.mediaDevices.getUserMedia({
-        audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
-      })
-    } catch (e) {
-      const reason =
-        e && e.name === 'NotAllowedError' ? '权限被拒绝' : '未找到麦克风或当前环境不支持（需 HTTPS 或 localhost）'
-      error.value = `无法访问麦克风（${reason}）。也可以点下方「参考音」用耳朵调弦。`
-      return
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
+        })
+      } catch (e) {
+        const reason =
+          e && e.name === 'NotAllowedError' ? '权限被拒绝' : '未找到麦克风或当前环境不支持（需 HTTPS 或 localhost）'
+        error.value = `无法访问麦克风（${reason}）。也可以点下方「参考音」用耳朵调弦。`
+        return
+      }
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)()
+      analyser = audioCtx.createAnalyser()
+      analyser.fftSize = 4096
+      audioCtx.createMediaStreamSource(stream).connect(analyser)
+      buf = new Float32Array(analyser.fftSize)
+      active.value = true
+      loop()
+    } finally {
+      starting = false
     }
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)()
-    analyser = audioCtx.createAnalyser()
-    analyser.fftSize = 4096
-    audioCtx.createMediaStreamSource(stream).connect(analyser)
-    buf = new Float32Array(analyser.fftSize)
-    active.value = true
-    loop()
   }
 
   function detectPitch() {
@@ -96,8 +105,10 @@ export function useTuner() {
   function stop() {
     active.value = false
     if (raf) cancelAnimationFrame(raf)
+    if (analyser) { try { analyser.disconnect() } catch { /* noop */ } }
     if (stream) stream.getTracks().forEach((t) => t.stop())
     if (audioCtx) audioCtx.close()
+    analyser = null
     stream = null
     audioCtx = null
     note.value = '--'

@@ -2,7 +2,7 @@
 import { ref, computed } from 'vue'
 import { usePracticeStore } from '../stores/practice.js'
 import { useTimerStore } from '../stores/timer.js'
-import { localDateStr } from '../utils/date.js'
+import { localDateStr, fmtClock } from '../utils/date.js'
 import RecordPanel from '../components/RecordPanel.vue'
 
 const practice = usePracticeStore()
@@ -24,12 +24,7 @@ const note = computed({
   set: (v) => (draft.note = v),
 })
 
-const clock = computed(() => {
-  const total = Math.floor(timer.elapsedSec)
-  const m = String(Math.floor(total / 60)).padStart(2, '0')
-  const s = String(total % 60).padStart(2, '0')
-  return `${m}:${s}`
-})
+const clock = computed(() => fmtClock(timer.elapsedSec))
 
 function toggleTag(t) {
   const i = draft.tags.indexOf(t)

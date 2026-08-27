@@ -23,6 +23,18 @@ const isPortraitTip = ref(false)
 let pdfDoc = null
 let renderTask = null
 let pdfjsLib = null
+// v0.13.2：worker 只创建一次常驻复用——此前每次 load 都 new Worker 且从不回收，
+// 反复开关 PDF 会累积渲染线程（泄漏）
+let sharedWorkerPort = null
+
+function ensurePdfWorker(lib) {
+  if (!sharedWorkerPort) {
+    // 用 Vite 原生 worker 打包写法：产物是 .js 文件，随主构建进 SW 预缓存
+    // （pdf.worker.min.mjs 若走 new URL 资产引用会留在 globPatterns 之外，断网拉不到）
+    sharedWorkerPort = new Worker(new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url), { type: 'module' })
+    lib.GlobalWorkerOptions.workerPort = sharedWorkerPort
+  }
+}
 
 async function load() {
   try {
@@ -32,10 +44,7 @@ async function load() {
     if (!blob) throw new Error('没有找到 PDF 文件（可能已被移除或本机未上传）')
     const mod = await import('pdfjs-dist')
     pdfjsLib = mod
-    // 用 Vite 原生 worker 打包写法：产物是 .js 文件，随主构建进 SW 预缓存
-    // （pdf.worker.min.mjs 若走 new URL 资产引用会留在 globPatterns 之外，断网拉不到）
-    const worker = new Worker(new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url), { type: 'module' })
-    pdfjsLib.GlobalWorkerOptions.workerPort = worker
+    ensurePdfWorker(pdfjsLib)
     const buf = await blob.arrayBuffer()
     pdfDoc = await pdfjsLib.getDocument({ data: buf }).promise
     total.value = pdfDoc.numPages
@@ -99,6 +108,9 @@ onMounted(() => {
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', onKey)
   if (renderTask) { try { renderTask.cancel() } catch { /* noop */ } }
+  // v0.13.2：关闭时销毁文档句柄释放内存；worker 常驻复用（见 sharedWorkerPort）
+  if (pdfDoc) { try { pdfDoc.destroy() } catch { /* noop */ } }
+  pdfDoc = null
 })
 </script>
 

@@ -3,21 +3,22 @@
 // Key 只存在 Cloudflare 控制台的环境变量里（AI_KEY_DEEPSEEK / AI_KEY_ARK / AI_KEY_QWEN），
 // 本文件永远不出现真实 Key，环境变量也不进 git。
 //
-// 防盗刷（v0.5.0 评审修复）：
-//   Origin 白名单只能防「浏览器」跨站调用，挡不住 curl/脚本直连（可伪造或不带 Origin），
-//   所以再加一层访问令牌：环境变量 ASK_TOKEN 存一个随机密钥（只配一次），
-//   应用内「AI 答疑」页首次使用时填入（存本机 localStorage），每次请求带 X-Ask-Token 头，
-//   代理校验一致才放行。令牌不在代码包里，攻击者无法从网页源码拿到。
-//   更严格的按 IP 限流需要自定义域名 + Cloudflare 限流规则（当前 pages.dev 免费域名配不了），
-//   令牌层已能挡住绝大多数盗刷，后续换域名时可补。
+// 防盗刷（v0.5.0 评审修复）：Origin 白名单只能防「浏览器」跨站调用，挡不住 curl/脚本
+// 直连（可伪造或不带 Origin），所以再加一层访问令牌：环境变量 ASK_TOKEN 存随机密钥
+// （只配一次），应用内「AI 答疑」页首次使用时填入（存本机 localStorage），每次请求带
+// X-Ask-Token 头。更严格的按 IP 限流需要自定义域名 + Cloudflare 限流规则（免费域名配不了）。
+//
+// v0.13.2：Origin/CORS/JSON/令牌校验抽到 _lib.js（与 sync.js 共用一份）；
+// 令牌改恒时比较；上游错误原文不再回传客户端（只记服务端日志），避免暴露供应商细节。
 //
 // 三平台都是 OpenAI 兼容的 chat/completions 格式，一张表切换：
 //   deepseek  → https://api.deepseek.com/chat/completions
 //   ark（火山方舟）→ https://ark.cn-beijing.volces.com/api/v3/chat/completions（model 填 endpoint id，环境变量 AI_MODEL_ARK）
 //   qwen（阿里百炼）→ https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions
-//
-// 限流策略（个人站轻量版）：max_tokens 上限 + 请求体大小上限 + 单条消息长度上限；
-// 更严格的按 IP 限流可后续加 Cloudflare Rate Limiting 规则（控制台免费额度）。
+
+import { jsonResponse as json, corsHeaders, resolveOrigin, verifyToken } from '../_lib.js'
+
+const ALLOW_HEADERS = ['Content-Type', 'X-Ask-Token']
 
 const PROVIDERS = {
   deepseek: {
@@ -40,49 +41,27 @@ const PROVIDERS = {
 const SYSTEM_PROMPT = `你是「练琴搭子」应用里的电吉他学习助手。用户是零基础初学者，设备是依班娜 GRX40 电吉他 + JOYO Jam Buddy 2 音箱。
 回答要求：中文、大白话、按步骤组织（一步步能照着做）；针对电吉他；建议要具体（练什么、几遍、目标速度）；不要展开无关内容；默认简洁，除非用户要求详细。如果用户没有指定歌曲，可以结合上下文里给的歌曲/练习数据回答。`
 
-// 来源白名单：只有我们自己的站点和本地开发端口能调用这个接口，
-// 防止别人发现接口地址后白嫖你的 API Key 额度。
-// 换自定义域名时记得把新域名加进来。
-const ALLOWED_ORIGINS = [
-  'https://guitar-learning-assistant.pages.dev',
-  'http://localhost:4174',
-  'http://localhost:5173',
-]
-
-const CORS = (origin) => ({
-  'Access-Control-Allow-Origin': origin,
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, X-Ask-Token',
-})
-
-function json(data, status = 200, origin = '') {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS(origin) },
-  })
-}
-
-export async function onRequestOptions({ request }) {
-  const origin = request.headers.get('Origin') || ''
-  if (!ALLOWED_ORIGINS.includes(origin)) return new Response(null, { status: 403 })
-  return new Response(null, { status: 204, headers: CORS(origin) })
+export async function onRequestOptions({ request, env }) {
+  const origin = resolveOrigin(request, env)
+  if (!origin) return new Response(null, { status: 403 })
+  return new Response(null, { status: 204, headers: corsHeaders(origin, ALLOW_HEADERS) })
 }
 
 export async function onRequestPost({ request, env }) {
-  const origin = request.headers.get('Origin') || ''
-  if (!ALLOWED_ORIGINS.includes(origin)) {
-    return json({ ok: false, error: '请求来源不被允许' }, 403)
+  const origin = resolveOrigin(request, env)
+  if (!origin) {
+    return json({ ok: false, error: '请求来源不被允许' }, 403, origin)
   }
 
-  // 访问令牌校验（v0.5.0）：防脚本直连盗刷 Key 额度。未配置 ASK_TOKEN 时拒绝服务，
-  // 配置了但令牌不匹配也拒绝——宁可暂时用不了，也不敞开额度。
-  const askToken = env.ASK_TOKEN
-  if (!askToken) {
-    return json({ ok: false, code: 'NO_TOKEN_CONFIG', error: '服务端还没配置访问令牌（Cloudflare 环境变量 ASK_TOKEN）' }, 503, origin)
-  }
-  const gotToken = request.headers.get('X-Ask-Token') || ''
-  if (gotToken !== askToken) {
-    return json({ ok: false, code: 'BAD_TOKEN', error: '访问令牌不对，请在应用里重新填写' }, 401, origin)
+  // 访问令牌校验：未配置 ASK_TOKEN 时拒绝服务，配置了但令牌不匹配也拒绝——
+  // 宁可暂时用不了，也不敞开额度。
+  const badToken = await verifyToken(request, env, { header: 'X-Ask-Token', envVar: 'ASK_TOKEN' })
+  if (badToken) {
+    const msg =
+      badToken.code === 'NO_TOKEN_CONFIG'
+        ? '服务端还没配置访问令牌，请先在 Cloudflare 后台配置后再使用'
+        : '访问令牌不对，请在应用里重新填写'
+    return json({ ok: false, code: badToken.code, error: msg }, badToken.status, origin)
   }
 
   let body
@@ -97,7 +76,11 @@ export async function onRequestPost({ request, env }) {
 
   const key = env[provider.keyEnv]
   if (!key) {
-    return json({ ok: false, code: 'NO_KEY', provider: body.provider, error: '这个平台的 API Key 还没配置（需要在 Cloudflare 后台设置环境变量）' }, 503, origin)
+    return json(
+      { ok: false, code: 'NO_KEY', provider: body.provider, error: `${body.provider} 平台的 Key 还没配置，先换一个模型或稍后再试` },
+      503,
+      origin,
+    )
   }
 
   const model = provider.model || env[provider.modelEnv]
@@ -138,12 +121,15 @@ export async function onRequestPost({ request, env }) {
     clearTimeout(timer)
     if (!resp.ok) {
       const text = await resp.text()
-      return json({ ok: false, error: `模型服务返回 ${resp.status}`, detail: text.slice(0, 300) }, 502, origin)
+      console.error(`[ask] 上游 ${provider.url} 返回 ${resp.status}:`, text.slice(0, 300))
+      // 错误详情只进服务端日志，不回传客户端（避免泄露供应商信息）
+      return json({ ok: false, error: `模型服务暂时不可用（${resp.status}），请稍后再试` }, 502, origin)
     }
     const data = await resp.json()
     const reply = data.choices?.[0]?.message?.content || ''
     return json({ ok: true, reply, model }, 200, origin)
   } catch (e) {
+    console.error('[ask] 请求上游失败:', e?.message || e)
     return json({ ok: false, error: '请求模型服务失败，请稍后再试' }, 502, origin)
   }
 }

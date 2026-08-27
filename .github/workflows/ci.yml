@@ -1,4 +1,5 @@
-# 持续集成（v0.5.0 新增）：push 自动跑规则引擎对拍 + 数据校验 + 合成音频引擎测试 + 构建。
+# 持续集成（v0.5.0 新增；v0.13.2 重构：单 job 串行 → 三组并行 + 同 ref 取消旧跑次
+# + 构建产物守卫脚本 + 上传 dist artifact）。
 # 注意：真实歌曲对拍（test_frontend_analyze.mjs）需要本地版权音频与 ffmpeg，只在本地跑，
 # 不在 CI 跑；CI 用纯 JS 合成的节拍音覆盖引擎的半速加倍/慢歌不加倍逻辑。
 name: CI
@@ -8,49 +9,79 @@ on:
     branches: [main]
   pull_request:
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  test-and-build:
+  # 业务逻辑层：规则引擎 / store 冒烟 / 数据资产校验 / 云同步决策
+  tests-logic:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
           cache-dependency-path: app/package-lock.json
-
       - name: 安装依赖
         run: npm ci
         working-directory: app
-
       - name: 规则引擎对拍（25 项）
         run: node spike/test_plan_engine.mjs
-
-      - name: Store 冒烟测试（24 项，v0.5.1 起，v0.8.0 增计时/草稿落盘/失败通知/备份覆盖）
+      - name: Store 冒烟测试（25 项：运行时引用/持久化/备份覆盖）
         run: node spike/test_stores_smoke.mjs
-
-      - name: 套路归类规则 + 设备建议回归（53 项，v0.6.0 起，v0.8.0 增套路名映射护栏）
-        run: node spike/test_tone_guide.mjs
-
-      - name: 面板组件渲染冒烟（13 项，v0.6.2）
-        run: node spike/test_panels_render.mjs
-
-      - name: 数据完整性校验（828 项，v0.12.0 增课件式谱面格式/词表/毕业曲专项）
+      - name: 数据完整性校验（836 项：曲谱/和弦/词表/毕业曲专项）
         run: node spike/test_sheets.mjs
-
-      - name: 课件式谱面渲染冒烟（19 项，v0.12.0）
-        run: node spike/test_sheet_view.mjs
-
-      - name: 壁纸模块测试（20 项，v0.13.0：纯逻辑/存储层/落盘）
-        run: node spike/test_wallpapers.mjs
-
-      - name: 分析引擎合成音频测试（半速加倍 / 慢歌不加倍）
-        run: node spike/test_frontend_synthetic.mjs
-
-      - name: 云同步校验（13 项，v0.11.0：方向决策/白名单/快照/覆盖语义）
+      - name: 云同步校验（方向决策/坏时间戳防御/快照清洗/stamp 门控/覆盖语义）
         run: node spike/test_sync.mjs
 
+  # 引擎与渲染层：合成音频对拍 / 套路与设备建议回归 / SSR 渲染冒烟
+  tests-engine-render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - name: 安装依赖
+        run: npm ci
+        working-directory: app
+      - name: 分析引擎合成音频测试（半速加倍 / 慢歌不加倍）
+        run: node spike/test_frontend_synthetic.mjs
+      - name: 套路归类规则 + 设备建议回归（53 项）
+        run: node spike/test_tone_guide.mjs
+      - name: 面板组件渲染冒烟（13 项）
+        run: node spike/test_panels_render.mjs
+      - name: 课件式谱面渲染冒烟（19 项）
+        run: node spike/test_sheet_view.mjs
+      - name: 壁纸模块测试（26 项：纯逻辑/存储层/壁纸包提取）
+        run: node spike/test_wallpapers.mjs
+
+  # 构建 + 产物守卫：globPatterns 覆盖检查（防 .mjs/.wasm 混入 SW 预缓存之外，坑 45）
+  # + 体积打印 + 关键入口存在性；dist 存为 artifact 免去 Cloudflare 侧等待时的盲等。
+  build-and-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - name: 安装依赖
+        run: npm ci
+        working-directory: app
       - name: 生产构建
         run: npm run build
         working-directory: app
+      - name: 构建产物守卫检查
+        run: node spike/check_dist_assets.mjs app/dist
+      - name: 上传 dist 产物（7 天留存，供排查对照）
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: app/dist
+          retention-days: 7

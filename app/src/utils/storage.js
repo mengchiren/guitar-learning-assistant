@@ -5,6 +5,8 @@
 // 注意：save 失败（如 localStorage 满）会抛错——宁可暴露问题，也不静默丢数据；
 // v0.8.0 起同时通知全局监听者（onStorageError），UI 据此弹「存储不足」横幅。
 
+import { SYNC_KEYS } from './syncKeys.js'
+
 const PREFIX = 'gla:v1:'
 const META_KEY = 'gla:v1:meta'
 
@@ -109,8 +111,11 @@ export function save(key, value) {
   try {
     localStorage.setItem(PREFIX + key, JSON.stringify(value))
     // v0.11.0 云同步：记录「本机最后写入时间」（全量快照同步的新旧判断依据）。
-    // 高频小字符串写入，成本可忽略；同步恢复写入也会刷新它（reload 后才是新数据）。
-    localStorage.setItem(PREFIX + 'sync-stamp', new Date().toISOString())
+    // v0.13.2 起只对可同步的 key 刷新——之前任何 key（草稿/计时会话等本机态）落盘都刷，
+    // 会把「只在某设备上写过草稿」误判成该设备数据更新，引导出覆盖另一台设备的方向建议。
+    if (SYNC_KEYS.includes(key)) {
+      localStorage.setItem(PREFIX + 'sync-stamp', new Date().toISOString())
+    }
   } catch (err) {
     notifyStorageError(err)
     throw err

@@ -1,5 +1,9 @@
 // 分析引擎的 Worker 封装：主线程只传数据、收结果，不阻塞 UI。
 // Worker 不可用时（极端环境）回退到主线程直调，功能不降级。
+//
+// v0.13.2 自愈：postMessage 不再转移所有权（结构化克隆复制一份）——原来转移后
+// samples.buffer 已 detach，Worker 一崩当前分析无法重试，用户被迫重选文件重新解码。
+// 现在 Worker 崩溃时重建实例并对在途任务原地重发一次（限一次，防死循环）。
 
 import { analyzeAudio } from './analyze.js'
 
@@ -20,15 +24,25 @@ function ensureWorker() {
       else p.reject(new Error(error || '分析失败'))
     }
     worker.onerror = () => {
-      // Worker 崩溃：清空等待队列并回退主线程（下次调用重建）
-      for (const [, p] of pending) p.reject(new Error('分析线程异常'))
-      pending.clear()
+      // Worker 崩溃：重建 + 在途任务各重试一次（samples 还在主线程手里，可重发）
       try {
         worker.terminate()
       } catch {
         /* ignore */
       }
       worker = null
+      const inflight = [...pending.entries()]
+      pending.clear()
+      const reborn = ensureWorker()
+      for (const [id, p] of inflight) {
+        if (reborn && !p.retried) {
+          p.retried = true
+          pending.set(id, p)
+          dispatch(id, p.input)
+        } else {
+          p.reject(new Error(reborn ? '分析线程异常，请重试' : '分析线程多次异常'))
+        }
+      }
     }
     return true
   } catch {
@@ -36,8 +50,13 @@ function ensureWorker() {
   }
 }
 
+function dispatch(id, { samples, sampleRate, debug }) {
+  // 结构化克隆（不用转移列表）：克隆一份大数组的瞬时开销换来「崩溃可原地重试」
+  worker.postMessage({ id, samples, sampleRate, debug })
+}
+
 /**
- * 在 Worker 里分析音频（samples 会被转移所有权，调用后不可再使用）。
+ * 在 Worker 里分析音频（v0.13.2 起 samples 归主线程所有，不转移所有权）。
  * @param {{ samples: Float32Array, sampleRate: number, debug?: boolean }} input
  * @returns {Promise<object>} 与 analyzeAudio 相同的分析结果 JSON
  */
@@ -48,8 +67,8 @@ export function analyzeInWorker({ samples, sampleRate, debug = false }) {
   }
   const id = ++seq
   return new Promise((resolve, reject) => {
-    pending.set(id, { resolve, reject })
-    // samples.buffer 转移给 Worker，避免大数组结构化克隆的双份内存
-    worker.postMessage({ id, samples, sampleRate, debug }, [samples.buffer])
+    const p = { resolve, reject, input: { samples, sampleRate, debug }, retried: false }
+    pending.set(id, p)
+    dispatch(id, p.input)
   })
 }

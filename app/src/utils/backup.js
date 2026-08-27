@@ -59,6 +59,11 @@ export function parseBackup(text) {
   if (!obj || obj.app !== 'guitar-learning-assistant' || typeof obj.data !== 'object' || obj.data === null) {
     throw new Error('不是「练琴搭子」的备份文件')
   }
+  // v0.13.2：消费 backupVersion（此前字段一直没人校验）——新版本备份恢复进旧应用，
+  // 数据结构可能对不上，明确拒绝并提示先升级，比静默写坏数据强。
+  if ((obj.backupVersion || 1) > BACKUP_VERSION) {
+    throw new Error(`这份备份来自更新版本的应用（备份版本 v${obj.backupVersion}，当前支持到 v${BACKUP_VERSION}）。请先把网页更新到最新版再恢复。`)
+  }
   return obj
 }
 

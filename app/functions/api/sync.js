@@ -8,69 +8,64 @@
 //   - 前端约定：全量快照 + 最后写入胜出 + 打开时自动检查（direction 决策在前端做，
 //     上传前/下载前用户确认方向——服务端只做存储与读回，无业务逻辑）。
 //
+// v0.13.2：公共代码（Origin/CORS/JSON/令牌恒时比较）收敛到 _lib.js；
+// 上传快照加体积上限（2MB，正常个人数据几百 KB 量级），防持令牌的异常/恶意负载刷配额；
+// 上传的 data 必须是普通对象。
+//
 // action 说明：
 //   upload   → body { app, backupVersion?, data, updatedAt, deviceId }；写入 KV，返回 { ok, updatedAt }
 //   download → 读 KV，返回 { ok, empty?, data?, updatedAt?, deviceId? }（无数据时 empty: true）
 //   check    → 只读版本信息，返回 { ok, empty?, updatedAt?, deviceId? }（不返回 data）
 
-// 来源白名单：与 ask.js 保持一致（新域名/新端口记得同步加）
-const ALLOWED_ORIGINS = [
-  'https://guitar-learning-assistant.pages.dev',
-  'http://localhost:4174',
-  'http://localhost:5173',
-]
+import { jsonResponse as json, corsHeaders, resolveOrigin, verifyToken } from '../_lib.js'
 
-const CORS = (origin) => ({
-  'Access-Control-Allow-Origin': origin,
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, X-Sync-Token',
-})
+const ALLOW_HEADERS = ['Content-Type', 'X-Sync-Token']
 
-function json(data, status = 200, origin = '') {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS(origin) },
-  })
-}
+// 快照体积上限（序列化后字符数）。KV 单值上限 25MB，这里收紧到 2MB：
+// 正常个人数据在几百 KB 内，超限视为异常负载，直接拒绝保护带宽与配额。
+const MAX_UPLOAD_CHARS = 2 * 1024 * 1024
 
-export async function onRequestOptions({ request }) {
-  const origin = request.headers.get('Origin') || ''
-  if (!ALLOWED_ORIGINS.includes(origin)) return new Response(null, { status: 403 })
-  return new Response(null, { status: 204, headers: CORS(origin) })
+export async function onRequestOptions({ request, env }) {
+  const origin = resolveOrigin(request, env)
+  if (!origin) return new Response(null, { status: 403 })
+  return new Response(null, { status: 204, headers: corsHeaders(origin, ALLOW_HEADERS) })
 }
 
 export async function onRequestPost({ request, env }) {
-  const origin = request.headers.get('Origin') || ''
-  if (!ALLOWED_ORIGINS.includes(origin)) {
-    return json({ ok: false, error: '请求来源不被允许' }, 403)
+  const origin = resolveOrigin(request, env)
+  if (!origin) {
+    return json({ ok: false, error: '请求来源不被允许' }, 403, origin)
   }
 
   // 访问令牌校验：未配置 SYNC_TOKEN 时拒绝服务（宁可暂时用不了，也不敞开数据读写）
-  const syncToken = env.SYNC_TOKEN
-  if (!syncToken) {
-    return json({ ok: false, error: '同步功能未启用（服务端未配置 SYNC_TOKEN）' }, 503)
-  }
-  const auth = request.headers.get('X-Sync-Token') || ''
-  if (auth !== syncToken) {
-    return json({ ok: false, error: '同步令牌不正确' }, 401)
+  const badToken = await verifyToken(request, env, { header: 'X-Sync-Token', envVar: 'SYNC_TOKEN' })
+  if (badToken) {
+    const msg =
+      badToken.code === 'NO_TOKEN_CONFIG'
+        ? '同步功能未启用（服务端未配置令牌）'
+        : '同步令牌不正确'
+    return json({ ok: false, code: badToken.code, error: msg }, badToken.status, origin)
   }
 
   // KV 绑定必须存在（Cloudflare Pages 控制台绑定命名空间，变量名 SYNC_KV）
   const kv = env.SYNC_KV
   if (!kv) {
-    return json({ ok: false, error: '同步存储未配置（KV 绑定 SYNC_KV 缺失）' }, 503)
+    return json({ ok: false, error: '同步存储未配置（KV 绑定缺失）' }, 503, origin)
   }
 
   let body
   try {
     body = await request.json()
   } catch {
-    return json({ ok: false, error: '请求体不是 JSON' }, 400)
+    return json({ ok: false, error: '请求体不是 JSON' }, 400, origin)
   }
 
   const action = body.action
   try {
     if (action === 'upload') {
+      if (!body.data || typeof body.data !== 'object' || Array.isArray(body.data)) {
+        return json({ ok: false, error: '快照数据格式不对（data 必须是对象）' }, 400, origin)
+      }
       const snapshot = {
         app: 'guitar-learning-assistant',
         backupVersion: body.backupVersion || 1,
@@ -78,7 +73,11 @@ export async function onRequestPost({ request, env }) {
         updatedAt: body.updatedAt || new Date().toISOString(),
         deviceId: body.deviceId || 'unknown',
       }
-      await kv.put('sync:snapshot', JSON.stringify(snapshot))
+      const raw = JSON.stringify(snapshot)
+      if (raw.length > MAX_UPLOAD_CHARS) {
+        return json({ ok: false, error: '快照超过大小上限（异常数据），已拒绝写入' }, 413, origin)
+      }
+      await kv.put('sync:snapshot', raw)
       return json({ ok: true, updatedAt: snapshot.updatedAt })
     }
 
@@ -96,8 +95,9 @@ export async function onRequestPost({ request, env }) {
       return json(out)
     }
 
-    return json({ ok: false, error: '未知 action' }, 400)
+    return json({ ok: false, error: '未知 action' }, 400, origin)
   } catch (err) {
-    return json({ ok: false, error: '同步存储读写失败' }, 500)
+    console.error('[sync] KV 读写失败:', err?.message || err)
+    return json({ ok: false, error: '同步存储读写失败' }, 500, origin)
   }
 }

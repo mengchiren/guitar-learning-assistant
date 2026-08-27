@@ -22,6 +22,12 @@ Thumbs.db
 # 工具会话文件
 .zcode/
 
+# 本地密钥与云工具目录（v0.13.2 前瞻守护：将来若引入 .env / wrangler 本地态不误提交）
+.env
+.env.*
+!.env.example
+.wrangler/
+
 # 开发测试音频（浏览器端分析联调用，用完即删）
 app/public/test-audio.mp3
 

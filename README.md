@@ -29,13 +29,14 @@
 - 🖼 **背景壁纸**（v0.13.0，v0.13.1 支持壁纸包直接导入）：用自定义图片/视频做整站背景，可导入 **Wallpaper Engine** 的壁纸文件，**更可**直接上传 **`.mpkg`/`.pkg` 壁纸包**（自动从包里提取视频/图片当背景，用包内预览图做缩略图；拆包全在本机浏览器完成）；融合进「外观主题」——当前壁纸预览、上传图片（≤5MB）/视频（≤100MB）、恢复主题默认、**模糊/亮度/遮罩**三滑条实时生效，移动端视频自动压低模糊降级；**壁纸只存本机浏览器**（IndexedDB），换设备需重新上传，不随云同步。
 - 💾 **数据同步（云，v0.11.0）**：「我的」页一键上传/下载，把打卡、歌单与分析结果、计划/课程进度、自录曲谱、聊天记录、设置偏好在两台设备间保持一致（Cloudflare KV + Functions 代理 + 令牌防刷；打开应用自动检查云端更新并提示；录音与音频永不上云）。
 - 💾 **数据备份**：「我的」页一键导出/恢复全部数据（JSON 文件，录音除外）。
+- 🛡 **健壮性底座（v0.13.2）**：持久化在页面隐藏/关闭时强制刷盘（计时与草稿不怕秒关进程）、音频解码内存护栏前移 + 分析 Worker 崩溃自愈重试、全局异常捕获进本机错误横幅（点开可复制，不出设备不上云）、云同步快照前后端双大小上限 + 坏数据逐项清洗。
 - 🎨 **视觉**：简约瑞士军刀风——米白底、细线卡片、瑞士红点缀、线性图标；桌面端为 B 站式顶栏 + 仪表盘多栏，手机端为底部导航单栏。
 
 ## 技术栈
 
 - Vue 3 + Vite + Pinia + Vue Router + vite-plugin-pwa
 - **自研纯前端音频分析引擎**（`app/src/utils/analyze.js`）：手写 FFT/onset 包络/自相关/K-S 调性模板，无任何 ML/音频库依赖，Node 与浏览器通用；**分析在 Web Worker 后台线程跑**（`app/src/workers/analyze.worker.js`），大文件不卡界面；**套路归类规则是数据**（`app/src/data/classifyRules.js`），新增套路不改引擎
-- 本地存储：localStorage 抽象层（**schema 版本 + 迁移 + 变更订阅**，云同步接入点）+ IndexedDB（录音）；**Pinia 自动持久化插件**（store 声明 persist 配置即自动落盘，消灭手动 save 漏调）
+- 本地存储：localStorage 抽象层（**schema 版本 + 迁移 + 变更订阅**，云同步接入点）+ IndexedDB（录音）；**Pinia 自动持久化插件**（store 声明 persist 配置即自动落盘，消灭手动 save 漏调；v0.13.2 起页面隐藏/关闭强制刷盘）
 - 导航配置化：`app/src/data/nav.js` 一份清单驱动路由 / 底部 tab / 工具页
 - 设备能力声明式化：`app/src/data/devices.js` 的 params/keyParams 描述设备旋钮，设备建议按当前设备渲染，新增设备只加数据
 - Cloudflare Pages Functions：AI 答疑代理（`app/functions/api/ask.js`，Key 存环境变量，访问令牌防刷）+ 云同步代理（`app/functions/api/sync.js`，KV 快照 + SYNC_TOKEN 防刷）
@@ -107,9 +108,10 @@ node spike/test_stores_smoke.mjs                 # Store 冒烟测试 25 项（C
 node spike/test_tone_guide.mjs                   # 套路归类规则 + 设备建议回归 53 项（CI 跑）
 node spike/test_sheet_view.mjs                   # 课件式谱面 SSR 渲染 19 项（CI 跑）
 node spike/test_wallpapers.mjs                   # 壁纸模块：纯逻辑/存储层/壁纸包提取 26 项（CI 跑）
+node spike/check_dist_assets.mjs app/dist        # 构建产物守卫：dist 禁 .mjs/.wasm 等预缓存外后缀 + 入口文件检查（CI 构建后自动跑）
 ```
 
-**CI**（`.github/workflows/ci.yml`）：push/PR 自动跑合成音频引擎测试 + 规则引擎对拍 + 数据校验 + store 冒烟测试 + 设备建议回归 + 面板/谱面渲染 + 壁纸模块测试 + 云同步校验 + 生产构建，全过才允许合并；真实歌曲对拍因版权音频不入库，只在本地跑。
+**CI**（`.github/workflows/ci.yml`，v0.13.2 起**三组并行 job** + 同 ref 连推自动取消旧跑次）：tests-logic（规则引擎对拍 / store 冒烟 / 数据校验 / 云同步决策含坏时间戳防御与快照清洗）、tests-engine-render（合成音频引擎测试 / 设备建议回归 / 面板与课件式谱面 SSR 渲染 / 壁纸模块）、build-and-guard（生产构建 + dist 产物守卫脚本【globPatterns 外后缀直接 fail】+ 上传 dist artifact）；全过才允许合并。真实歌曲对拍因版权音频不入库，只在本地跑。
 
 ## 部署
 

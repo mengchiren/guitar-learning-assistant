@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { load } from '../utils/storage.js'
+import { apiBase } from '../utils/config.js'
 
 // 可切换的模型平台（先接 DeepSeek，其余按需配 Key 即用）
 export const AI_PROVIDERS = [
@@ -8,10 +9,7 @@ export const AI_PROVIDERS = [
   { id: 'qwen', label: '通义千问（百炼）' },
 ]
 
-// 本地开发时请求线上 Functions（本地 vite 不跑 Functions）；生产同源直连
-function apiBase() {
-  return import.meta.env.DEV ? 'https://guitar-learning-assistant.pages.dev' : ''
-}
+// apiBase 已收敛到 utils/config.js（v0.13.2；本地 dev 指向线上 Functions）
 
 export const useChatStore = defineStore('chat', {
   // v0.6.0：状态变更自动持久化（persist 插件），不再手动 save

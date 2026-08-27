@@ -1,7 +1,7 @@
 <script setup>
 // 看板娘（v0.7.0）：主题可选的常驻小角色。
 // 只在当前主题声明了 mascot 图时显示（data/themes.js）；点她说话，练琴鼓励向。
-import { ref, computed } from 'vue'
+import { ref, computed, onUnmounted } from 'vue'
 import { useSettingsStore } from '../stores/settings.js'
 import { THEMES } from '../data/themes.js'
 
@@ -22,14 +22,18 @@ const LINES = [
 ]
 const line = ref(LINES[0])
 const shown = ref(false)
+// v0.13.2：计时器改组件内变量并在卸载清理——原来挂在函数属性 poke._t 上、卸载不清
+let bubbleTimer = 0
 
 function poke() {
   line.value = LINES[Math.floor(Math.random() * LINES.length)]
   shown.value = true
   // 气泡 4 秒后自动收起，再点可再说
-  clearTimeout(poke._t)
-  poke._t = setTimeout(() => (shown.value = false), 4000)
+  clearTimeout(bubbleTimer)
+  bubbleTimer = setTimeout(() => (shown.value = false), 4000)
 }
+
+onUnmounted(() => clearTimeout(bubbleTimer))
 </script>
 
 <template>

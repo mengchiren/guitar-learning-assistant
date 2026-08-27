@@ -7,6 +7,9 @@ import { useSettingsStore } from './stores/settings.js'
 import { useSyncStore } from './stores/sync.js'
 import { onStorageError } from './utils/storage.js'
 import { fmtWhen } from './utils/sync.js'
+import { onLogChange, getErrors, clearErrors } from './utils/errorLog.js'
+import { useMediaQuery } from './composables/useMediaQuery.js'
+import { fmtClock } from './utils/date.js'
 import { TABS, ROUTES } from './data/nav.js'
 import Mascot from './components/Mascot.vue'
 import { useWallpaperBg } from './composables/useWallpaperBg.js'
@@ -28,11 +31,28 @@ timer.init()
 const storageError = ref('')
 // 云端更新横幅（v0.11.0）：自动检查发现远端比本机新时提示，点「去同步」跳我的页
 const syncNotice = ref(null)
+// 全局错误横幅（v0.13.2）：渲染/Promise 异常进本机环形缓冲并提示（手机端没有 DevTools）
+const errLatest = ref(null)
+const errShowList = ref(false)
+const errorLogText = () =>
+  getErrors()
+    .map((e) => {
+      const d = new Date(e.at)
+      const p = (n) => String(n).padStart(2, '0')
+      return `${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())} [${e.kind}] ${e.msg}`
+    })
+    .join('\n\n')
 let offStorageError = null
+let offLogChange = null
 onMounted(() => {
   offStorageError = onStorageError(() => {
     storageError.value =
       '存储空间不足，最近的更改可能没有保存。请到「我的」页导出备份，并删除旧录音或清空聊天记录后重试。'
+  })
+  // v0.13.2：订阅全局错误环形缓冲，最新一条上横幅
+  offLogChange = onLogChange((e) => {
+    errLatest.value = e
+    errShowList.value = false
   })
   // v0.9.0：空闲时预加载 5 个 tab 页面的 chunk（弱网/首次访问时减少切换等待）
   const warm = () => ROUTES.filter((r) => r.meta?.tab).forEach((r) => r.component())
@@ -44,7 +64,10 @@ onMounted(() => {
     if (r) syncNotice.value = r
   }, 3500)
 })
-onUnmounted(() => offStorageError && offStorageError())
+onUnmounted(() => {
+  if (offStorageError) offStorageError()
+  if (offLogChange) offLogChange()
+})
 
 // 外观主题（v0.7.0）：themeId 变化时切换 html[data-theme]，CSS 变量换肤
 watch(
@@ -65,7 +88,8 @@ watch(
 
 // 深色模式（v0.10.0）：darkMode = system（跟随系统）/ light / dark。
 // 深色变量只在 [data-theme='dsh'] 有定义，其他主题忽略（保持浅色）。
-const sysDark = ref(window.matchMedia('(prefers-color-scheme: dark)').matches)
+// v0.13.2：matchMedia 监听复用 useMediaQuery composable（原来手写一份重复实现）。
+const sysDark = useMediaQuery('(prefers-color-scheme: dark)')
 watch(
   [() => settings.darkMode, sysDark],
   () => {
@@ -83,24 +107,11 @@ watch(
   },
   { immediate: true },
 )
-let offSysDark = null
-onMounted(() => {
-  const mq = window.matchMedia('(prefers-color-scheme: dark)')
-  const onChange = (e) => (sysDark.value = e.matches)
-  mq.addEventListener('change', onChange)
-  offSysDark = () => mq.removeEventListener('change', onChange)
-})
-onUnmounted(() => offSysDark && offSysDark())
 
 // tab 列表由 data/nav.js 统一声明（v0.6.0）
 
 // 外壳「练习中」胶囊：显示 mm:ss，点击回练习页
-const chipTime = computed(() => {
-  const total = Math.floor(timer.elapsedSec)
-  const m = String(Math.floor(total / 60)).padStart(2, '0')
-  const s = String(total % 60).padStart(2, '0')
-  return `${m}:${s}`
-})
+const chipTime = computed(() => fmtClock(timer.elapsedSec))
 const showChip = computed(() => timer.active && route.path !== '/practice')
 
 function goBack() {
@@ -193,17 +204,41 @@ function goBack() {
       </router-view>
     </main>
 
-    <!-- 存储失败横幅（v0.8.0）：落盘失败时持续显示，手动关闭 -->
-    <div v-if="storageError" class="storage-banner" role="alert">
-      <span>{{ storageError }}</span>
-      <button class="storage-banner-close" aria-label="关闭提示" @click="storageError = ''">×</button>
-    </div>
+    <!-- 底部横幅堆叠（v0.13.2）：三类提示统一进一个 fixed 容器纵向排列，
+         此前存储失败与云端更新两条会完全重叠、下面那条的按钮点不到 -->
+    <div v-if="storageError || syncNotice || errLatest" class="banner-stack">
+      <!-- 存储失败横幅（v0.8.0）：落盘失败时持续显示，手动关闭 -->
+      <div v-if="storageError" class="storage-banner" role="alert">
+        <span class="banner-text">{{ storageError }}</span>
+        <button class="storage-banner-close" aria-label="关闭存储不足提示" @click="storageError = ''">×</button>
+      </div>
 
-    <!-- 云端更新横幅（v0.11.0）：自动检查发现远端比本机新，提示去同步（不自动覆盖） -->
-    <div v-if="syncNotice" class="storage-banner sync-banner" role="alert">
-      <span>云端有更新的练琴数据（{{ fmtWhen(syncNotice.updatedAt) }}）。</span>
-      <router-link to="/profile" class="sync-banner-link" @click="syncNotice = null">去同步</router-link>
-      <button class="storage-banner-close" aria-label="关闭提示" @click="syncNotice = null">×</button>
+      <!-- 云端更新横幅（v0.11.0）：自动检查发现远端比本机新，提示去同步（不自动覆盖） -->
+      <div v-if="syncNotice" class="storage-banner sync-banner" role="alert">
+        <span class="banner-text">云端有更新的练琴数据（{{ fmtWhen(syncNotice.updatedAt) }}）。</span>
+        <router-link to="/profile" class="sync-banner-link" @click="syncNotice = null">去同步</router-link>
+        <button class="storage-banner-close" aria-label="关闭云端更新提示" @click="syncNotice = null">×</button>
+      </div>
+
+      <!-- 全局错误横幅（v0.13.2）：只存本机不出设备；点文字展开最近错误列表（可复制） -->
+      <div v-if="errLatest" class="storage-banner error-banner" role="alert">
+        <span class="banner-text" @click="errShowList = !errShowList">{{ errLatest.msg }}</span>
+        <button class="error-banner-toggle" @click="errShowList = !errShowList">
+          {{ errShowList ? '收起' : '详情' }}
+        </button>
+        <pre v-if="errShowList" class="error-log-list">{{ errorLogText() }}</pre>
+        <button
+          class="error-banner-toggle"
+          @click="
+            clearErrors();
+            errLatest = null;
+            errShowList = false
+          "
+        >
+          清除
+        </button>
+        <button class="storage-banner-close" aria-label="关闭错误提示" @click="errLatest = null">×</button>
+      </div>
     </div>
 
     <!-- 主题看板娘（v0.7.0）：仅当前主题配置了 mascot 时显示 -->
