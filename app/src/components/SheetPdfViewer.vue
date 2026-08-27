@@ -96,9 +96,20 @@ function setZoom(z) {
 }
 
 function onKey(e) {
-  if (e.key === 'Escape') emit('close')
-  if (e.key === 'ArrowLeft') prevPage()
-  if (e.key === 'ArrowRight') nextPage()
+  // v0.14.0：蓝牙脚踏翻页器（AirTurn/PageTurn 等）本质是 HID 键盘，
+  // 按下发 PageUp/PageDown——监听这两个键即零成本支持，无需任何蓝牙 API。
+  // preventDefault 防止弹层背后的页面跟着滚动。
+  if (e.key === 'Escape') {
+    emit('close')
+    return
+  }
+  if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+    e.preventDefault()
+    prevPage()
+  } else if (e.key === 'ArrowRight' || e.key === 'PageDown') {
+    e.preventDefault()
+    nextPage()
+  }
 }
 
 onMounted(() => {
