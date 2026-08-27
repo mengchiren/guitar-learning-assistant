@@ -39,7 +39,12 @@ onUnmounted(() => tuner.stop())
   <div class="narrow">
     <h1 class="page-title">调音器</h1>
     <div class="card tuner">
-      <div class="tuner-note">{{ tuner.note.value }}</div>
+      <div class="lock-row">
+        <span class="lock-pill" :class="{ on: tuner.stable.value }">
+          {{ tuner.stable.value ? '已锁定' : '拾音中…' }}
+        </span>
+      </div>
+      <div class="tuner-note" :class="{ dimmed: !tuner.stable.value }">{{ tuner.note.value }}</div>
       <div class="needle-track">
         <div
           class="needle"
@@ -72,7 +77,19 @@ onUnmounted(() => tuner.stop())
 
 <style scoped>
 .tuner { text-align: center; }
-.tuner-note { font-size: 56px; font-weight: 700; min-height: 76px; }
+.lock-row { min-height: 20px; }
+.lock-pill {
+  display: inline-block;
+  font-size: 11px;
+  padding: 2px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+}
+.lock-pill.on { border-color: var(--accent); color: var(--accent); }
+.tuner-note { font-size: 56px; font-weight: 700; min-height: 76px; transition: opacity 0.15s linear; }
+/* 未锁定时读数半透明：明确告诉用户这个数还没稳 */
+.tuner-note.dimmed { opacity: 0.45; }
 .needle-track { position: relative; height: 14px; background: var(--bg-input); border-radius: 999px; margin: 14px 0 8px; }
 .needle { position: absolute; top: -4px; width: 4px; height: 22px; background: var(--accent); border-radius: 2px; transform: translateX(-50%); transition: left 0.06s linear; }
 .needle-center { position: absolute; top: -6px; left: 50%; width: 2px; height: 26px; background: var(--text-dim); transform: translateX(-50%); }

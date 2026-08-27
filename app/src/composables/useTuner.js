@@ -9,6 +9,9 @@ export function useTuner() {
   const note = ref('--')
   const cents = ref(0)
   const error = ref('')
+  // v0.14.0：读数平滑（参考 cwilso/PitchDetect 的去抖思路）——原始检测每帧都在跳，
+  // 连续几帧落在同一音名且音分波动小才认为「锁定」，避免新手被乱跳的指针劝退
+  const stable = ref(false)
 
   let audioCtx = null
   let stream = null
@@ -18,6 +21,12 @@ export function useTuner() {
   // v0.13.2：start 期间的重入锁——原来 active 要等 getUserMedia 返回后才置位，
   // 快速双击会起两条 stream/两个 AudioContext，先者被覆盖后永不释放（泄麦克风）
   let starting = false
+  let hist = [] // 最近几帧 {m: 音名索引(midi), c: 相对该音名的音分}
+
+  function resetSmoothing() {
+    hist = []
+    stable.value = false
+  }
 
   function noteName(midi) {
     const n = ((midi % 12) + 12) % 12
@@ -44,6 +53,7 @@ export function useTuner() {
       analyser.fftSize = 4096
       audioCtx.createMediaStreamSource(stream).connect(analyser)
       buf = new Float32Array(analyser.fftSize)
+      resetSmoothing()
       active.value = true
       loop()
     } finally {
@@ -93,11 +103,25 @@ export function useTuner() {
     if (freq > 0) {
       const midi = 69 + 12 * Math.log2(freq / A4)
       const nearest = Math.round(midi)
-      note.value = noteName(nearest)
-      cents.value = Math.round((midi - nearest) * 100)
+      const centsRaw = Math.round((midi - nearest) * 100)
+
+      hist.push({ m: nearest, c: centsRaw })
+      if (hist.length > 5) hist.shift()
+      const sameNote = hist.every((h) => h.m === hist[0].m)
+      const spread = Math.max(...hist.map((h) => h.c)) - Math.min(...hist.map((h) => h.c))
+      if (hist.length >= 3 && sameNote && spread <= 8) {
+        // 锁定：取近几帧均值，指针稳定可读
+        note.value = noteName(hist[0].m)
+        cents.value = Math.round(hist.reduce((s, h) => s + h.c, 0) / hist.length)
+        stable.value = true
+      } else {
+        // 未锁定：保留上一次读数但标记不稳定（低音弦弱基频本来波动就大，阈值放宽到 8 音分）
+        stable.value = false
+      }
     } else {
       note.value = '--'
       cents.value = 0
+      resetSmoothing()
     }
     raf = requestAnimationFrame(loop)
   }
@@ -113,7 +137,8 @@ export function useTuner() {
     audioCtx = null
     note.value = '--'
     cents.value = 0
+    resetSmoothing()
   }
 
-  return { active, note, cents, error, start, stop }
+  return { active, note, cents, error, stable, start, stop }
 }
