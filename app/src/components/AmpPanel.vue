@@ -83,29 +83,49 @@ const val = (field) => props.values[field]
     :aria-label="`${panel.brand} ${panel.brandSub} 面板示意图`"
   >
     <defs>
-      <!-- 机身（上亮下暗的微光黑塑） -->
+      <!-- 机身（暖深灰褐，上亮下暗） -->
       <linearGradient :id="`${uid}-shell`" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stop-color="#4a4b50" />
-        <stop offset="0.35" stop-color="#2b2c30" />
-        <stop offset="1" stop-color="#141518" />
+        <stop offset="0" stop-color="#5a5751" />
+        <stop offset="0.35" stop-color="#3a3733" />
+        <stop offset="1" stop-color="#211f1c" />
       </linearGradient>
       <!-- 网罩格栅底 -->
       <linearGradient :id="`${uid}-spk`" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stop-color="#1b1c20" />
-        <stop offset="0.5" stop-color="#101114" />
-        <stop offset="1" stop-color="#191a1e" />
+        <stop offset="0" stop-color="#26272b" />
+        <stop offset="0.5" stop-color="#18191d" />
+        <stop offset="1" stop-color="#1e1f23" />
       </linearGradient>
-      <!-- 面板 -->
+      <!-- 蜂窝网罩点阵 -->
+      <pattern :id="`${uid}-mesh`" width="9" height="8" patternUnits="userSpaceOnUse">
+        <circle cx="2.4" cy="2.4" r="1.9" fill="#0d0e10" />
+        <circle cx="2.4" cy="2.4" r="1.1" fill="#33343a" />
+        <circle cx="6.9" cy="6.4" r="1.9" fill="#0d0e10" />
+        <circle cx="6.9" cy="6.4" r="1.1" fill="#33343a" />
+      </pattern>
+      <!-- 控制面板：银灰拉丝铝（对照俯视图实物） -->
       <linearGradient :id="`${uid}-panel`" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stop-color="#2b2c32" />
-        <stop offset="1" stop-color="#1b1c21" />
+        <stop offset="0" stop-color="#dcdee1" />
+        <stop offset="0.5" stop-color="#c6c9cd" />
+        <stop offset="1" stop-color="#adb0b5" />
       </linearGradient>
-      <!-- 金色旋钮帽（径向金属） -->
-      <radialGradient :id="`${uid}-gold`" cx="0.38" cy="0.32" r="0.85">
-        <stop offset="0" stop-color="#ffe27a" />
-        <stop offset="0.45" stop-color="#f0be3c" />
-        <stop offset="0.8" stop-color="#c08c1c" />
-        <stop offset="1" stop-color="#7e5c0e" />
+      <!-- 品牌黑光带（JOYO 徽标/LCD/LED 区） -->
+      <linearGradient :id="`${uid}-strip`" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#2c2d33" />
+        <stop offset="0.12" stop-color="#1a1b20" />
+        <stop offset="1" stop-color="#101114" />
+      </linearGradient>
+      <!-- 琥珀色旋钮顶面（对照实物：黑身 + 半透明琥珀顶） -->
+      <radialGradient :id="`${uid}-amber`" cx="0.38" cy="0.3" r="0.9">
+        <stop offset="0" stop-color="#ffdf92" />
+        <stop offset="0.4" stop-color="#f3bc45" />
+        <stop offset="0.78" stop-color="#d0951e" />
+        <stop offset="1" stop-color="#96660e" />
+      </radialGradient>
+      <!-- 旋钮黑身侧壁 -->
+      <radialGradient :id="`${uid}-knobside`" cx="0.5" cy="0.42" r="0.72">
+        <stop offset="0.62" stop-color="#3a3b40" />
+        <stop offset="0.9" stop-color="#1a1b1f" />
+        <stop offset="1" stop-color="#0c0d0f" />
       </radialGradient>
       <!-- 旋钮座 -->
       <radialGradient :id="`${uid}-knobbase`" cx="0.5" cy="0.5" r="0.6">
@@ -118,11 +138,11 @@ const val = (field) => props.values[field]
         <stop offset="0.45" stop-color="#e9eaee" />
         <stop offset="1" stop-color="#74767c" />
       </linearGradient>
-      <!-- LCD 屏 -->
+      <!-- LCD 屏（浅灰绿背光） -->
       <linearGradient :id="`${uid}-lcd`" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stop-color="#babec4" />
-        <stop offset="0.6" stop-color="#989da3" />
-        <stop offset="1" stop-color="#7f848b" />
+        <stop offset="0" stop-color="#c9cdbc" />
+        <stop offset="0.6" stop-color="#a9aea0" />
+        <stop offset="1" stop-color="#90958a" />
       </linearGradient>
       <!-- LED 光晕 -->
       <radialGradient :id="`${uid}-ledGlow`" cx="0.5" cy="0.5" r="0.5">
@@ -149,42 +169,52 @@ const val = (field) => props.values[field]
     <rect x="44" y="6" :width="panel.width - 88" :height="panel.height - 22" rx="40" :fill="`url(#${uid}-shell)`" stroke="#0d0e10" stroke-width="1" />
     <rect x="52" y="14" :width="panel.width - 104" :height="panel.height - 38" rx="34" fill="none" stroke="#5a5b60" stroke-width="1" opacity="0.35" />
 
-    <!-- ══ 顶部喇叭网罩 ══ -->
+    <!-- ══ 顶部喇叭网罩（蜂窝点阵 + JOYO 浮雕） ══ -->
     <rect x="118" y="20" :width="panel.width - 236" height="72" rx="26" :fill="`url(#${uid}-spk)`" stroke="#000" stroke-width="1" />
-    <!-- 格栅纹理 -->
-    <g :stroke="`#26272c`" stroke-width="1.6" opacity="0.8">
-      <line v-for="i in 9" :key="i" :x1="130" :x2="panel.width - 130" :y1="28 + i * 7" :y2="28 + i * 7" />
-    </g>
-    <!-- JOYO 浮雕 -->
+    <rect x="122" y="24" :width="panel.width - 244" height="64" rx="22" :fill="`url(#${uid}-mesh)`" />
+    <!-- JOYO 浮雕（暗底 + 银面两层错位） -->
+    <text :x="panel.width / 2" y="71.5" text-anchor="middle" class="spk-brand spk-brand-shadow" :style="{ fontStyle: 'italic' }">JOYO</text>
     <text :x="panel.width / 2" y="70" text-anchor="middle" class="spk-brand" :style="{ fontStyle: 'italic' }">JOYO</text>
 
-    <!-- ══ 面板 ══ -->
-    <rect x="64" y="102" :width="panel.width - 128" height="402" rx="16" :fill="`url(#${uid}-panel)`" stroke="#3a3b41" stroke-width="1.2" />
+    <!-- ══ 控制面板（银灰拉丝铝，只到品牌黑光带上沿） ══ -->
+    <rect x="64" y="102" :width="panel.width - 128" height="242" rx="16" :fill="`url(#${uid}-panel)`" stroke="#8e9196" stroke-width="1.2" />
+    <!-- 拉丝纹理（细横线） -->
+    <g stroke="#ffffff" stroke-width="0.8" opacity="0.16">
+      <line v-for="i in 15" :key="'b' + i" x1="72" :x2="panel.width - 72" :y1="104 + i * 15.5" :y2="104 + i * 15.5" />
+    </g>
+    <g stroke="#5d6065" stroke-width="0.6" opacity="0.12">
+      <line v-for="i in 15" :key="'d' + i" x1="72" :x2="panel.width - 72" :y1="110 + i * 15.5" :y2="110 + i * 15.5" />
+    </g>
+    <!-- ══ 品牌黑光带（JOYO 徽标 · LCD · JAM BUDDY II · 四枚 LED） ══ -->
+    <rect x="64" y="348" :width="panel.width - 128" height="148" rx="14" :fill="`url(#${uid}-strip)`" stroke="#3a3b41" stroke-width="1" />
+    <rect x="70" y="352" :width="panel.width - 140" height="6" rx="3" fill="#4a4b52" opacity="0.5" />
 
-    <!-- ══ 旋钮 ══ -->
+    <!-- ══ 旋钮（黑身 + 琥珀顶，对照实物） ══ -->
     <g
       v-for="k in panel.knobs"
       :key="k.field"
       :class="{ knob: true, on: on(k.field), clickable: interactive }"
       @click="interactive && emit('select', k.field)"
-    >      <!-- 印刷标签（旋钮上方） -->
-      <text :x="k.x" :y="k.y - (k.r ?? 24) - 14" text-anchor="middle" class="knob-label">{{ k.label }}</text>
+    >      <!-- 印刷标签（旋钮上方，深字印在银面板上） -->
+      <text :x="k.x" :y="k.y - (k.r ?? 24) - 12" text-anchor="middle" class="knob-label">{{ k.label }}</text>
       <!-- 座圈 -->
-      <circle :cx="k.x" :cy="k.y" :r="(k.r ?? 24) + 5" :fill="`url(#${uid}-knobbase)`" />
-      <!-- 帽体 -->
-      <circle :cx="k.x" :cy="k.y" :r="k.r ?? 24" :fill="`url(#${uid}-gold)`" stroke="#5c4408" stroke-width="0.8" />
-      <!-- 帽顶高光 -->
-      <ellipse :cx="k.x - (k.r ?? 24) * 0.3" :cy="k.y - (k.r ?? 24) * 0.34" :rx="(k.r ?? 24) * 0.34" ry="(k.r ?? 24) * 0.2" fill="#fff" opacity="0.28" />
-      <!-- 数值旋钮：白色指示刻线 -->
+      <circle :cx="k.x" :cy="k.y" :r="(k.r ?? 24) + 4" :fill="`url(#${uid}-knobbase)`" />
+      <!-- 黑色帽身 -->
+      <circle :cx="k.x" :cy="k.y" :r="k.r ?? 24" :fill="`url(#${uid}-knobside)`" stroke="#0a0b0d" stroke-width="1" />
+      <!-- 琥珀顶面 -->
+      <circle :cx="k.x" :cy="k.y - (k.r ?? 24) * 0.06" :r="(k.r ?? 24) * 0.74" :fill="`url(#${uid}-amber)`" stroke="#8a5f0c" stroke-width="0.7" />
+      <!-- 顶面高光 -->
+      <ellipse :cx="k.x - (k.r ?? 24) * 0.22" :cy="k.y - (k.r ?? 24) * 0.3" :rx="(k.r ?? 24) * 0.26" ry="(k.r ?? 24) * 0.14" fill="#fff" opacity="0.35" />
+      <!-- 数值旋钮：帽顶白色指示刻线 -->
       <template v-if="isNum(k)">
-        <line :x1="tickEnd(k, 0.16).x" :y1="tickEnd(k, 0.16).y" :x2="tickEnd(k).x" :y2="tickEnd(k).y" class="knob-tick" />
+        <line :x1="tickEnd(k, 0.12).x" :y1="tickEnd(k, 0.12).y - (k.r ?? 24) * 0.06" :x2="tickEnd(k, 0.52).x" :y2="tickEnd(k, 0.52).y - (k.r ?? 24) * 0.06" class="knob-tick" />
       </template>
       <!-- 高亮圈 -->
       <circle v-if="on(k.field)" :cx="k.x" :cy="k.y" :r="(k.r ?? 24) + 10" class="hl-ring" />
       <!-- 当前值标签（高亮时红底） -->
       <g v-if="val(k.field) !== undefined && on(k.field)">
-        <rect :x="k.x - 52" :y="k.y - (k.r ?? 24) - 42" :width="104" :height="20" rx="10" class="val-chip" />
-        <text :x="k.x" :y="k.y - (k.r ?? 24) - 28" text-anchor="middle" class="val-text">{{ val(k.field) }}</text>
+        <rect :x="k.x - 52" :y="k.y - (k.r ?? 24) - 44" :width="104" :height="20" rx="10" class="val-chip" />
+        <text :x="k.x" :y="k.y - (k.r ?? 24) - 30" text-anchor="middle" class="val-text">{{ val(k.field) }}</text>
       </g>
       <title>{{ k.label }}：{{ k.note }}</title>
     </g>
@@ -196,9 +226,9 @@ const val = (field) => props.values[field]
       :class="{ sw: true, clickable: interactive }"
       @click="interactive && emit('select', s.id)"
     >
-      <text :x="s.x" y="138" text-anchor="middle" class="knob-label">{{ s.label }}</text>
+      <text :x="s.x" :y="s.y - 30" text-anchor="middle" class="knob-label">{{ s.label }}</text>
       <!-- 状态灯孔 -->
-      <circle :cx="s.x" :cy="150" r="3" class="sw-led-hole" />
+      <circle :cx="s.x" :cy="s.y - 20" r="3" class="sw-led-hole" />
       <!-- 底座 -->
       <rect :x="s.x - 9" :y="s.y - 16" width="18" height="32" rx="6" fill="#1c1d21" stroke="#3d3e44" stroke-width="1" />
       <!-- 拨杆银杆 -->
@@ -238,12 +268,12 @@ const val = (field) => props.values[field]
       <!-- 实体踏板 -->
       <template v-if="f.type !== 'label'">
         <rect :x="f.x - f.w / 2" :y="f.y - f.h / 2" :width="f.w" :height="f.h" rx="12" :fill="`url(#${uid}-pedal)`" stroke="#08090b" stroke-width="1.2" />
-        <!-- 横纹凸起 -->
-        <g stroke="#101114" stroke-width="4" opacity="0.9">
-          <line v-for="i in 4" :key="i" :x1="f.x - f.w / 2 + 14" :x2="f.x + f.w / 2 - 14" :y1="f.y - f.h / 2 + 16 + i * 12" :y2="f.y - f.h / 2 + 16 + i * 12" />
+        <!-- 横纹凸起（细密 8 条，对照实物） -->
+        <g stroke="#0e0f12" stroke-width="2.6" opacity="0.95">
+          <line v-for="i in 8" :key="i" :x1="f.x - f.w / 2 + 12" :x2="f.x + f.w / 2 - 12" :y1="f.y - f.h / 2 + 10 + i * 8.4" :y2="f.y - f.h / 2 + 10 + i * 8.4" />
         </g>
-        <g stroke="#33343a" stroke-width="1" opacity="0.8">
-          <line v-for="i in 4" :key="i" :x1="f.x - f.w / 2 + 14" :x2="f.x + f.w / 2 - 14" :y1="f.y - f.h / 2 + 17 + i * 12" :y2="f.y - f.h / 2 + 17 + i * 12" />
+        <g stroke="#3a3b41" stroke-width="0.9" opacity="0.85">
+          <line v-for="i in 8" :key="'h' + i" :x1="f.x - f.w / 2 + 12" :x2="f.x + f.w / 2 - 12" :y1="f.y - f.h / 2 + 11.2 + i * 8.4" :y2="f.y - f.h / 2 + 11.2 + i * 8.4" />
         </g>
         <!-- 顶部高光 -->
         <rect :x="f.x - f.w / 2 + 3" :y="f.y - f.h / 2 + 3" :width="f.w - 6" height="6" rx="3" fill="#4c4d52" opacity="0.55" />
@@ -271,12 +301,13 @@ const val = (field) => props.values[field]
 .amp-panel { width: 100%; display: block; }
 
 /* 浮雕/品牌 */
-.spk-brand { fill: #4b4c52; font-size: 30px; font-weight: 900; letter-spacing: 8px; }
+.spk-brand { fill: #b4b6bb; font-size: 30px; font-weight: 900; letter-spacing: 8px; }
+.spk-brand-shadow { fill: #08090b; }
 .brand-logo { fill: #141414; font-size: 20px; font-weight: 900; letter-spacing: 1px; }
 .brand-model { fill: #e4e5e8; font-size: 19px; font-weight: 800; font-style: italic; letter-spacing: 2px; }
 
-/* 旋钮印刷标签 */
-.knob-label { fill: #c6c7cb; font-size: 10px; font-weight: 700; letter-spacing: 0.3px; }
+/* 旋钮印刷标签（银面板上印深字） */
+.knob-label { fill: #3b3c40; font-size: 10px; font-weight: 700; letter-spacing: 0.3px; }
 .knob-tick { stroke: #fffdf4; stroke-width: 2.6; stroke-linecap: round; }
 
 /* 高亮圈/值标签（主题色） */
@@ -285,8 +316,8 @@ const val = (field) => props.values[field]
 .val-text { fill: #fff; font-size: 11px; font-weight: 800; }
 
 /* 拨杆 */
-.sw-led-hole { fill: #0c0d0f; stroke: #3b3c42; stroke-width: 1; }
-.sw-state { fill: #8f9095; font-size: 8px; font-weight: 600; }
+.sw-led-hole { fill: #0c0d0f; stroke: #55575d; stroke-width: 1; }
+.sw-state { fill: #4a4b50; font-size: 8px; font-weight: 600; }
 
 /* LED */
 .led-dot { fill: #33353a; stroke: #45474d; stroke-width: 1; }

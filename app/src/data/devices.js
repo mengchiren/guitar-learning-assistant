@@ -64,16 +64,17 @@ export const GUITARS = [
       { field: 'volume', label: '音量旋钮', kind: 'knob' },
       { field: 'tone', label: '音色旋钮', kind: 'knob' },
     ],
-    // 吉他写实示意图（v0.17.0）：浅灰琴身 + 白色护板 + HSS 拾音器 + 枫木尖头琴头，
-    // 坐标按用户实物照片（琴全身/琴头特写/琴桥特写）比例标注。
+    // 吉他写实示意图（v0.17.2 按实物照片重排）：白珠光 Strat 型双缺角琴身 + 白护板（包拨杆/双旋钮）
+    // + HSS 拾音器 + 枫木 GIO 琴头（弦钮左侧一列）+ 银琴桥 + 输出插孔。
+    // 坐标对照实物照片：拨杆在双线圈右上方，音量在拨杆左下、音色在右下角，输出孔在琴桥右侧。
     panel: {
       width: 300,
       height: 660,
       note: '',
-      switch: { field: 'pickup', x: 218, y: 486, positions: 5 },
+      switch: { field: 'pickup', x: 194, y: 510, positions: 5, label: '档位拨杆', note: '5 档拨杆：选择用哪组拾音器（1 琴颈最暖 ~ 5 琴桥最亮）。' },
       knobs: [
-        { field: 'volume', label: '音量', x: 186, y: 530, kind: 'text', note: '吉他总音量。关小可以把失真变「清音化」。' },
-        { field: 'tone', label: '音色', x: 238, y: 566, kind: 'text', note: '音色旋钮：开大偏亮、关小偏闷。套路建议里标了大致范围。' },
+        { field: 'volume', label: '音量', x: 184, y: 528, kind: 'text', note: '吉他总音量。关小可以把失真变「清音化」。' },
+        { field: 'tone', label: '音色', x: 212, y: 555, kind: 'text', note: '音色旋钮：开大偏亮、关小偏闷。套路建议里标了大致范围。' },
       ],
     },
   },
