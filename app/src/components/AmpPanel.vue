@@ -264,22 +264,16 @@ const val = (field) => props.values[field]
         <title>{{ f.label }}：{{ f.note }}</title>
       </template>
     </g>
-
-    <!-- 说明 -->
-    <text :x="panel.width / 2" :y="panel.height - 8" text-anchor="middle" class="panel-note">
-      {{ panel.note }}
-    </text>
   </svg>
 </template>
 
 <style scoped>
-.amp-panel { width: 100%; min-width: 460px; display: block; }
+.amp-panel { width: 100%; display: block; }
 
 /* 浮雕/品牌 */
 .spk-brand { fill: #4b4c52; font-size: 30px; font-weight: 900; letter-spacing: 8px; }
 .brand-logo { fill: #141414; font-size: 20px; font-weight: 900; letter-spacing: 1px; }
 .brand-model { fill: #e4e5e8; font-size: 19px; font-weight: 800; font-style: italic; letter-spacing: 2px; }
-.panel-note { fill: #7c7d82; font-size: 10px; }
 
 /* 旋钮印刷标签 */
 .knob-label { fill: #c6c7cb; font-size: 10px; font-weight: 700; letter-spacing: 0.3px; }

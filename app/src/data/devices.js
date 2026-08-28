@@ -69,11 +69,11 @@ export const GUITARS = [
     panel: {
       width: 300,
       height: 660,
-      note: '写实示意图：5 档拾音器拨杆 + 音量/音色旋钮，位置与实物一致',
-      switch: { field: 'pickup', x: 215, y: 430, positions: 5 },
+      note: '',
+      switch: { field: 'pickup', x: 218, y: 486, positions: 5 },
       knobs: [
-        { field: 'volume', label: '音量', x: 186, y: 478, kind: 'text', note: '吉他总音量。关小可以把失真变「清音化」。' },
-        { field: 'tone', label: '音色', x: 240, y: 512, kind: 'text', note: '音色旋钮：开大偏亮、关小偏闷。套路建议里标了大致范围。' },
+        { field: 'volume', label: '音量', x: 186, y: 530, kind: 'text', note: '吉他总音量。关小可以把失真变「清音化」。' },
+        { field: 'tone', label: '音色', x: 238, y: 566, kind: 'text', note: '音色旋钮：开大偏亮、关小偏闷。套路建议里标了大致范围。' },
       ],
     },
   },

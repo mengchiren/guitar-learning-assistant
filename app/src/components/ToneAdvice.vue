@@ -48,15 +48,13 @@ const guitarHighlight = computed(() => guitar.value?.keyParams || [])
 
 <template>
   <div v-if="settings.displayMode === 'beginner'">
-    <!-- 面板示意图：要动的旋钮红圈高亮（v0.6.2） -->
-    <div class="panel-scroll">
-      <div class="panel-wrap">
-        <div v-if="guitar" class="guitar-wrap">
-          <GuitarPanel :panel="guitar.panel" :values="guitarValues" :highlight="guitarHighlight" />
-        </div>
-        <div v-if="amp" class="amp-wrap">
-          <AmpPanel :panel="amp.panel" :values="ampValues" :highlight="ampHighlight" />
-        </div>
+    <!-- 面板示意图：要动的旋钮高亮圈 + 数值（v0.6.2 / v0.17.0 写实重绘） -->
+    <div class="panel-wrap">
+      <div v-if="guitar" class="guitar-wrap">
+        <GuitarPanel :panel="guitar.panel" :values="guitarValues" :highlight="guitarHighlight" />
+      </div>
+      <div v-if="amp" class="amp-wrap">
+        <AmpPanel :panel="amp.panel" :values="ampValues" :highlight="ampHighlight" />
       </div>
     </div>
     <p class="muted small" style="margin-top: 6px">上图高亮圈出的就是要动的：照着数值拧/按，其余先别碰。</p>
@@ -94,11 +92,10 @@ const guitarHighlight = computed(() => guitar.value?.keyParams || [])
 </template>
 
 <style scoped>
-/* 面板区：手机横向滚动（音箱图保持可读宽度），桌面并排 */
-.panel-scroll { overflow-x: auto; padding-bottom: 4px; }
-.panel-wrap { display: flex; gap: 10px; align-items: flex-start; }
-.guitar-wrap { flex: none; width: 150px; }
-.amp-wrap { flex: none; width: 760px; }
+/* 面板区（v0.17.0 起自适应：音箱全图在一屏内，无需横向翻动；吉他在音箱上方窄条） */
+.panel-wrap { display: flex; flex-direction: column; gap: 10px; }
+.guitar-wrap { width: 200px; }
+.amp-wrap { width: 100%; }
 
 .quick-params { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
 .quick-chip {

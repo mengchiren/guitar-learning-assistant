@@ -126,7 +126,7 @@ const items = computed(() => [
 
 <style scoped>
 .panel-scroll { overflow-x: auto; padding-bottom: 4px; }
-.panel-wrap { min-width: 760px; }
+.panel-wrap { width: 100%; }
 
 .guide-box {
   margin-top: 10px;
