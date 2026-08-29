@@ -1,0 +1,2 @@
+# 环境脚本固定 LF（Git Bash 执行；CRLF 会干扰 bash 解析）
+*.sh text eol=lf
